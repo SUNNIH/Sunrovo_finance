@@ -1,0 +1,54 @@
+import type { Metadata } from "next";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getAccountsForUser } from "@/features/banking/accounts";
+import { listBeneficiaries } from "@/features/banking/beneficiaries";
+import { TransferWizard } from "./transfer-wizard";
+
+export const metadata: Metadata = { title: "Transfer Money" };
+
+interface TransfersPageProps {
+  searchParams: Promise<{ from?: string }>;
+}
+
+export default async function TransfersPage({ searchParams }: TransfersPageProps) {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const { from } = await searchParams;
+  const [accounts, beneficiaries] = await Promise.all([
+    getAccountsForUser(user.id),
+    listBeneficiaries(user.id),
+  ]);
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-page-title-mobile text-text-primary sm:text-page-title">Transfer Money</h1>
+        <p className="mt-1 text-sm text-text-secondary">
+        Send money between your PLT accounts or to a saved beneficiary. Enter an account number to confirm the recipient before you continue.
+        </p>
+      </div>
+
+      <TransferWizard
+        accounts={accounts.map((a) => ({
+          id: a.id,
+          nickname: a.nickname,
+          type: a.type,
+          accountNumber: a.accountNumber,
+          currencySymbol: a.currencySymbol,
+          balanceCache: a.balanceCache.toString(),
+        }))}
+        beneficiaries={beneficiaries.map((b) => ({
+          id: b.id,
+          type: b.type,
+          nickname: b.nickname,
+          accountName: b.accountName,
+          accountNumber: b.accountNumber,
+          bankName: b.bankName,
+          isFavorite: b.isFavorite,
+        }))}
+        initialSourceAccountId={from}
+      />
+    </div>
+  );
+}
