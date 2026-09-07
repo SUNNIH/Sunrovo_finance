@@ -1,0 +1,740 @@
+// PLATINUM TRUST BANK (PLT) — Prisma schema
+//
+// Money rules (data memory):
+//  - No floating-point arithmetic for authoritative financial values.
+//  - All monetary/asset amounts are Prisma `Decimal` mapped to Postgres
+//    NUMERIC(36,18), which safely represents both fiat (2dp) and crypto
+//    (up to 18dp) amounts. Display precision is looked up per-Asset.
+//  - Ledger is the source of truth. `balanceCache` fields on BankAccount /
+//    AssetBalance are performance caches only, reconciled against
+//    LedgerEntry rows — never written to directly by application code
+//    outside lib/ledger.
+//  - Every financial mutation table carries an `idempotencyKey` so retried
+//    requests return the original result instead of double-processing.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+enum KycStatus {
+  NOT_STARTED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum VerificationTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+enum AssetType {
+  FIAT
+  CRYPTO
+}
+
+enum BankAccountType {
+  CURRENT
+  SAVINGS
+  FOREIGN_CURRENCY
+  FIXED_DEPOSIT
+}
+
+enum BeneficiaryType {
+  INTERNAL_PLT
+  EXTERNAL_BANK
+}
+
+enum TransferStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
+}
+
+enum TransactionType {
+  TRANSFER
+  DEPOSIT
+  WITHDRAWAL
+  TRADE
+  CONVERSION
+  FEE
+  CARD_PAYMENT
+}
+
+enum TransactionDirection {
+  CREDIT
+  DEBIT
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
+}
+
+enum LedgerAccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum LedgerDirection {
+  DEBIT
+  CREDIT
+}
+
+enum OrderSide {
+  BUY
+  SELL
+}
+
+enum OrderType {
+  MARKET
+  LIMIT
+}
+
+enum OrderStatus {
+  OPEN
+  FILLED
+  PARTIALLY_FILLED
+  CANCELLED
+  REJECTED
+}
+
+enum DepositStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  REVIEWING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum CardFormFactor {
+  PHYSICAL
+  VIRTUAL
+}
+
+enum CardStatus {
+  ACTIVE
+  FROZEN
+  LOST
+  CANCELLED
+}
+
+enum NotificationType {
+  SECURITY
+  TRANSACTION
+  MARKETING
+  SYSTEM
+}
+
+// ---------------------------------------------------------------------------
+// Identity & security
+// ---------------------------------------------------------------------------
+
+model User {
+  id              String     @id @default(cuid())
+  email           String     @unique
+  passwordHash    String
+  role            UserRole   @default(USER)
+  status          UserStatus @default(ACTIVE)
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  profile         Profile?
+  securitySetting SecuritySetting?
+
+  sessions            Session[]
+  verificationTokens  VerificationToken[]
+  trustedDevices      TrustedDevice[]
+  loginEvents         LoginEvent[]
+
+  bankAccounts  BankAccount[]
+  cryptoWallets CryptoWallet[]
+  beneficiaries Beneficiary[]
+  transfers     Transfer[]
+  transactions  Transaction[]
+
+  cryptoOrders      CryptoOrder[]
+  conversionQuotes  ConversionQuote[]
+  conversions       Conversion[]
+  deposits          Deposit[]
+  withdrawals       Withdrawal[]        @relation("UserWithdrawals")
+  reviewedWithdrawals Withdrawal[]      @relation("AdminReviewedWithdrawals")
+  withdrawalAllowlistEntries WithdrawalAllowlistEntry[]
+  announcementsCreated Announcement[]   @relation("AdminCreatedAnnouncements")
+
+  cards         Card[]
+  watchlist     Watchlist[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+
+  @@index([role])
+  @@map("users")
+}
+
+model Profile {
+  id                      String     @id @default(cuid())
+  userId                  String     @unique
+  user                    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName                String
+  country                 String?
+  preferredFiatCurrency   String     @default("USD")
+  accountType             String     @default("individual")
+  dateOfBirth             DateTime?
+  phoneNumber             String?
+  kycStatus               KycStatus  @default(NOT_STARTED)
+  onboardingCompletedAt   DateTime?
+  createdAt               DateTime   @default(now())
+  updatedAt               DateTime   @updatedAt
+
+  @@map("profiles")
+}
+
+model SecuritySetting {
+  id                        String   @id @default(cuid())
+  userId                    String   @unique
+  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mfaEnabled                Boolean  @default(false)
+  mfaSecretEncrypted        String?
+  transactionPinHash        String?
+  antiPhishingPhrase        String?
+  withdrawalAllowlistEnabled Boolean @default(false)
+  biometricEnabled          Boolean @default(false)
+  updatedAt                 DateTime @updatedAt
+
+  @@map("security_settings")
+}
+
+model Session {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionTokenHash String   @unique
+  ipAddress        String?
+  userAgent        String?
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id         String                @id @default(cuid())
+  userId     String
+  user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String                @unique
+  type       VerificationTokenType
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime              @default(now())
+
+  @@index([userId, type])
+  @@map("verification_tokens")
+}
+
+model TrustedDevice {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceFingerprint String
+  deviceName        String?
+  trusted           Boolean  @default(false)
+  lastSeenAt        DateTime @default(now())
+  createdAt         DateTime @default(now())
+
+  @@unique([userId, deviceFingerprint])
+  @@map("trusted_devices")
+}
+
+model LoginEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress String?
+  userAgent String?
+  success   Boolean
+  riskFlag  String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("login_events")
+}
+
+// ---------------------------------------------------------------------------
+// Assets & balances
+// ---------------------------------------------------------------------------
+
+model Asset {
+  id        String    @id @default(cuid())
+  symbol    String    @unique
+  name      String
+  type      AssetType
+  precision Int
+  isActive  Boolean   @default(true)
+  iconUrl   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  watchlist Watchlist[]
+
+  @@map("assets")
+}
+
+model BankAccount {
+  id            String          @id @default(cuid())
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          BankAccountType
+  currencySymbol String
+  accountNumber String          @unique
+  nickname      String?
+  balanceCache  Decimal         @default(0) @db.Decimal(36, 18)
+  isPrimary     Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  ledgerAccount    LedgerAccount?
+  outgoingTransfers Transfer[]   @relation("SourceAccount")
+
+  @@index([userId])
+  @@map("bank_accounts")
+}
+
+model CryptoWallet {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String   @default("Spot Wallet")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  balances       AssetBalance[]
+  ledgerAccounts LedgerAccount[]
+
+  @@index([userId])
+  @@map("crypto_wallets")
+}
+
+model AssetBalance {
+  id           String       @id @default(cuid())
+  walletId     String
+  wallet       CryptoWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  assetSymbol  String
+  available    Decimal      @default(0) @db.Decimal(36, 18)
+  locked       Decimal      @default(0) @db.Decimal(36, 18)
+  updatedAt    DateTime     @updatedAt
+
+  @@unique([walletId, assetSymbol])
+  @@map("asset_balances")
+}
+
+// ---------------------------------------------------------------------------
+// Double-entry ledger (source of truth for every financial event)
+// ---------------------------------------------------------------------------
+
+model LedgerAccount {
+  id             String            @id @default(cuid())
+  type           LedgerAccountType
+  assetSymbol    String
+  name           String
+  // Ownership is optional: platform-level accounts (fee revenue, fiat
+  // settlement, crypto inventory) have no owning user.
+  bankAccountId  String?           @unique
+  bankAccount    BankAccount?      @relation(fields: [bankAccountId], references: [id], onDelete: SetNull)
+  cryptoWalletId String?
+  cryptoWallet   CryptoWallet?     @relation(fields: [cryptoWalletId], references: [id], onDelete: SetNull)
+  createdAt      DateTime          @default(now())
+
+  entries LedgerEntry[]
+
+  @@index([cryptoWalletId])
+  @@index([type, assetSymbol])
+  @@map("ledger_accounts")
+}
+
+model LedgerEntry {
+  id              String          @id @default(cuid())
+  ledgerAccountId String
+  ledgerAccount   LedgerAccount   @relation(fields: [ledgerAccountId], references: [id], onDelete: Restrict)
+  // groupId ties every leg of one atomic posting together. The sum of
+  // DEBIT amounts must equal the sum of CREDIT amounts within a groupId,
+  // per assetSymbol — enforced in lib/ledger/postLedgerEntries.ts before
+  // the surrounding Prisma transaction commits.
+  groupId         String
+  direction       LedgerDirection
+  assetSymbol     String
+  amount          Decimal         @db.Decimal(36, 18)
+  referenceType   String
+  referenceId     String
+  createdAt       DateTime        @default(now())
+
+  @@index([ledgerAccountId, createdAt])
+  @@index([groupId])
+  @@map("ledger_entries")
+}
+
+// ---------------------------------------------------------------------------
+// Banking
+// ---------------------------------------------------------------------------
+
+model Beneficiary {
+  id            String          @id @default(cuid())
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          BeneficiaryType
+  nickname      String
+  accountName   String
+  accountNumber String
+  bankName      String?
+  isFavorite    Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  transfers Transfer[]
+
+  @@index([userId])
+  @@map("beneficiaries")
+}
+
+model Transfer {
+  id              String         @id @default(cuid())
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceAccountId String
+  sourceAccount   BankAccount    @relation("SourceAccount", fields: [sourceAccountId], references: [id], onDelete: Restrict)
+  beneficiaryId   String?
+  beneficiary     Beneficiary?   @relation(fields: [beneficiaryId], references: [id], onDelete: SetNull)
+  currencySymbol  String
+  amount          Decimal        @db.Decimal(36, 18)
+  feeAmount       Decimal        @default(0) @db.Decimal(36, 18)
+  narration       String?
+  status          TransferStatus @default(PENDING)
+  idempotencyKey  String         @unique
+  ledgerGroupId   String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  transactions Transaction[]
+
+  @@index([userId, createdAt])
+  @@map("transfers")
+}
+
+// Unified, user-facing history row. Every money-moving feature (transfer,
+// deposit, withdrawal, trade, conversion, card payment) writes exactly one
+// Transaction per user-visible side effect, referencing its source record.
+model Transaction {
+  id             String               @id @default(cuid())
+  userId         String
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type           TransactionType
+  direction      TransactionDirection
+  status         TransactionStatus    @default(PENDING)
+  assetSymbol    String
+  amount         Decimal              @db.Decimal(36, 18)
+  feeAmount      Decimal              @default(0) @db.Decimal(36, 18)
+  counterparty   String?
+  narration      String?
+  referenceType  String
+  referenceId    String
+  ledgerGroupId  String?
+  isDemo         Boolean              @default(true)
+  createdAt      DateTime             @default(now())
+
+  transferId String?
+  transfer   Transfer? @relation(fields: [transferId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([referenceType, referenceId])
+  @@map("transactions")
+}
+
+// ---------------------------------------------------------------------------
+// Crypto: trading, conversion, deposits & withdrawals
+// ---------------------------------------------------------------------------
+
+model CryptoOrder {
+  id             String      @id @default(cuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  symbol         String // e.g. BTCUSDT
+  side           OrderSide
+  type           OrderType
+  quantity       Decimal     @db.Decimal(36, 18)
+  limitPrice     Decimal?    @db.Decimal(36, 18)
+  filledPrice    Decimal?    @db.Decimal(36, 18)
+  feeAmount      Decimal     @default(0) @db.Decimal(36, 18)
+  status         OrderStatus @default(OPEN)
+  idempotencyKey String      @unique
+  ledgerGroupId  String?
+  createdAt      DateTime    @default(now())
+  filledAt       DateTime?
+  cancelledAt    DateTime?
+
+  @@index([userId, createdAt])
+  @@index([symbol, status])
+  @@map("crypto_orders")
+}
+
+model ConversionQuote {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromAsset      String
+  toAsset        String
+  fromAmount     Decimal  @db.Decimal(36, 18)
+  toAmount       Decimal  @db.Decimal(36, 18)
+  rate           Decimal  @db.Decimal(36, 18)
+  feeAmount      Decimal  @default(0) @db.Decimal(36, 18)
+  expiresAt      DateTime
+  consumedAt     DateTime?
+  createdAt      DateTime @default(now())
+
+  conversion Conversion?
+
+  @@index([userId, createdAt])
+  @@map("conversion_quotes")
+}
+
+model Conversion {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quoteId        String   @unique
+  quote          ConversionQuote @relation(fields: [quoteId], references: [id], onDelete: Restrict)
+  fromAsset      String
+  toAsset        String
+  fromAmount     Decimal  @db.Decimal(36, 18)
+  toAmount       Decimal  @db.Decimal(36, 18)
+  feeAmount      Decimal  @default(0) @db.Decimal(36, 18)
+  idempotencyKey String   @unique
+  ledgerGroupId  String?
+  status         TransactionStatus @default(PENDING)
+  createdAt      DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("conversions")
+}
+
+model Deposit {
+  id             String        @id @default(cuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetSymbol    String
+  amount         Decimal       @db.Decimal(36, 18)
+  network        String?
+  demoAddress    String?
+  status         DepositStatus @default(PENDING)
+  idempotencyKey String        @unique
+  ledgerGroupId  String?
+  createdAt      DateTime      @default(now())
+  completedAt    DateTime?
+
+  @@index([userId, createdAt])
+  @@map("deposits")
+}
+
+model Withdrawal {
+  id                  String           @id @default(cuid())
+  userId              String
+  user                User             @relation("UserWithdrawals", fields: [userId], references: [id], onDelete: Cascade)
+  assetSymbol         String
+  amount              Decimal          @db.Decimal(36, 18)
+  feeAmount           Decimal          @default(0) @db.Decimal(36, 18)
+  destination         String
+  network             String?
+  status              WithdrawalStatus @default(PENDING)
+  idempotencyKey      String           @unique
+  ledgerGroupId       String?
+  reviewedByAdminId   String?
+  reviewedByAdmin     User?            @relation("AdminReviewedWithdrawals", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+  reviewedAt          DateTime?
+  rejectionReason     String?
+  reversalLedgerGroupId String?
+  createdAt           DateTime         @default(now())
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@map("withdrawals")
+}
+
+// A destination is only valid for the user and network for which it was
+// approved. Addresses are stored exactly as entered after trimming; matching
+// is deliberately exact so we never silently rewrite a financial destination.
+model WithdrawalAllowlistEntry {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Empty string is the explicit unscoped sentinel. Nullable columns cannot
+  // enforce a compound uniqueness key consistently in PostgreSQL.
+  assetSymbol String   @default("")
+  network     String   @default("")
+  destination String
+  label       String?
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, assetSymbol, network, destination])
+  @@index([userId, destination])
+  @@map("withdrawal_allowlist_entries")
+}
+
+// ---------------------------------------------------------------------------
+// Cards (demonstration only — no real card network integration)
+// ---------------------------------------------------------------------------
+
+model Card {
+  id             String         @id @default(cuid())
+  userId         String
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  formFactor     CardFormFactor
+  maskedNumber   String
+  expiryMonth    Int
+  expiryYear     Int
+  status         CardStatus     @default(ACTIVE)
+  spendingLimit  Decimal?       @db.Decimal(36, 18)
+  currencySymbol String         @default("USD")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  cardTransactions CardTransaction[]
+
+  @@index([userId])
+  @@map("cards")
+}
+
+model CardTransaction {
+  id             String   @id @default(cuid())
+  cardId         String
+  card           Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  merchant       String
+  amount         Decimal  @db.Decimal(36, 18)
+  currencySymbol String
+  status         TransactionStatus @default(COMPLETED)
+  createdAt      DateTime @default(now())
+
+  @@index([cardId, createdAt])
+  @@map("card_transactions")
+}
+
+// ---------------------------------------------------------------------------
+// Engagement, ops & compliance
+// ---------------------------------------------------------------------------
+
+model Watchlist {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetSymbol String
+  asset       Asset    @relation(fields: [assetSymbol], references: [symbol], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, assetSymbol])
+  @@map("watchlist_items")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead, createdAt])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorUserId  String?
+  actorUser    User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorRole    UserRole?
+  action       String
+  targetType   String
+  targetId     String
+  metadata     Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  @@index([actorUserId, createdAt])
+  @@index([targetType, targetId])
+  @@map("audit_logs")
+}
+
+// Records the health/config of an external provider connection (e.g.
+// Bybit). Never stores API secrets — those live only in server env vars.
+model ApiConnection {
+  id                String   @id @default(cuid())
+  provider          String   @unique
+  mode              String   @default("public")
+  status            String   @default("unknown")
+  lastHealthCheckAt DateTime?
+  metadata          Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("api_connections")
+}
+
+model Announcement {
+  id              String   @id @default(cuid())
+  title           String
+  body            String
+  isActive        Boolean  @default(true)
+  publishedAt     DateTime @default(now())
+  createdByAdminId String?
+  createdByAdmin  User?    @relation("AdminCreatedAnnouncements", fields: [createdByAdminId], references: [id], onDelete: SetNull)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([isActive, publishedAt])
+  @@map("announcements")
+}
+
+// A singleton record (id = "default") keeps the operational maintenance
+// switch durable and auditable without relying on process-local state.
+model PlatformSetting {
+  id                 String   @id @default("default")
+  maintenanceMode    Boolean  @default(false)
+  maintenanceMessage String?
+  updatedAt          DateTime @updatedAt
+
+  @@map("platform_settings")
+}

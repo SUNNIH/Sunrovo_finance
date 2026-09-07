@@ -25,9 +25,10 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
           aria-describedby={cn(errorId, hintId) || undefined}
           className={cn(
             "h-11 rounded-md border bg-surface px-3 text-sm text-text-primary placeholder:text-text-tertiary",
-            "transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            "transition-[border-color,box-shadow,background-color] duration-200",
+            "focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25",
             "disabled:cursor-not-allowed disabled:opacity-50",
-            error ? "border-danger" : "border-border",
+            error ? "border-danger focus-visible:border-danger focus-visible:ring-danger/20" : "border-border",
             className
           )}
           {...props}
@@ -38,7 +39,7 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
           </p>
         )}
         {error && (
-          <p id={errorId} role="alert" className="text-body-sm text-danger">
+          <p id={errorId} role="alert" className="text-body-sm text-danger animate-slide-up">
             {error}
           </p>
         )}

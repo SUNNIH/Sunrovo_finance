@@ -1,0 +1,2 @@
+# Generated migrations in this directory target PostgreSQL.
+provider = "postgresql"

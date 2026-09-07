@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * PLT design tokens (brand memory: blue primary, white/blue light mode,
+ * black-navy/blue dark mode). These are the single source of truth for
+ * colour in the product. Components consume them via Tailwind classes
+ * (bg-surface, text-secondary, border-default, etc.) defined in
+ * tailwind.config.ts -- never hardcode hex values in components.
+ */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --surface: 216 45% 98%;
+    --surface-elevated: 0 0% 100%;
+    --surface-hover: 216 42% 95%;
+
+    --primary: 220 87% 51%;
+    --primary-hover: 220 100% 45%;
+    --primary-soft: 220 100% 96%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 216 42% 95%;
+    --secondary-foreground: 220 43% 11%;
+
+    --text-primary: 220 43% 11%;
+    --text-secondary: 221 13% 46%;
+    --text-tertiary: 218 15% 65%;
+
+    --border: 218 17% 91%;
+    --border-strong: 220 16% 82%;
+    --ring: 220 87% 51%;
+
+    --success: 153 91% 30%;
+    --success-soft: 148 52% 94%;
+    --danger: 4 74% 49%;
+    --danger-soft: 3 82% 96%;
+    --warning: 28 97% 44%;
+    --warning-soft: 32 92% 95%;
+    --info: 220 87% 51%;
+    --info-soft: 220 100% 96%;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+  }
+
+  .dark {
+    --background: 222 48% 5%;
+    --surface: 220 45% 9%;
+    --surface-elevated: 219 46% 12%;
+    --surface-hover: 220 45% 16%;
+
+    --primary: 222 100% 59%;
+    --primary-hover: 222 100% 65%;
+    --primary-soft: 222 65% 22%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 45% 16%;
+    --secondary-foreground: 210 40% 98%;
+
+    --text-primary: 210 40% 98%;
+    --text-secondary: 218 15% 65%;
+    --text-tertiary: 216 12% 54%;
+
+    --border: 218 34% 21%;
+    --border-strong: 218 32% 29%;
+    --ring: 222 100% 65%;
+
+    --success: 150 66% 52%;
+    --success-soft: 156 52% 12%;
+    --danger: 4 92% 69%;
+    --danger-soft: 5 47% 15%;
+    --warning: 39 98% 56%;
+    --warning-soft: 39 63% 14%;
+    --info: 222 100% 65%;
+    --info-soft: 222 65% 22%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-text-primary antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Financial values must use tabular numerals (data memory). */
+  .tabular-nums,
+  .financial-value {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+
+  /* Visible keyboard focus everywhere (accessibility). */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Reduced-motion support (browser memory). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Prevent horizontal mobile overflow (browser memory). */
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Device safe-area handling. */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Minimum accessible touch target (browser memory: 44px). */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
