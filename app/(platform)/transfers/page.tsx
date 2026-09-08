@@ -22,10 +22,12 @@ export default async function TransfersPage({ searchParams }: TransfersPageProps
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-page-title-mobile text-text-primary sm:text-page-title">Transfer Money</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-        Send money between your PLT accounts or to a saved beneficiary. Enter an account number to confirm the recipient before you continue.
+      <div className="flex flex-col gap-1">
+        <h1 className="text-page-title-mobile sm:text-page-title font-semibold tracking-tight text-text-primary">
+          Transfer Money
+        </h1>
+        <p className="text-sm text-text-secondary max-w-2xl">
+          Move funds between your PLT accounts or send to authorized beneficiaries. All transfers are verified and logged on the PLT ledger.
         </p>
       </div>
 

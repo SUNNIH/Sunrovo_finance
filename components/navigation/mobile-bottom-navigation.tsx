@@ -15,7 +15,12 @@ export function MobileBottomNavigation() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface-elevated/95 backdrop-blur lg:hidden safe-area-bottom"
+      className={cn(
+        "fixed inset-x-0 bottom-0 z-40 safe-area-bottom lg:hidden",
+        "border-t border-border/80 bg-surface-elevated/[0.97] backdrop-blur-md",
+        /* Subtle blue upward shadow — mirrors the header's downward cast */
+        "shadow-[0_-1px_0_hsl(var(--primary)/0.05)]"
+      )}
     >
       <ul className="grid grid-cols-5">
         {MOBILE_NAV.map((item) => {
@@ -27,11 +32,31 @@ export function MobileBottomNavigation() {
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "touch-target flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium transition-colors duration-150",
-                  isActive ? "text-primary" : "text-text-secondary"
+                  "touch-target flex flex-col items-center justify-center gap-0.5 py-2",
+                  "text-[11px] font-medium tracking-tight",
+                  "transition-colors duration-200 ease-out",
+                  isActive ? "text-primary" : "text-text-secondary hover:text-text-primary"
                 )}
               >
-                <Icon className="h-5 w-5" aria-hidden="true" />
+                {/*
+                 * Active pip: a short horizontal bar above the icon.
+                 * Both states render the span — active gets bg-primary,
+                 * inactive gets bg-transparent — so there is no height jump.
+                 */}
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "mb-0.5 h-0.5 w-5 rounded-full transition-colors duration-200",
+                    isActive ? "bg-primary" : "bg-transparent"
+                  )}
+                />
+                <Icon
+                  className={cn(
+                    "h-5 w-5 transition-transform duration-200 ease-out",
+                    isActive && "scale-105"
+                  )}
+                  aria-hidden="true"
+                />
                 {item.label}
               </Link>
             </li>

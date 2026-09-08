@@ -57,6 +57,7 @@ export const RATE_LIMIT_RULES = {
   resendVerification: { action: "resend-verification", limit: 4, windowMs: 60 * 60 * 1000 },
   transfer: { action: "transfer", limit: 20, windowMs: 60 * 60 * 1000 },
   beneficiaryCreate: { action: "beneficiary-create", limit: 10, windowMs: 60 * 60 * 1000 },
+  recipientLookup: { action: "recipient-lookup", limit: 20, windowMs: 15 * 60 * 1000 },
 } as const satisfies Record<string, RateLimitRule>;
 
 /** identifier is typically `${ip}:${email}` or just `ip` for pre-auth endpoints. */

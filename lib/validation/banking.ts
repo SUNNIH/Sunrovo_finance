@@ -20,6 +20,7 @@ export const transferSchema = z.object({
   destination: z.discriminatedUnion("kind", [
     z.object({ kind: z.literal("own_account"), destinationAccountId: z.string().min(1) }),
     z.object({ kind: z.literal("beneficiary"), beneficiaryId: z.string().min(1) }),
+    z.object({ kind: z.literal("internal_account"), destinationAccountId: z.string().min(1) }),
   ]),
   amount: amountSchema,
   narration: z.string().trim().max(140).optional(),
@@ -29,6 +30,12 @@ export type TransferInput = z.infer<typeof transferSchema>;
 
 export const transferPreviewSchema = transferSchema.omit({ transactionPin: true, narration: true });
 export type TransferPreviewInput = z.infer<typeof transferPreviewSchema>;
+
+export const recipientLookupSchema = z.object({
+  accountNumber: z.string().trim().min(4, "Enter an account number with at least 4 digits").max(34),
+  sourceAccountId: z.string().optional(),
+});
+export type RecipientLookupInput = z.infer<typeof recipientLookupSchema>;
 
 export const BENEFICIARY_TYPES = ["INTERNAL_PLT", "EXTERNAL_BANK"] as const;
 

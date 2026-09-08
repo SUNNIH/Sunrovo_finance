@@ -12,11 +12,13 @@ export default async function DepositPage() {
   const accounts = await getAccountsForUser(user.id);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 animate-fade-in-up">
       <div>
-        <h1 className="text-page-title-mobile text-text-primary sm:text-page-title">Deposit</h1>
+        <h1 className="text-page-title-mobile font-semibold tracking-tight text-text-primary sm:text-page-title">
+          Deposit
+        </h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Add demo funds to your fiat accounts or spot wallet.
+          Add simulated demo funds to your fiat accounts or spot wallet.
         </p>
       </div>
       <DepositClient
@@ -25,6 +27,8 @@ export default async function DepositPage() {
           nickname: a.nickname,
           type: a.type,
           currencySymbol: a.currencySymbol,
+          accountNumber: a.accountNumber,
+          balanceCache: a.balanceCache.toString(),
         }))}
       />
     </div>

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-const NETWORK_BY_ASSET: Record<string, string> = {
+export const NETWORK_BY_ASSET: Record<string, string> = {
   BTC: "Bitcoin",
   ETH: "Ethereum (ERC-20)",
   SOL: "Solana",

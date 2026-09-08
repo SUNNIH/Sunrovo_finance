@@ -41,6 +41,32 @@ async function resolveDestination(
     };
   }
 
+  if (destination.kind === "internal_account") {
+    const dest = await prisma.bankAccount.findUnique({
+      where: { id: destination.destinationAccountId },
+      include: { user: { include: { profile: true } } },
+    });
+    if (!dest) {
+      throw new AuthError("ACCOUNT_NOT_FOUND", "The destination PLT account could not be found.", 404);
+    }
+    if (dest.id === sourceAccount.id) {
+      throw new AuthError("SAME_ACCOUNT", "Choose a different destination account.", 422);
+    }
+    if (dest.currencySymbol !== sourceAccount.currencySymbol) {
+      throw new AuthError("CURRENCY_MISMATCH", "This recipient's account uses a different currency.", 422);
+    }
+    const label =
+      dest.userId === userId
+        ? (dest.nickname ?? "Your account")
+        : (dest.user.profile?.fullName ?? dest.nickname ?? "PLT Customer");
+
+    return {
+      kind: "internal_beneficiary",
+      label,
+      destinationBankAccount: { id: dest.id, userId: dest.userId, nickname: dest.nickname },
+    };
+  }
+
   const beneficiary = await prisma.beneficiary.findUnique({ where: { id: destination.beneficiaryId } });
   if (!beneficiary || beneficiary.userId !== userId) {
     throw new AuthError("BENEFICIARY_NOT_FOUND", "Beneficiary not found.", 404);
@@ -153,7 +179,7 @@ export async function createTransfer(
           data: {
             userId,
             sourceAccountId: sourceAccount.id,
-            beneficiaryId: resolved.beneficiaryId,
+            beneficiaryId: resolved.beneficiaryId ?? null,
             currencySymbol: currency,
             amount: amountMoney.toFixed(precision),
             feeAmount: fee.toFixed(precision),

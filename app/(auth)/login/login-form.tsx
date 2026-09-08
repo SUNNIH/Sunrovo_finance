@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
 import { postJson, ApiRequestError } from "@/lib/utilities/api-client";
+import { SignupCard } from "@/components/auth/signup-card";
 import { TextField } from "@/components/forms/text-field";
 import { PasswordField } from "@/components/forms/password-field";
 import { Button } from "@/components/ui/button";
@@ -14,6 +16,10 @@ import { Button } from "@/components/ui/button";
 interface LoginResponse {
   status: "success" | "mfa_required";
 }
+
+const fieldClassName =
+  "h-12 rounded-lg bg-background shadow-sm transition-[border-color,box-shadow,background-color] duration-200 " +
+  "focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20";
 
 export function LoginForm() {
   const router = useRouter();
@@ -44,77 +50,100 @@ export function LoginForm() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-page-title-mobile text-text-primary">Welcome back</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          Sign in to continue to PLATINUM TRUST BANK.
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
+    <SignupCard
+      eyebrow="Returning customer"
+      title="Sign in to your account"
+      description="Enter your credentials to access your PLT accounts, transfers, and wallets."
+    >
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+        aria-busy={isSubmitting}
+        className="flex flex-col gap-5"
+      >
         <TextField
           label="Email address"
           type="email"
           autoComplete="email"
           error={errors.email?.message}
+          disabled={isSubmitting}
+          className={fieldClassName}
           {...register("email")}
         />
-        <div>
+
+        <div className="flex flex-col gap-2">
           <PasswordField
             label="Password"
             autoComplete="current-password"
             error={errors.password?.message}
+            disabled={isSubmitting}
+            className={fieldClassName}
             {...register("password")}
           />
-          <div className="mt-2 flex justify-end">
-            <Link href="/forgot-password" className="text-sm font-medium text-primary hover:underline">
+          <div className="flex justify-end">
+            <Link
+              href="/forgot-password"
+              className="text-sm font-medium text-primary hover:underline"
+            >
               Forgot password?
             </Link>
           </div>
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-text-secondary">
+        <label className="flex items-center gap-2.5 text-sm text-text-secondary">
           <input
             type="checkbox"
-            className="h-4 w-4 rounded border-border-strong text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            disabled={isSubmitting}
+            className="mt-0.5 h-4 w-4 rounded border-border-strong text-primary transition-shadow duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
             {...register("rememberDevice")}
           />
           Remember this device
         </label>
 
         {serverError && (
-          <p role="alert" className="text-body-sm text-danger">
+          <p role="alert" className="text-body-sm text-danger animate-slide-up">
             {serverError}
           </p>
         )}
 
-        <Button type="submit" size="lg" disabled={isSubmitting} className="mt-1">
-          {isSubmitting ? "Signing in..." : "Sign In"}
+        <Button
+          type="submit"
+          size="lg"
+          disabled={isSubmitting}
+          className="mt-1 w-full shadow-sm transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-md"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Signing in...
+            </>
+          ) : (
+            "Sign In"
+          )}
         </Button>
+
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-body-sm text-text-tertiary">or continue with</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Button variant="outline" disabled title="Coming soon">
+            Google
+          </Button>
+          <Button variant="outline" disabled title="Coming soon">
+            Apple
+          </Button>
+        </div>
+
+        <p className="text-center text-sm text-text-secondary">
+          Don&rsquo;t have an account?{" "}
+          <Link href="/register" className="font-medium text-primary hover:underline">
+            Sign up
+          </Link>
+        </p>
       </form>
-
-      <div className="flex items-center gap-3">
-        <div className="h-px flex-1 bg-border" />
-        <span className="text-body-sm text-text-tertiary">or continue with</span>
-        <div className="h-px flex-1 bg-border" />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <Button variant="outline" disabled title="Coming soon">
-          Google
-        </Button>
-        <Button variant="outline" disabled title="Coming soon">
-          Apple
-        </Button>
-      </div>
-
-      <p className="text-center text-sm text-text-secondary">
-        Don&rsquo;t have an account?{" "}
-        <Link href="/register" className="font-medium text-primary hover:underline">
-          Sign up
-        </Link>
-      </p>
-    </div>
+    </SignupCard>
   );
 }

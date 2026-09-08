@@ -148,4 +148,16 @@
     min-height: 44px;
     min-width: 44px;
   }
+
+  /**
+   * PLT shell: 48 px financial grid watermark.
+   * Applied to the sidebar and mobile-drawer logo/header areas only.
+   * Uses --border CSS var so it adapts to light and dark mode automatically.
+   */
+  .plt-grid-texture {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.5) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.5) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
 }

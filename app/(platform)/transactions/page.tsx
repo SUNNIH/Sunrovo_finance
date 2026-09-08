@@ -26,10 +26,14 @@ export default async function TransactionsPage() {
   }));
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 animate-fade-in-up">
       <div>
-        <h1 className="text-page-title-mobile text-text-primary sm:text-page-title">Transactions</h1>
-        <p className="mt-1 text-sm text-text-secondary">Your full transfer, deposit, and trade history.</p>
+        <h1 className="text-page-title-mobile font-semibold tracking-tight text-text-primary sm:text-page-title">
+          Transactions
+        </h1>
+        <p className="mt-1 text-sm text-text-secondary">
+          Your full transfer, deposit, trade, and conversion history.
+        </p>
       </div>
       <TransactionsClient initialItems={serializable} initialCursor={nextCursor} />
     </div>

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { transferSchema, beneficiaryCreateSchema, setTransactionPinSchema, amountSchema } from "@/lib/validation/banking";
+import {
+  transferSchema,
+  beneficiaryCreateSchema,
+  setTransactionPinSchema,
+  amountSchema,
+  recipientLookupSchema,
+} from "@/lib/validation/banking";
 
 describe("amountSchema", () => {
   it("accepts a positive decimal string", () => {
@@ -32,6 +38,14 @@ describe("transferSchema", () => {
     const result = transferSchema.safeParse({
       ...base,
       destination: { kind: "beneficiary", beneficiaryId: "ben_1" },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a valid internal-account transfer", () => {
+    const result = transferSchema.safeParse({
+      ...base,
+      destination: { kind: "internal_account", destinationAccountId: "acct_3" },
     });
     expect(result.success).toBe(true);
   });
@@ -97,3 +111,21 @@ describe("setTransactionPinSchema", () => {
     expect(result.success).toBe(true);
   });
 });
+
+describe("recipientLookupSchema", () => {
+  it("accepts valid account numbers", () => {
+    expect(recipientLookupSchema.safeParse({ accountNumber: "1234567890" }).success).toBe(true);
+    expect(
+      recipientLookupSchema.safeParse({ accountNumber: "111122223333", sourceAccountId: "src_1" }).success
+    ).toBe(true);
+  });
+
+  it("rejects account numbers shorter than 4 characters", () => {
+    expect(recipientLookupSchema.safeParse({ accountNumber: "123" }).success).toBe(false);
+  });
+
+  it("rejects account numbers longer than 34 characters", () => {
+    expect(recipientLookupSchema.safeParse({ accountNumber: "a".repeat(35) }).success).toBe(false);
+  });
+});
+

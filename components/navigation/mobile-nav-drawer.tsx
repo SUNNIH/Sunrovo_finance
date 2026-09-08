@@ -63,40 +63,68 @@ export function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps) {
 
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
+      {/* Backdrop scrim */}
       <button
         type="button"
         aria-label="Close menu"
-        className="absolute inset-0 bg-black/40 animate-fade-in"
+        className="absolute inset-0 bg-black/50 animate-fade-in"
         onClick={onClose}
       />
+
+      {/* Drawer panel */}
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
-        className="absolute inset-y-0 left-0 flex w-[86%] max-w-xs flex-col bg-surface-elevated shadow-xl animate-slide-up safe-area-top safe-area-bottom"
+        className={cn(
+          "absolute inset-y-0 left-0 flex w-[86%] max-w-xs flex-col",
+          "bg-surface-elevated shadow-xl animate-slide-up",
+          "safe-area-top safe-area-bottom"
+        )}
       >
-        <div className="flex h-16 items-center justify-between border-b border-border px-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+        {/* ── Logo / wordmark — matches sidebar exactly ── */}
+        <div
+          className={cn(
+            "flex h-16 items-center justify-between border-b border-border px-4",
+            "plt-grid-texture"
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className={cn(
+                "flex h-8 w-8 items-center justify-center rounded-lg",
+                "bg-gradient-to-br from-primary to-primary-hover text-primary-foreground",
+                "shadow-[0_2px_8px_hsl(var(--primary)/0.30)]"
+              )}
+            >
               <Diamond className="h-4 w-4" aria-hidden="true" />
             </div>
-            <span className="text-sm font-semibold text-text-primary">PLATINUM TRUST BANK</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-text-primary">
+              Platinum Trust Bank
+            </span>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="touch-target inline-flex items-center justify-center rounded-md text-text-secondary hover:bg-surface-hover"
+            className={cn(
+              "touch-target inline-flex items-center justify-center rounded-lg",
+              "text-text-secondary transition-colors duration-200 ease-out hover:bg-surface-hover"
+            )}
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
+        {/* ── Navigation ── */}
         <nav className="flex-1 overflow-y-auto px-3 py-4">
-          {SIDEBAR_NAV.map((group) => (
-            <div key={group.label} className="mb-5">
-              <p className="mb-1.5 px-2 text-label uppercase tracking-wide text-text-tertiary">
+          {SIDEBAR_NAV.map((group, groupIndex) => (
+            <div key={group.label} className="mb-1">
+              {groupIndex > 0 && (
+                <div className="my-3 border-t border-border/50" aria-hidden="true" />
+              )}
+              <p className="mb-1.5 px-3 text-label uppercase tracking-[0.14em] text-text-tertiary">
                 {group.label}
               </p>
               <ul className="flex flex-col gap-0.5">
@@ -110,10 +138,16 @@ export function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps) {
                         onClick={onClose}
                         aria-current={isActive ? "page" : undefined}
                         className={cn(
-                          "touch-target flex items-center gap-3 rounded-md px-2.5 text-sm font-medium transition-colors duration-150",
+                          "touch-target flex items-center gap-3 rounded-md px-2.5 text-sm font-medium",
+                          /*
+                           * Option A — same border-l-2 on all items:
+                           * active → border-primary bg-primary-soft text-primary
+                           * inactive → border-transparent (no layout shift)
+                           */
+                          "border-l-2 transition-colors duration-200 ease-out",
                           isActive
-                            ? "bg-primary-soft text-primary"
-                            : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+                            ? "border-primary bg-primary-soft text-primary"
+                            : "border-transparent text-text-secondary hover:bg-surface-hover hover:text-text-primary"
                         )}
                       >
                         <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -125,14 +159,22 @@ export function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps) {
               </ul>
             </div>
           ))}
-          <Link
-            href={SUPPORT_NAV_ITEM.href}
-            onClick={onClose}
-            className="touch-target flex items-center gap-3 rounded-md px-2.5 text-sm font-medium text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-          >
-            <SUPPORT_NAV_ITEM.icon className="h-[18px] w-[18px]" aria-hidden="true" />
-            {SUPPORT_NAV_ITEM.label}
-          </Link>
+
+          {/* Support link */}
+          <div className="mt-3 border-t border-border/50 pt-3">
+            <Link
+              href={SUPPORT_NAV_ITEM.href}
+              onClick={onClose}
+              className={cn(
+                "touch-target flex items-center gap-3 rounded-md px-2.5 text-sm font-medium",
+                "border-l-2 border-transparent text-text-secondary",
+                "transition-colors duration-200 ease-out hover:bg-surface-hover hover:text-text-primary"
+              )}
+            >
+              <SUPPORT_NAV_ITEM.icon className="h-[18px] w-[18px]" aria-hidden="true" />
+              {SUPPORT_NAV_ITEM.label}
+            </Link>
+          </div>
         </nav>
       </div>
     </div>

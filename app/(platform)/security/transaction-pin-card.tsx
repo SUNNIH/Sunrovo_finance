@@ -1,7 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { KeyRound } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle2,
+  KeyRound,
+  Loader2,
+  Lock,
+} from "lucide-react";
+import { setTransactionPinSchema, type SetTransactionPinInput } from "@/lib/validation/banking";
 import { postJson, ApiRequestError } from "@/lib/utilities/api-client";
 import { TextField } from "@/components/forms/text-field";
 import { PasswordField } from "@/components/forms/password-field";
@@ -16,83 +26,170 @@ interface TransactionPinCardProps {
 export function TransactionPinCard({ initialPinSet }: TransactionPinCardProps) {
   const [pinSet, setPinSet] = React.useState(initialPinSet);
   const [editing, setEditing] = React.useState(false);
-  const [pin, setPin] = React.useState("");
-  const [confirmPin, setConfirmPin] = React.useState("");
-  const [currentPassword, setCurrentPassword] = React.useState("");
-  const [error, setError] = React.useState<string | null>(null);
-  const [busy, setBusy] = React.useState(false);
+  const [serverError, setServerError] = React.useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
 
-  async function onSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    setError(null);
-    setBusy(true);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<SetTransactionPinInput>({
+    resolver: zodResolver(setTransactionPinSchema),
+  });
+
+  async function onSubmit(values: SetTransactionPinInput) {
+    setServerError(null);
+    setSuccessMessage(null);
     try {
-      await postJson("/api/security/transaction-pin", { pin, confirmPin, currentPassword });
+      await postJson("/api/security/transaction-pin", values);
       setPinSet(true);
       setEditing(false);
-      setPin("");
-      setConfirmPin("");
-      setCurrentPassword("");
+      reset();
+      setSuccessMessage("Transaction PIN saved successfully.");
+      setTimeout(() => setSuccessMessage(null), 4000);
     } catch (err) {
-      setError(err instanceof ApiRequestError ? err.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
+      setServerError(err instanceof ApiRequestError ? err.message : "Failed to set transaction PIN. Please try again.");
     }
   }
 
   return (
-    <Card>
-      <CardHeader className="flex-row items-center justify-between space-y-0">
-        <div>
-          <CardTitle>Transaction PIN</CardTitle>
-          <CardDescription>Required to confirm transfers and other sensitive actions.</CardDescription>
+    <Card className="border-border/80 shadow-xs">
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between space-y-0">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+            <Lock className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <div>
+            <CardTitle className="text-base font-semibold text-text-primary">Transaction PIN</CardTitle>
+            <CardDescription className="text-xs text-text-secondary mt-0.5">
+              Required to authorize withdrawals, account transfers, and sensitive operations.
+            </CardDescription>
+          </div>
         </div>
-        <Badge variant={pinSet ? "success" : "neutral"}>{pinSet ? "Set" : "Not set"}</Badge>
+        <div className="shrink-0">
+          <Badge
+            variant={pinSet ? "success" : "warning"}
+            className="flex items-center gap-1.5 px-2.5 py-1 text-xs"
+          >
+            {pinSet ? (
+              <>
+                <CheckCircle2 className="h-3.5 w-3.5 text-success" aria-hidden="true" />
+                <span>Configured</span>
+              </>
+            ) : (
+              <>
+                <AlertCircle className="h-3.5 w-3.5 text-warning" aria-hidden="true" />
+                <span>Not Set</span>
+              </>
+            )}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        {error && (
-          <p role="alert" className="text-body-sm text-danger">
-            {error}
-          </p>
+        {successMessage && (
+          <div
+            role="status"
+            className="flex items-center gap-2.5 rounded-xl border border-success/30 bg-success-soft/30 p-3.5 text-xs font-medium text-success animate-fade-in"
+          >
+            <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>{successMessage}</span>
+          </div>
         )}
 
-        {!editing && (
-          <Button onClick={() => setEditing(true)} className="w-fit">
-            <KeyRound className="h-4 w-4" /> {pinSet ? "Change PIN" : "Set a transaction PIN"}
-          </Button>
+        {serverError && (
+          <div
+            role="alert"
+            className="flex items-start gap-2.5 rounded-xl border border-danger/40 bg-danger-soft/40 p-3.5 text-xs font-medium text-danger animate-fade-in"
+          >
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>{serverError}</span>
+          </div>
         )}
 
-        {editing && (
-          <form onSubmit={onSubmit} className="flex max-w-xs flex-col gap-3">
+        {!editing ? (
+          <div>
+            <p className="text-xs text-text-secondary mb-3 leading-relaxed">
+              {pinSet
+                ? "Your transaction PIN is active and protecting your financial actions."
+                : "You have not configured a transaction PIN. Financial operations will be blocked until a PIN is established."}
+            </p>
+            <Button
+              type="button"
+              variant={pinSet ? "outline" : "primary"}
+              onClick={() => {
+                setEditing(true);
+                setServerError(null);
+                setSuccessMessage(null);
+              }}
+              className="touch-target gap-2 font-medium"
+            >
+              <KeyRound className="h-4 w-4" aria-hidden="true" />
+              <span>{pinSet ? "Change Transaction PIN" : "Set Transaction PIN"}</span>
+            </Button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex max-w-sm flex-col gap-4 animate-fade-in">
             <TextField
               id="new-pin"
-              label="New PIN (4-6 digits)"
+              label="New PIN"
+              type="password"
               inputMode="numeric"
               maxLength={6}
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
+              placeholder="••••"
+              className="font-mono tracking-widest text-center text-lg financial-value max-w-[180px]"
+              autoComplete="off"
+              error={errors.pin?.message}
+              {...register("pin")}
             />
+
             <TextField
               id="confirm-pin"
               label="Confirm PIN"
+              type="password"
               inputMode="numeric"
               maxLength={6}
-              value={confirmPin}
-              onChange={(e) => setConfirmPin(e.target.value)}
+              placeholder="••••"
+              className="font-mono tracking-widest text-center text-lg financial-value max-w-[180px]"
+              autoComplete="off"
+              error={errors.confirmPin?.message}
+              {...register("confirmPin")}
             />
+
             <PasswordField
               id="pin-current-password"
-              label="Current password"
+              label="Current Password"
               autoComplete="current-password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
+              error={errors.currentPassword?.message}
+              {...register("currentPassword")}
             />
-            <div className="flex gap-2">
-              <Button type="button" variant="outline" onClick={() => setEditing(false)}>
+
+            <div className="flex gap-2.5 pt-1">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setEditing(false);
+                  reset();
+                  setServerError(null);
+                }}
+                className="touch-target"
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={busy}>
-                {busy ? "Saving..." : "Save PIN"}
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="touch-target gap-2 font-medium"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    <span>Saving PIN...</span>
+                  </>
+                ) : (
+                  <span>Save Transaction PIN</span>
+                )}
               </Button>
             </div>
           </form>

@@ -4,7 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { KeyRound } from "lucide-react";
+import { AlertTriangle, CheckCircle2, KeyRound, Loader2 } from "lucide-react";
 import { changePasswordSchema, type ChangePasswordInput } from "@/lib/validation/treasury";
 import { postJson, ApiRequestError } from "@/lib/utilities/api-client";
 import { PasswordField } from "@/components/forms/password-field";
@@ -29,52 +29,85 @@ export function ChangePasswordCard() {
       await postJson("/api/security/change-password", values);
       setDone(true);
       reset();
-      // Changing the password revokes every session, including this one.
-      setTimeout(() => router.push("/login"), 1500);
+      // Changing the password revokes all active sessions on the backend.
+      setTimeout(() => router.push("/login"), 1800);
     } catch (error) {
-      setServerError(error instanceof ApiRequestError ? error.message : "Something went wrong.");
+      setServerError(error instanceof ApiRequestError ? error.message : "Failed to update password. Please try again.");
     }
   }
 
   return (
-    <Card>
+    <Card className="border-border/80 shadow-xs">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <KeyRound className="h-4 w-4" /> Change password
-        </CardTitle>
-        <CardDescription>You&rsquo;ll be signed out everywhere after changing it.</CardDescription>
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+            <KeyRound className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <div>
+            <CardTitle className="text-base font-semibold text-text-primary">Change Password</CardTitle>
+            <CardDescription className="text-xs text-text-secondary mt-0.5">
+              Updating your password will immediately sign you out of all active sessions.
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         {done ? (
-          <p className="text-sm text-success">Password updated. Redirecting you to sign in...</p>
+          <div
+            role="status"
+            className="flex items-center gap-2.5 rounded-xl border border-success/30 bg-success-soft/30 p-4 text-xs font-medium text-success animate-fade-in"
+          >
+            <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>Password updated successfully. Redirecting you to sign in...</span>
+          </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex max-w-sm flex-col gap-3">
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex max-w-sm flex-col gap-4">
             <PasswordField
-              label="Current password"
+              label="Current Password"
+              id="current-password"
               autoComplete="current-password"
               error={errors.currentPassword?.message}
               {...register("currentPassword")}
             />
             <PasswordField
-              label="New password"
+              label="New Password"
+              id="new-password"
               autoComplete="new-password"
-              hint="At least 10 characters"
+              hint="Must be at least 10 characters"
               error={errors.newPassword?.message}
               {...register("newPassword")}
             />
             <PasswordField
-              label="Confirm new password"
+              label="Confirm New Password"
+              id="confirm-new-password"
               autoComplete="new-password"
               error={errors.confirmNewPassword?.message}
               {...register("confirmNewPassword")}
             />
+
             {serverError && (
-              <p role="alert" className="text-body-sm text-danger">
-                {serverError}
-              </p>
+              <div
+                role="alert"
+                className="flex items-start gap-2.5 rounded-xl border border-danger/40 bg-danger-soft/40 p-3.5 text-xs font-medium text-danger animate-fade-in"
+              >
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>{serverError}</span>
+              </div>
             )}
-            <Button type="submit" disabled={isSubmitting} className="w-fit">
-              {isSubmitting ? "Updating..." : "Update password"}
+
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="touch-target mt-1 w-full gap-2 sm:w-auto font-medium"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  <span>Updating Password...</span>
+                </>
+              ) : (
+                <span>Update Password</span>
+              )}
             </Button>
           </form>
         )}

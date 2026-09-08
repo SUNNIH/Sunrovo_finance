@@ -23,10 +23,12 @@ export default async function BeneficiariesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-page-title-mobile text-text-primary sm:text-page-title">Beneficiaries</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          Saved recipients for faster transfers. Adding a new one requires your password.
+      <div className="flex flex-col gap-1">
+        <h1 className="text-page-title-mobile sm:text-page-title font-semibold tracking-tight text-text-primary">
+          Saved Beneficiaries
+        </h1>
+        <p className="text-sm text-text-secondary max-w-2xl">
+          Authorized recipients for instant and scheduled transfers. Adding or modifying recipients is protected with password authentication.
         </p>
       </div>
       <BeneficiariesClient initialBeneficiaries={serializable} />
