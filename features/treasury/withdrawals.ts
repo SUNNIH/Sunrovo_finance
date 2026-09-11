@@ -3,7 +3,7 @@ import Decimal from "decimal.js";
 import { prisma } from "@/lib/db/prisma";
 import { getAssetPrecision } from "@/lib/money/format";
 import { isFiatAsset } from "@/lib/money/asset-kind";
-import { getTicker } from "@/lib/bybit/client";
+import { meetsMinimumWithdrawal, MINIMUM_WITHDRAWAL_USD } from "@/lib/money/usd-equivalent";
 import { verifyTransactionPin } from "@/lib/auth/transaction-pin";
 import { postLedgerEntries } from "@/lib/ledger/postLedgerEntries";
 import { getOrCreatePlatformLedgerAccount, externalSettlementPoolName, feeRevenuePoolName } from "@/lib/ledger/platform-accounts";
@@ -13,25 +13,7 @@ import { writeAuditLog } from "@/lib/audit/log";
 import type { WithdrawalInput } from "@/lib/validation/treasury";
 import { AuthError } from "@/features/authentication/errors";
 
-/** Above this USD-equivalent value, a withdrawal is held for admin review. */
-const REVIEW_THRESHOLD_USD = new Decimal(1000);
-const FIAT_USD_APPROX_RATE: Record<string, Decimal.Value> = { USD: 1, EUR: 1, GBP: 1, NGN: "0.000666666666666667" };
 const WITHDRAWAL_FEE_RATE = "0.005"; // 0.5% flat demo fee
-
-async function estimateUsdValue(assetSymbol: string, amount: string): Promise<Decimal> {
-  if (isFiatAsset(assetSymbol)) {
-    return new Decimal(amount).mul(FIAT_USD_APPROX_RATE[assetSymbol] ?? 1);
-  }
-  if (assetSymbol === "USDT") return new Decimal(amount);
-  try {
-    const ticker = await getTicker(`${assetSymbol}USDT`);
-    return new Decimal(amount).mul(ticker.lastPrice);
-  } catch {
-    // Fail closed: uncertain valuation enters review rather than being
-    // treated as a small, instantly approved withdrawal.
-    return REVIEW_THRESHOLD_USD.add(1);
-  }
-}
 
 function isValidDestinationFormat(assetSymbol: string, destination: string): boolean {
   if (isFiatAsset(assetSymbol)) return destination.trim().length >= 4;
@@ -75,11 +57,32 @@ export async function createWithdrawal(userId: string, input: WithdrawalInput, i
     }
   }
 
+  // Check minimum withdrawal amount ($100 USD equivalent)
+  try {
+    const meetsMinimum = await meetsMinimumWithdrawal(input.assetSymbol, input.amount);
+    if (!meetsMinimum) {
+      throw new AuthError(
+        "BELOW_MINIMUM_WITHDRAWAL",
+        `Minimum withdrawal is $${MINIMUM_WITHDRAWAL_USD.toString()} USD equivalent.`,
+        422
+      );
+    }
+  } catch (error) {
+    // If it's already our AuthError, rethrow it
+    if (error instanceof AuthError) {
+      throw error;
+    }
+    // If pricing failed, reject the withdrawal (fail-safe)
+    throw new AuthError(
+      "PRICING_UNAVAILABLE",
+      "Unable to verify minimum withdrawal amount. Please try again later.",
+      503
+    );
+  }
+
   const precision = getAssetPrecision(input.assetSymbol);
   const fee = new Decimal(input.amount).mul(WITHDRAWAL_FEE_RATE).toFixed(precision);
   const totalDebit = new Decimal(input.amount).add(fee).toFixed(precision);
-  const usdValue = await estimateUsdValue(input.assetSymbol, input.amount);
-  const requiresReview = usdValue.gt(REVIEW_THRESHOLD_USD);
 
   const fiat = isFiatAsset(input.assetSymbol);
 
@@ -120,7 +123,8 @@ export async function createWithdrawal(userId: string, input: WithdrawalInput, i
           name: feeRevenuePoolName(input.assetSymbol),
         });
 
-        const status = requiresReview ? "PENDING" : "COMPLETED";
+        // ALL withdrawals now require admin review
+        const status = "PENDING";
         const withdrawal = await tx.withdrawal.create({
           data: {
             userId,
@@ -148,12 +152,12 @@ export async function createWithdrawal(userId: string, input: WithdrawalInput, i
             userId,
             type: "WITHDRAWAL",
             direction: "DEBIT",
-            status: requiresReview ? "PENDING" : "COMPLETED",
+            status: "PENDING",
             assetSymbol: input.assetSymbol,
             amount: input.amount,
             feeAmount: fee,
             counterparty: input.destination,
-            narration: requiresReview ? "Withdrawal pending review" : "Simulated withdrawal",
+            narration: "Withdrawal pending administrator review",
             referenceType: "Withdrawal",
             referenceId: withdrawal.id,
             ledgerGroupId: groupId,
@@ -161,16 +165,14 @@ export async function createWithdrawal(userId: string, input: WithdrawalInput, i
           },
         });
 
-        if (requiresReview) {
-          await tx.notification.create({
-            data: {
-              userId,
-              type: "TRANSACTION",
-              title: "Withdrawal pending review",
-              body: `Your withdrawal of ${input.amount} ${input.assetSymbol} exceeds the instant-approval limit and is pending review.`,
-            },
-          });
-        }
+        await tx.notification.create({
+          data: {
+            userId,
+            type: "TRANSACTION",
+            title: "Withdrawal pending review",
+            body: `Your withdrawal of ${input.amount} ${input.assetSymbol} is pending administrator review.`,
+          },
+        });
 
         return withdrawal;
       }),
@@ -185,7 +187,7 @@ export async function createWithdrawal(userId: string, input: WithdrawalInput, i
     action: "treasury.withdrawal_request",
     targetType: "Withdrawal",
     targetId: result.id,
-    metadata: { assetSymbol: input.assetSymbol, requiresReview },
+    metadata: { assetSymbol: input.assetSymbol, requiresReview: true },
   });
 
   return result;

@@ -31,6 +31,7 @@ import { generateClientId } from "@/lib/utilities/id";
 import { accountDisplayName, maskAccountNumber } from "@/lib/utilities/format-account";
 import { isDestinationAllowlisted } from "@/lib/treasury/withdrawal-allowlist";
 import { cn } from "@/lib/utilities/cn";
+import { FiseLoader } from "@/components/brand/fise-loader";
 
 export interface BankAccountView {
   id: string;
@@ -140,7 +141,7 @@ export function WithdrawClient({
       ? (activeAccount?.balanceCache ?? "0")
       : (activeCrypto?.available ?? "0");
 
-  // Allowlist checking using official PLT helper
+  // Allowlist checking using official FHT helper
   const matchingAllowlistEntry = React.useMemo(() => {
     if (!activeDestination.trim()) return null;
     return (
@@ -255,7 +256,7 @@ export function WithdrawClient({
           </div>
           <Link href="/deposit">
             <Button className="mt-2 gap-2">
-              <span>Make a Demo Deposit</span>
+              <span>Make a Deposit</span>
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -368,7 +369,7 @@ export function WithdrawClient({
                         {activeAccount && (
                           <div className="flex items-center justify-between text-xs text-text-tertiary pt-0.5">
                             <span>
-                              {activeAccount.accountNumber ? maskAccountNumber(activeAccount.accountNumber) : "PLT Account"}
+                              {activeAccount.accountNumber ? maskAccountNumber(activeAccount.accountNumber) : "FHT Account"}
                             </span>
                             <span className="flex items-center gap-1 font-medium text-text-secondary">
                               Available:{" "}
@@ -437,9 +438,12 @@ export function WithdrawClient({
 
                       {/* Amount Entry */}
                       <div className="flex flex-col gap-1.5">
-                        <label htmlFor="fiat-amount" className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-                          Withdrawal Amount ({activeAssetSymbol})
-                        </label>
+                        <div className="flex items-center justify-between">
+                          <label htmlFor="fiat-amount" className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">
+                            Withdrawal Amount ({activeAssetSymbol})
+                          </label>
+                          <span className="text-[11px] text-text-tertiary">Min: $100 USD equiv.</span>
+                        </div>
                         <TextField
                           id="fiat-amount"
                           label="Amount"
@@ -516,7 +520,7 @@ export function WithdrawClient({
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-text-secondary">Transfer Network</span>
                           <span className="text-xs font-semibold text-text-primary">
-                            {supportedNetworks[selectedCryptoSymbol] ?? "PLT Supported Network"}
+                            {supportedNetworks[selectedCryptoSymbol] ?? "FHT Supported Network"}
                           </span>
                         </div>
                       </div>
@@ -581,12 +585,7 @@ export function WithdrawClient({
                           <label htmlFor="crypto-amount" className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">
                             Withdrawal Amount ({selectedCryptoSymbol})
                           </label>
-                          <span className="text-xs text-text-tertiary">
-                            Available:{" "}
-                            <span className="font-mono font-semibold text-text-primary financial-value">
-                              {activeCrypto?.available ?? "0"} {selectedCryptoSymbol}
-                            </span>
-                          </span>
+                          <span className="text-[11px] text-text-tertiary">Min: $100 USD equiv.</span>
                         </div>
 
                         <TextField
@@ -598,6 +597,12 @@ export function WithdrawClient({
                           placeholder="0.00"
                           className="financial-value font-mono text-base"
                         />
+
+                        <div className="flex items-center justify-between text-xs text-text-tertiary pt-0.5">
+                          <span>Available: <span className="font-mono font-semibold text-text-primary financial-value">
+                            {activeCrypto?.available ?? "0"} {selectedCryptoSymbol}
+                          </span></span>
+                        </div>
 
                         {/* Preset Chips */}
                         {CRYPTO_PRESET_AMOUNTS[selectedCryptoSymbol] && (
@@ -624,7 +629,7 @@ export function WithdrawClient({
               <div className="flex items-start gap-2.5 rounded-xl border border-border bg-surface/70 p-3.5 text-xs text-text-tertiary">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-text-tertiary" aria-hidden="true" />
                 <span className="leading-relaxed">
-                  A demo processing fee applies upon ledger posting. Some withdrawals may require review before completion.
+                  A processing fee may apply. Some withdrawals may require review before completion.
                 </span>
               </div>
 
@@ -667,7 +672,7 @@ export function WithdrawClient({
                 </span>
               </div>
               <p className="mt-1.5 text-xs text-text-secondary">
-                Simulated withdrawal from your {tab === "fiat" ? "fiat bank account" : "crypto spot wallet"}
+                Withdrawal from your {tab === "fiat" ? "fiat bank account" : "crypto spot wallet"}
               </p>
             </div>
 
@@ -726,6 +731,13 @@ export function WithdrawClient({
                 </span>
               </div>
             </div>
+
+            {/* Processing Indicator for Withdrawal */}
+              {submitting && (
+                <div className="flex flex-col items-center gap-2 rounded-xl border border-primary/30 bg-primary-soft/30 p-4 animate-fade-in">
+                  <FiseLoader variant="inline" size="sm" text="Processing withdrawal..." />
+                </div>
+              )}
 
             {/* PIN Authorization Section */}
             {!hasPin ? (
@@ -860,14 +872,14 @@ export function WithdrawClient({
                 {receipt.status === "COMPLETED"
                   ? "Withdrawal Complete"
                   : receipt.status === "PENDING"
-                  ? "Withdrawal Pending Review"
+                  ? "Awaiting Administrator Review"
                   : `Withdrawal ${receipt.status}`}
               </h2>
               <p className="text-sm text-text-secondary max-w-md">
                 {receipt.status === "COMPLETED"
-                  ? "Processed in this demo environment."
+                  ? "Your withdrawal has been approved and completed. Funds have been sent to your destination."
                   : receipt.status === "PENDING"
-                  ? "This withdrawal has been submitted and is currently pending review."
+                  ? "Your withdrawal has been submitted and is awaiting administrator review. You will be notified once it has been approved or rejected."
                   : `Withdrawal status is ${receipt.status}.`}
               </p>
             </div>
@@ -961,9 +973,6 @@ export function WithdrawClient({
               )}
             </div>
 
-            <Badge variant="warning" className="text-xs">
-              Demo — no real funds were transferred
-            </Badge>
 
             {/* Navigation Actions */}
             <div className="flex w-full max-w-md flex-col gap-2.5 sm:flex-row pt-2">

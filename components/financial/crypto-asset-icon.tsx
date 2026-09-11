@@ -53,7 +53,7 @@ export const KNOWN_CRYPTO_ASSETS: Record<string, CryptoAssetMeta> = {
     borderClass: "border-[#26A17B]/30",
   },
   PLT: {
-    name: "PLT Demo Token",
+    name: "PLT Token",
     symbol: "PLT",
     glyph: "P",
     isFictional: true,
@@ -116,7 +116,7 @@ export function CryptoAssetIcon({
       {showBadge && meta.isFictional && (
         <span
           className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-warning ring-2 ring-background"
-          title="Demo token"
+          title="PLT Token"
         />
       )}
     </div>

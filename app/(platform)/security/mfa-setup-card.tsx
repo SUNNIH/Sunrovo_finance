@@ -12,6 +12,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import { postJson, ApiRequestError } from "@/lib/utilities/api-client";
+import { FiseLoader } from "@/components/brand/fise-loader";
 import { TextField } from "@/components/forms/text-field";
 import { PasswordField } from "@/components/forms/password-field";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,9 @@ export function MfaSetupCard({ initialMfaEnabled }: MfaSetupCardProps) {
       setBusy(false);
     }
   }
+
+  // Show FiseLoader during MFA enrollment initiation
+  const isEnrolling = busy && stage === "enrolling";
 
   async function confirmEnrollment(event: React.FormEvent) {
     event.preventDefault();
@@ -138,15 +142,22 @@ export function MfaSetupCard({ initialMfaEnabled }: MfaSetupCardProps) {
         )}
 
         {!mfaEnabled && stage === "idle" && (
-          <div>
-            <p className="text-xs text-text-secondary mb-3 leading-relaxed">
+          <div className="flex flex-col gap-3">
+            <p className="text-xs text-text-secondary mb-1 leading-relaxed">
               Enhance account security by pairing with an authenticator app such as Google Authenticator, Microsoft Authenticator, or 1Password.
             </p>
+
+            {isEnrolling && (
+              <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary-soft/30 p-3 animate-fade-in">
+                <FiseLoader variant="inline" size="sm" text="Preparing 2FA setup..." />
+              </div>
+            )}
+
             <Button
               type="button"
               onClick={beginEnrollment}
               disabled={busy}
-              className="touch-target gap-2 font-medium"
+              className="touch-target gap-2 font-medium w-fit"
             >
               {busy ? (
                 <>

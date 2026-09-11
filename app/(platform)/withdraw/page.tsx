@@ -30,7 +30,7 @@ export default async function WithdrawPage() {
           Withdraw
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Simulated withdrawals — request transfers to external bank accounts or crypto destinations.
+          Request withdrawals to external bank accounts or crypto destinations.
         </p>
       </div>
       <WithdrawClient

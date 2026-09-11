@@ -6,7 +6,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { Bell, LogOut, Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { DemoEnvironmentBadge } from "@/components/layout/demo-environment-badge";
 import { cn } from "@/lib/utilities/cn";
 
 interface TopNavigationProps {
@@ -89,7 +88,6 @@ export function TopNavigation({ onOpenMobileMenu, userName, userInitials = "U" }
 
       {/* Right-side controls */}
       <div className="ml-auto flex items-center gap-2 sm:gap-3">
-        <DemoEnvironmentBadge />
         <ThemeToggle />
 
         {/* Notifications bell */}

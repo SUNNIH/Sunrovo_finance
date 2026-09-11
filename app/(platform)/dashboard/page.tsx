@@ -19,8 +19,9 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getAccountsForUser } from "@/features/banking/accounts";
 import { listTransactions } from "@/features/banking/transactions";
 import { prisma } from "@/lib/db/prisma";
-import { maskAccountNumber, BANK_ACCOUNT_TYPE_LABELS } from "@/lib/utilities/format-account";
+import { accountDisplayName, maskAccountNumber } from "@/lib/utilities/format-account";
 import { cn } from "@/lib/utilities/cn";
+import { LocalGreeting } from "@/components/dashboard/local-greeting";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -57,7 +58,7 @@ export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) return null;
 
-  const firstName = (user.profile?.fullName ?? "there").split(" ")[0];
+  const firstName = (user.profile?.fullName ?? "there").split(" ")[0] ?? "there";
 
   // Crypto wallet is read directly here (not via a feature module) since
   // the crypto feature surface itself is Phase 4 scope — this is just
@@ -88,15 +89,12 @@ export default async function DashboardPage() {
             Dashboard
           </p>
           <h1 className="mt-1 text-page-title-mobile text-text-primary sm:text-page-title">
-            Good morning, {firstName}
+            <LocalGreeting firstName={firstName} />
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
             Here&rsquo;s what&rsquo;s happening with your accounts today.
           </p>
         </div>
-        <Badge variant="warning" className="w-fit shrink-0 sm:mt-1">
-          Demo Environment — no real funds
-        </Badge>
       </div>
 
       {/* ── Balance overview card ─────────────────────────────────────────── */}
@@ -206,7 +204,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="mt-3">
                     <CardTitle className="text-sm font-semibold text-text-primary">
-                      {account.nickname ?? BANK_ACCOUNT_TYPE_LABELS[account.type]}
+                      {accountDisplayName(account.nickname, account.type)}
                     </CardTitle>
                     <p className="mt-0.5 text-body-sm financial-value text-text-tertiary">
                       {maskAccountNumber(account.accountNumber)}

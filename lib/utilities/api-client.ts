@@ -52,7 +52,7 @@ async function request<T>(
   return payload.data as T;
 }
 
-/** POSTs JSON to a PLT API route and unwraps the { data } / { error } envelope. */
+/** POSTs JSON to an FHT API route and unwraps the { data } / { error } envelope. */
 export async function postJson<T>(url: string, body: unknown): Promise<T> {
   return request<T>("POST", url, body);
 }

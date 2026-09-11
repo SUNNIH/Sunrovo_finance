@@ -80,7 +80,7 @@ interface CalculatePreviewParams {
 
 /**
  * Calculates indicative trading preview (notional, fee, net proceeds/cost)
- * by directly reusing PLT's computeMarketBuyFill / computeMarketSellFill
+ * by directly reusing FHT's computeMarketBuyFill / computeMarketSellFill
  * and exact Decimal arithmetic for limit orders.
  */
 export function calculateOrderPreview({

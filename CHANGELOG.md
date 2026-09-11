@@ -217,7 +217,7 @@ maintained docs.
 
 ### Added
 
-- **`lib/bybit/`**: PLT-owned types (`types.ts`), the five supported
+- **`lib/bybit/`**: FHT-owned types (`types.ts`), the five supported
   pairs (`instruments.ts`), a deterministic-ish mock-data generator
   (`mock-data.ts`, always used for PLT/USDT and as the fallback for
   everything else), Bybit V5 response normalisers (`normalisers.ts`), an
@@ -290,7 +290,7 @@ maintained docs.
   data) on any mismatch, but a live-data smoke test on your machine is
   the first real validation of the actual Bybit integration.
 - **WebSocket connects directly browser-to-Bybit**, not proxied through
-  a PLT server route — a deliberate, documented deviation from the
+  an FHT server route — a deliberate, documented deviation from the
   product spec's architecture diagram, driven by Next.js's
   serverless-friendly deployment model having no persistent process to
   fan out a shared upstream connection. See `ARCHITECTURE.md`.
@@ -300,7 +300,7 @@ maintained docs.
 - **Convert only supports pairs where one side is USDT** (not direct
   BTC→ETH) — see `ARCHITECTURE.md`.
 - Trades and conversions don't require the transaction PIN transfers do
-  — a deliberate scope choice (PIN gates money *leaving* PLT-controlled
+  — a deliberate scope choice (PIN gates money *leaving* FHT-controlled
   accounts; trading/converting stays within the user's own wallet). Worth
   revisiting if that distinction doesn't hold up under further design
   review.
@@ -376,7 +376,7 @@ visible from static analysis alone.
   `beneficiaries` (CRUD with password step-up on create),
   `transfer-pricing` (pure fee logic, unit-tested independently of
   Prisma), `transfers` (destination resolution across own-account /
-  internal-PLT / simulated-external, idempotent ledger-posted execution),
+  internal-FHT / simulated-external, idempotent ledger-posted execution),
   `transactions` (filtered, cursor-paginated history + CSV export).
 - **API routes**: `/api/accounts`, `/api/accounts/:id`,
   `/api/transfers/quote`, `/api/transfers`, `/api/transfers/:id`,

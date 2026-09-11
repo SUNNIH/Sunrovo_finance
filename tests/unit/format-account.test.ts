@@ -12,6 +12,14 @@ describe("accountDisplayName", () => {
     expect(accountDisplayName("Travel fund", "CURRENT")).toBe("Travel fund");
   });
 
+  it("formats only exact legacy default nicknames for display", () => {
+    expect(accountDisplayName("PLT Current Account", "CURRENT")).toBe("FHT Current Account");
+    expect(accountDisplayName("PLT Savings Account", "SAVINGS")).toBe("FHT Savings Account");
+    expect(accountDisplayName("PLT Current Account — travel", "CURRENT")).toBe(
+      "PLT Current Account — travel"
+    );
+  });
+
   it("falls back to the type label when no nickname is set", () => {
     expect(accountDisplayName(null, "SAVINGS")).toBe("Savings Account");
   });

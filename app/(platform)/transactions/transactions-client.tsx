@@ -27,6 +27,7 @@ import {
 import { formatMoney } from "@/lib/money/format";
 import { cn } from "@/lib/utilities/cn";
 import { SkeletonTable } from "@/components/ui/skeleton";
+import { transactionTextForDisplay } from "@/lib/utilities/format-transaction";
 
 interface TransactionsClientProps {
   initialItems: TransactionView[];
@@ -353,10 +354,10 @@ export function TransactionsClient({
                       minute: "2-digit",
                     });
 
-                    const displayDescription =
-                      txn.counterparty || txn.narration || "—";
-                    const secondaryText =
-                      txn.counterparty && txn.narration ? txn.narration : null;
+                    const counterparty = transactionTextForDisplay(txn.counterparty);
+                    const narration = transactionTextForDisplay(txn.narration);
+                    const displayDescription = counterparty || narration || "—";
+                    const secondaryText = counterparty && narration ? narration : null;
 
                     return (
                       <tr
@@ -470,7 +471,10 @@ export function TransactionsClient({
                 minute: "2-digit",
               });
 
-              const primaryText = txn.counterparty || txn.narration || typeName;
+              const primaryText =
+                transactionTextForDisplay(txn.counterparty) ||
+                transactionTextForDisplay(txn.narration) ||
+                typeName;
 
               return (
                 <div

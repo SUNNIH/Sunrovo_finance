@@ -25,8 +25,8 @@ export const metadata: Metadata = { title: "Profile & Settings" };
 
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "PL";
-  if (parts.length === 1) return parts[0]?.slice(0, 2).toUpperCase() ?? "PL";
+  if (parts.length === 0) return "FH";
+  if (parts.length === 1) return parts[0]?.slice(0, 2).toUpperCase() ?? "FH";
   const first = parts[0]?.[0] ?? "";
   const last = parts[parts.length - 1]?.[0] ?? "";
   return `${first}${last}`.toUpperCase();
@@ -160,7 +160,7 @@ export default async function ProfilePage() {
               <div>
                 <CardTitle className="text-base font-semibold text-text-primary">Personal Details</CardTitle>
                 <CardDescription className="text-xs text-text-secondary mt-0.5">
-                  Verified legal identity information registered with Platinum Trust Bank.
+                  Verified legal identity information registered with FISE Holdings Trust Bank.
                 </CardDescription>
               </div>
             </div>
@@ -219,7 +219,7 @@ export default async function ProfilePage() {
           <div className="flex items-start gap-2.5 rounded-xl border border-border bg-surface/60 p-3 text-xs text-text-secondary">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-text-tertiary" aria-hidden="true" />
             <span className="leading-relaxed">
-              Legal identity details were confirmed during account onboarding. To request corrections or submit updated KYC documentation, please contact Platinum Trust Bank compliance.
+              Legal identity details were confirmed during account onboarding. To request corrections or submit updated KYC documentation, please contact FISE Holdings Trust Bank compliance.
             </span>
           </div>
         </CardContent>

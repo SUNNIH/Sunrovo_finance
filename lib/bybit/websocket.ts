@@ -8,8 +8,8 @@
  *
  * Architecture note: Bybit's public topics require no authentication, so
  * this connects directly from the browser rather than being proxied
- * through a PLT server route. That's a deliberate deviation from the
- * "Browser -> PLT market-data service -> Bybit" diagram in the product
+ * through an FHT server route. That's a deliberate deviation from the
+ * "Browser -> FHT market-data service -> Bybit" diagram in the product
  * spec: Next.js's serverless-friendly request/response model has no
  * long-running process to hold a persistent upstream WebSocket open and
  * fan it out to many browser connections (unlike a traditional always-on
@@ -17,10 +17,10 @@
  * and `lib/bybit/client.ts` (server-side, cached, normalised, mock-data
  * fallback). Every message here is passed through the *same*
  * `normaliseTicker`/etc. functions the server uses, so the UI still only
- * ever sees PLT-owned types, never a raw Bybit payload shape — direct
+ * ever sees FHT-owned types, never a raw Bybit payload shape — direct
  * connection only changes the transport, not the data-ownership
  * boundary. A dedicated market-data fan-out service is the natural next
- * step if PLT ever needs the full proxied architecture (e.g. to add
+ * step if FHT ever needs the full proxied architecture (e.g. to add
  * private/authenticated streams, which do need server-side signing and
  * must never run in the browser).
  */

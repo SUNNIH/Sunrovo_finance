@@ -6,7 +6,7 @@ import { getAccountsForUser } from "@/features/banking/accounts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CurrencyValue } from "@/components/financial/currency-value";
-import { BANK_ACCOUNT_TYPE_LABELS } from "@/lib/utilities/format-account";
+import { accountDisplayName, BANK_ACCOUNT_TYPE_LABELS } from "@/lib/utilities/format-account";
 import { AccountNumberDisplay } from "@/components/accounts/account-number-display";
 import { AccountDetails } from "./account-details";
 import { cn } from "@/lib/utilities/cn";
@@ -35,7 +35,7 @@ export default async function AccountsPage() {
             Accounts
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
-            Your PLT fiat banking accounts and active balances.
+            Your FHT fiat banking accounts and active balances.
           </p>
         </div>
 
@@ -71,7 +71,7 @@ export default async function AccountsPage() {
             No Accounts Yet
           </h2>
           <p className="mt-1.5 max-w-sm text-sm text-text-secondary">
-            Complete your onboarding verification to receive your official PLT fiat accounts and begin transacting.
+            Complete your onboarding verification to receive your official FHT fiat accounts and begin transacting.
           </p>
           <div className="mt-6">
             <Link href="/dashboard">
@@ -84,8 +84,7 @@ export default async function AccountsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {accounts.map((account) => {
-            const displayName =
-              account.nickname ?? BANK_ACCOUNT_TYPE_LABELS[account.type] ?? "PLT Account";
+            const displayName = accountDisplayName(account.nickname, account.type);
             const typeLabel = BANK_ACCOUNT_TYPE_LABELS[account.type] ?? account.type;
 
             return (
@@ -168,7 +167,7 @@ export default async function AccountsPage() {
                         Account Number
                       </span>
                       <span className="text-[10px] font-medium text-text-tertiary">
-                        PLT Fiat
+                        FHT Fiat
                       </span>
                     </div>
                     <AccountNumberDisplay accountNumber={account.accountNumber} />

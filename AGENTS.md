@@ -1,10 +1,10 @@
-# PLATINUM TRUST BANK (PLT) — AGENT RULES
+# FISE HOLDINGS TRUST BANK (FHT) — AGENT RULES
 
 ## Project Identity
 
-PLATINUM TRUST BANK (PLT) is an original digital banking and cryptocurrency application.
-PLT is not a Bybit clone. Bybit may only be used as a public market-data provider, functional reference, or optional future API provider where explicitly required.
-Preserve the existing PLT branding, UI, navigation, authentication, database, ledger, wallets, banking architecture, security, and crypto features.
+FISE HOLDINGS TRUST BANK (FHT) is an original digital banking and cryptocurrency application.
+FHT is not a Bybit clone. Bybit may only be used as a public market-data provider, functional reference, or optional future API provider where explicitly required.
+Preserve the existing FHT branding, UI, navigation, authentication, database, ledger, wallets, banking architecture, security, and crypto features.
 
 ## Source of Truth
 
@@ -43,13 +43,13 @@ Preserve:
 - Existing auth/security libraries
 - Bybit V5 where applicable
 
-PLT is a feature-oriented modular monolith.
+FHT is a feature-oriented modular monolith.
 Prefer small modules, adapters, services, reusable components, focused migrations, and incremental changes.
 Do not perform broad rewrites of stable functionality without a strong reason.
 
 ## Financial Rules
 
-The PLT double-entry ledger is the financial source of truth.
+The FHT double-entry ledger is the financial source of truth.
 Never implement financial movement primarily as a direct balance edit.
 Financial operations must preserve authentication, authorization, ownership checks, validation, idempotency, atomic database transactions, ledger posting, transaction history, cache consistency, and auditability.
 Every completed posting must satisfy, per asset: TOTAL DEBITS = TOTAL CREDITS.
@@ -57,7 +57,7 @@ BankAccount.balanceCache and AssetBalance.available/locked are caches, not the a
 
 ## Money Safety
 
-Use Prisma Decimal, decimal.js, or existing PLT money utilities for authoritative financial values.
+Use Prisma Decimal, decimal.js, or existing FHT money utilities for authoritative financial values.
 Do not use Number() or parseFloat() for authoritative balances, transaction amounts, fees, quantities, reserves, notionals, financial comparisons, ledger amounts, or balance-cache calculations.
 Number() is acceptable for non-authoritative UI, charts, timestamps, pagination, and layout calculations.
 
@@ -89,10 +89,10 @@ Use .env.example or redacted values only.
 
 ## Bybit
 
-Keep Bybit modular: Bybit → PLT adapter/provider → normalized PLT types → PLT UI.
+Keep Bybit modular: Bybit → FHT adapter/provider → normalized FHT types → FHT UI.
 Public market data should not require private API credentials.
 Private Bybit credentials must remain server-side and must never be exposed through NEXT*PUBLIC*\* variables.
-Normal market-data paths may safely fall back to PLT mock/stale data.
+Normal market-data paths may safely fall back to FHT mock/stale data.
 Admin provider-health checks should distinguish actual upstream availability from fallback operation.
 
 ## Withdrawals
@@ -136,7 +136,7 @@ Never claim a command passed without actual output.
 
 ## UI / UX
 
-Preserve PLT branding:
+Preserve FHT branding:
 
 - Light mode: White + Blue
 - Dark mode: Black/Navy + Blue
@@ -147,14 +147,14 @@ Do not perform a major UI redesign while backend functionality is still changing
 
 ## UI Polish Guidelines
 
-PLT UI improvements must preserve existing functionality.
+FHT UI improvements must preserve existing functionality.
 
 Design goals:
 
 - Premium fintech experience
 - Professional banking feel
 - Clean and trustworthy
-- PLT-specific branding
+- FHT-specific branding
 
 References may include:
 

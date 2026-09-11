@@ -8,7 +8,7 @@ export async function assertPlatformOperational(role?: "USER" | "ADMIN") {
   if (settings.maintenanceMode) {
     throw new AuthError(
       "MAINTENANCE_MODE",
-      settings.maintenanceMessage || "PLT is temporarily undergoing maintenance.",
+      settings.maintenanceMessage || "FHT is temporarily undergoing maintenance.",
       503
     );
   }
@@ -22,7 +22,7 @@ export function rejectIfMaintenanceMode(
 
   throw new AuthError(
     "MAINTENANCE_MODE",
-    message?.trim() || "PLT is temporarily undergoing maintenance.",
+    message?.trim() || "FHT is temporarily undergoing maintenance.",
     503
   );
 }

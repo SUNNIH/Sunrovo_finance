@@ -124,7 +124,7 @@ export function AssetDetailClient({
 
               {pair.isFictional && (
                 <Badge variant="neutral" className="text-xs">
-                  Demo token
+                  PLT Token
                 </Badge>
               )}
             </div>
@@ -262,7 +262,7 @@ export function AssetDetailClient({
           <CardContent className="p-4 sm:p-5">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-card-title text-text-primary">Order Book Depth</h2>
-              <span className="text-xs text-text-tertiary">Simulated Snapshot</span>
+              <span className="text-xs text-text-tertiary">Order Book Snapshot</span>
             </div>
             <OrderBookDisplay
               orderBook={orderBook}

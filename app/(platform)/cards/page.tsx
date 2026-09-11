@@ -15,7 +15,7 @@ export default async function CardsPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-page-title-mobile text-text-primary sm:text-page-title">Cards</h1>
-        <p className="mt-1 text-sm text-text-secondary">Demonstration card management — no real card network.</p>
+        <p className="mt-1 text-sm text-text-secondary">Manage your FHT cards and card settings.</p>
       </div>
       <CardsClient
         initialCards={cards.map((c) => ({

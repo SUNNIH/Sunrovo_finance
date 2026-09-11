@@ -180,59 +180,71 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
               Notification Centre
             </h2>
             <p className="mt-0.5 text-sm text-text-secondary">
-              Security and account notifications are delivered through your PLT notification centre.
+              Security and account notifications are delivered through your FHT notification centre.
             </p>
           </div>
         </div>
       </div>
 
       {/* Filter Tabs and Actions Bar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div
-          role="tablist"
-          aria-label="Filter notifications"
-          className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar"
-        >
-          {filterTabs.map((tab) => {
-            const isActive = activeFilter === tab.id;
-            return (
-              <button
-                key={tab.id}
-                role="tab"
-                type="button"
-                aria-selected={isActive}
-                onClick={() => setActiveFilter(tab.id)}
-                className={cn(
-                  "touch-target inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium whitespace-nowrap transition-colors",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
-                  isActive
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "border border-border bg-surface-elevated text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-                )}
-              >
-                <span>{tab.label}</span>
-                <span
+      <div className="flex flex-col gap-3">
+        {/* Filter chips with smooth horizontal scroll and subtle fade indicator */}
+        <div className="relative">
+          <div
+            role="tablist"
+            aria-label="Filter notifications"
+            className="flex gap-2 overflow-x-auto scrollbar-none pb-1 scroll-smooth"
+          >
+            {filterTabs.map((tab) => {
+              const isActive = activeFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  role="tab"
+                  type="button"
+                  aria-selected={isActive}
+                  onClick={() => setActiveFilter(tab.id)}
                   className={cn(
-                    "rounded-full px-1.5 py-0.2 text-[10px] font-semibold leading-tight",
+                    "touch-target shrink-0 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium whitespace-nowrap transition-colors",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
                     isActive
-                      ? "bg-white/20 text-white"
-                      : "bg-surface-hover text-text-tertiary"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "border border-border bg-surface-elevated text-text-secondary hover:bg-surface-hover hover:text-text-primary"
                   )}
                 >
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
+                  <span>{tab.label}</span>
+                  <span
+                    className={cn(
+                      "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-tight min-w-[20px] text-center",
+                      isActive
+                        ? "bg-white/20 text-white"
+                        : "bg-surface-hover text-text-tertiary"
+                    )}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {/* Subtle right-edge fade to indicate more content */}
+          <div 
+            className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent sm:hidden" 
+            aria-hidden="true"
+          />
         </div>
 
-        <div className="flex items-center justify-end">
+        {/* Mark All Read - better mobile positioning */}
+        <div className="flex items-center justify-between sm:justify-end">
+          <span className="text-xs text-text-secondary sm:hidden">
+            {unreadCount > 0 ? `${unreadCount} unread` : "All read"}
+          </span>
           <Button
             variant="outline"
             size="sm"
             onClick={markAllRead}
             disabled={unreadCount === 0 || markingAll}
-            className="touch-target h-9 gap-1.5 px-3 text-xs"
+            className="touch-target h-9 gap-1.5 px-3 text-xs shrink-0"
             aria-label="Mark all notifications as read"
           >
             {markingAll ? (
@@ -326,14 +338,14 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
                 role="article"
                 aria-labelledby={`notif-title-${n.id}`}
                 className={cn(
-                  "flex flex-col gap-3 p-4 transition-colors sm:flex-row sm:items-start sm:justify-between sm:gap-4",
+                  "flex flex-col gap-3 p-3.5 sm:p-4 transition-colors sm:flex-row sm:items-start sm:justify-between sm:gap-4",
                   !n.isRead
                     ? "bg-primary-soft/20 hover:bg-primary-soft/30 dark:bg-primary-soft/10"
                     : "hover:bg-surface-hover/50"
                 )}
               >
                 {/* Left icon and message contents */}
-                <div className="flex items-start gap-3.5 min-w-0 flex-1">
+                <div className="flex items-start gap-3 min-w-0 flex-1">
                   <div
                     className={cn(
                       "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border",
@@ -346,19 +358,19 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
 
                   <div className="min-w-0 flex-1">
                     {/* Metadata Header: Type Badge + Read/Unread State + Relative Timestamp */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant={config.badgeVariant} className="text-[11px] font-medium">
+                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                      <Badge variant={config.badgeVariant} className="text-[11px] font-medium shrink-0">
                         {config.label}
                       </Badge>
 
                       {/* Explicit text badge so state is never communicated by color alone */}
                       {!n.isRead ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary shrink-0">
                           <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
                           <span>Unread</span>
                         </span>
                       ) : (
-                        <span className="text-[11px] text-text-tertiary">
+                        <span className="text-[11px] text-text-tertiary shrink-0">
                           Read
                         </span>
                       )}
@@ -366,7 +378,7 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
                       <time
                         dateTime={n.createdAt}
                         title={exactTimestamp}
-                        className="ml-auto text-xs text-text-tertiary whitespace-nowrap"
+                        className="text-xs text-text-tertiary whitespace-nowrap shrink-0 ml-auto"
                       >
                         {relativeTime}
                       </time>
@@ -376,7 +388,7 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
                     <h3
                       id={`notif-title-${n.id}`}
                       className={cn(
-                        "mt-1.5 text-sm text-text-primary",
+                        "text-sm text-text-primary mb-1",
                         !n.isRead ? "font-semibold" : "font-medium"
                       )}
                     >
@@ -384,21 +396,21 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
                     </h3>
 
                     {/* Body */}
-                    <p className="mt-0.5 text-sm text-text-secondary leading-relaxed break-words">
+                    <p className="text-sm text-text-secondary leading-relaxed break-words pr-2">
                       {n.body}
                     </p>
                   </div>
                 </div>
 
                 {/* Right Action: Explicit Mark as Read control */}
-                <div className="flex shrink-0 items-center sm:self-center">
+                <div className="flex shrink-0 items-center justify-end sm:self-center sm:justify-start mt-2 sm:mt-0">
                   {!n.isRead ? (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => markRead(n.id)}
                       disabled={markingId === n.id}
-                      className="touch-target h-9 gap-1.5 px-3 text-xs"
+                      className="touch-target h-9 gap-1.5 px-3 text-xs w-full sm:w-auto"
                       aria-label={`Mark "${n.title}" as read`}
                     >
                       {markingId === n.id ? (

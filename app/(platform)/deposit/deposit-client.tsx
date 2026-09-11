@@ -27,7 +27,7 @@ import { TransactionStatusBadge } from "@/components/financial/transaction-statu
 import { CurrencyValue } from "@/components/financial/currency-value";
 import { postJsonIdempotent, ApiRequestError } from "@/lib/utilities/api-client";
 import { generateClientId } from "@/lib/utilities/id";
-import { BANK_ACCOUNT_TYPE_LABELS } from "@/lib/utilities/format-account";
+import { accountDisplayName } from "@/lib/utilities/format-account";
 import { formatMoney } from "@/lib/money/format";
 import { cn } from "@/lib/utilities/cn";
 
@@ -175,10 +175,10 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
   }
 
   const selectedAccount = accounts.find((a) => a.id === accountId) ?? accounts[0]!;
-  const accountDisplayName =
-    selectedAccount.nickname ??
-    BANK_ACCOUNT_TYPE_LABELS[selectedAccount.type] ??
-    "PLT Account";
+  const selectedAccountDisplayName = accountDisplayName(
+    selectedAccount.nickname,
+    selectedAccount.type
+  );
 
   function handleReview(e: React.FormEvent) {
     e.preventDefault();
@@ -212,7 +212,7 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
         assetSymbol: deposit.assetSymbol,
         status: deposit.status,
         createdAt: deposit.completedAt ?? deposit.createdAt,
-        destinationLabel: accountDisplayName,
+        destinationLabel: selectedAccountDisplayName,
         destinationDetail: selectedAccount.accountNumber
           ? `Acc: ${selectedAccount.accountNumber}`
           : undefined,
@@ -255,12 +255,9 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
                 Review Fiat Deposit
               </h2>
               <p className="text-xs text-text-secondary">
-                Confirm simulated deposit details before crediting funds.
+                Review deposit details before crediting your account.
               </p>
             </div>
-            <Badge variant="warning" className="text-[10px] font-semibold">
-              Demo Environment
-            </Badge>
           </div>
 
           {/* Amount Overview */}
@@ -280,7 +277,7 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
             <div className="flex items-center justify-between py-2.5">
               <dt className="text-text-secondary">Destination Account</dt>
               <dd className="font-medium text-text-primary text-right">
-                {accountDisplayName}
+                {selectedAccountDisplayName}
                 {selectedAccount.accountNumber && (
                   <span className="block text-xs font-mono text-text-tertiary">
                     {selectedAccount.accountNumber}
@@ -299,17 +296,12 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
             <div className="flex items-center justify-between py-2.5">
               <dt className="text-text-secondary">Funding Method</dt>
               <dd className="font-medium text-text-primary">
-                Simulated Deposit (Demo)
+                Account Credit
               </dd>
             </div>
           </dl>
 
           {/* Safety Notice */}
-          <div className="rounded-lg border border-border bg-surface p-3 text-xs text-text-secondary">
-            <p>
-              <span className="font-semibold text-text-primary">Sandbox Notice:</span> This action simulates instant bank account funding. No real bank transfer or ACH debit is processed.
-            </p>
-          </div>
 
           {error && (
             <p role="alert" className="text-sm font-medium text-danger">
@@ -363,9 +355,6 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
       <CardContent className="flex flex-col gap-5 p-5 sm:p-7">
         {/* Environment Badge */}
         <div className="flex items-center justify-between">
-          <Badge variant="warning" className="text-[10px] font-semibold">
-            Demo Environment — Simulated Deposit
-          </Badge>
           <span className="text-xs text-text-tertiary">Step 1 of 2</span>
         </div>
 
@@ -386,7 +375,7 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
             >
               {accounts.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.nickname ?? BANK_ACCOUNT_TYPE_LABELS[a.type] ?? "PLT Account"} ({a.currencySymbol})
+                  {accountDisplayName(a.nickname, a.type)} ({a.currencySymbol})
                   {a.accountNumber ? ` — ${a.accountNumber}` : ""}
                 </option>
               ))}
@@ -554,7 +543,7 @@ function CryptoDeposit() {
       });
       setStep("receipt");
     } catch (err) {
-      setError(err instanceof ApiRequestError ? err.message : "Simulated deposit failed.");
+      setError(err instanceof ApiRequestError ? err.message : "Deposit could not be completed.");
     } finally {
       setBusy(false);
     }
@@ -593,18 +582,15 @@ function CryptoDeposit() {
                 Review Crypto Deposit
               </h2>
               <p className="text-xs text-text-secondary">
-                Confirm simulated incoming transfer to your spot wallet.
+                Review deposit details for your spot wallet.
               </p>
             </div>
-            <Badge variant="warning" className="text-[10px] font-semibold">
-              Demo Sandbox
-            </Badge>
           </div>
 
           {/* Amount Overview */}
           <div className="flex flex-col items-center justify-center rounded-xl border border-border/80 bg-surface/50 p-4 text-center">
             <span className="text-label uppercase tracking-wider text-text-tertiary font-medium">
-              Simulated Amount
+              Deposit Amount
             </span>
             <div className="mt-1 flex items-center gap-2">
               <CryptoAssetIcon symbol={asset} size="sm" showBadge />
@@ -626,7 +612,7 @@ function CryptoDeposit() {
             <div className="flex items-center justify-between py-2.5">
               <dt className="text-text-secondary">Network</dt>
               <dd className="font-medium text-text-primary">
-                {address?.network ?? "Demo Network"}
+                {address?.network ?? "Network unavailable"}
               </dd>
             </div>
 
@@ -648,11 +634,6 @@ function CryptoDeposit() {
           </dl>
 
           {/* Notice */}
-          <div className="rounded-lg border border-border bg-surface p-3 text-xs text-text-secondary">
-            <p>
-              <span className="font-semibold text-text-primary">Simulated Settlement:</span> This immediately generates a simulated on-chain deposit event for testing trading and conversions.
-            </p>
-          </div>
 
           {error && (
             <p role="alert" className="text-sm font-medium text-danger">
@@ -706,9 +687,6 @@ function CryptoDeposit() {
       <CardContent className="flex flex-col gap-5 p-5 sm:p-7">
         {/* Environment Badge */}
         <div className="flex items-center justify-between">
-          <Badge variant="warning" className="text-[10px] font-semibold">
-            Demo Sandbox — Non-Mainnet Address
-          </Badge>
           <span className="text-xs text-text-tertiary">Spot Wallet</span>
         </div>
 
@@ -791,7 +769,7 @@ function CryptoDeposit() {
 
               <p className="text-[11px] text-text-tertiary max-w-sm mt-1">
                 Send only <strong className="text-text-secondary">{asset}</strong> on{" "}
-                <strong className="text-text-secondary">{address.network}</strong>. Test sandbox address only.
+                <strong className="text-text-secondary">{address.network}</strong>. Confirm the asset and network before continuing.
               </p>
             </div>
           ) : (
@@ -799,7 +777,7 @@ function CryptoDeposit() {
           )}
         </div>
 
-        {/* Simulated Deposit Form */}
+        {/* Deposit form */}
         <form onSubmit={handleReview} className="flex flex-col gap-4 border-t border-border/80 pt-4">
           <div>
             <h3 className="text-sm font-semibold text-text-primary">
@@ -855,7 +833,7 @@ function CryptoDeposit() {
             disabled={!amount.trim() || !address}
             className="w-full font-semibold shadow-xs"
           >
-            Review Simulated Deposit
+            Review Deposit
           </Button>
         </form>
 
@@ -914,7 +892,7 @@ function DepositReceiptCard({
           </div>
           <h2 className="text-section-title text-text-primary">Deposit Confirmed</h2>
           <p className="mt-1 text-xs text-text-secondary sm:text-sm">
-            Your simulated deposit has been completed and credited to your account.
+            Your deposit has been credited to your account.
           </p>
         </div>
 

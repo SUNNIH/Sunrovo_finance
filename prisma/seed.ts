@@ -67,7 +67,7 @@ async function main() {
   }
 
   // Phase 3: fiat-only platform accounts for simulated external-bank
-  // transfers (funds "leave" PLT) and transfer fee revenue.
+  // transfers (funds "leave" FHT) and transfer fee revenue.
   const fiatAssets = ASSETS.filter((asset) => asset.type === AssetType.FIAT);
   for (const asset of fiatAssets) {
     await ensurePlatformLedgerAccount(

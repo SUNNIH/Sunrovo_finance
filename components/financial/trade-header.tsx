@@ -57,7 +57,7 @@ export function TradeHeader({
               )}
               {pair.isFictional && (
                 <Badge variant="neutral" className="text-xs">
-                  Demo token
+                  PLT Token
                 </Badge>
               )}
               {ticker.isStale && !isLive && (

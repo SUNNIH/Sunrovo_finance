@@ -273,7 +273,7 @@ export function MarketsClient({ initialMarkets }: { initialMarkets: MarketRow[] 
                               </span>
                               {meta.isFictional && (
                                 <Badge variant="neutral" className="text-[10px] py-0 px-1.5">
-                                  Demo token
+                                  PLT Token
                                 </Badge>
                               )}
                             </div>
@@ -391,7 +391,7 @@ export function MarketsClient({ initialMarkets }: { initialMarkets: MarketRow[] 
                           </span>
                           {meta.isFictional && (
                             <Badge variant="neutral" className="text-[9px] py-0 px-1">
-                              Demo
+                              PLT Token
                             </Badge>
                           )}
                         </div>

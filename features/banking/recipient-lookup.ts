@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/db/prisma";
+import { accountNicknameForDisplay } from "@/lib/utilities/format-account";
 import { maskAccountNumber, BANK_ACCOUNT_TYPE_LABELS } from "@/lib/utilities/format-account";
 import { normalizeAccountNumberInput } from "@/lib/utilities/transfer-recipient";
 
@@ -31,7 +32,8 @@ export function sanitizeRecipientData(params: {
   isInternalPlt?: boolean;
 }): Omit<SafeRecipientLookupResult, "status"> {
   const accountType = BANK_ACCOUNT_TYPE_LABELS[params.type] ?? params.type;
-  const displayName = params.fullName?.trim() || params.nickname?.trim() || "PLT Customer";
+  const displayName =
+    params.fullName?.trim() || accountNicknameForDisplay(params.nickname) || "FHT Customer";
 
   return {
     accountId: params.accountId,
@@ -45,7 +47,7 @@ export function sanitizeRecipientData(params: {
 }
 
 /**
- * Server-side lookup of a recipient PLT account number for an authenticated user.
+ * Server-side lookup of a recipient FHT account number for an authenticated user.
  */
 export async function lookupRecipientAccount(
   currentUserId: string,
@@ -110,7 +112,7 @@ export async function lookupRecipientAccount(
     };
   }
 
-  // 3. Look up any valid, active internal PLT bank account
+  // 3. Look up any valid, active internal FHT bank account
   const internalAccount = await prisma.bankAccount.findUnique({
     where: { accountNumber: normalized },
     include: {

@@ -3,7 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Diamond, X } from "lucide-react";
+import { X } from "lucide-react";
+import { FiseLogo } from "@/components/brand/fise-logo";
 import { cn } from "@/lib/utilities/cn";
 import { SIDEBAR_NAV, SUPPORT_NAV_ITEM } from "./nav-config";
 
@@ -91,18 +92,8 @@ export function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps) {
           )}
         >
           <div className="flex items-center gap-3">
-            <div
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-lg",
-                "bg-gradient-to-br from-primary to-primary-hover text-primary-foreground",
-                "shadow-[0_2px_8px_hsl(var(--primary)/0.30)]"
-              )}
-            >
-              <Diamond className="h-4 w-4" aria-hidden="true" />
-            </div>
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-text-primary">
-              Platinum Trust Bank
-            </span>
+            <FiseLogo variant="mark" className="h-8 w-8" />
+            <FiseLogo className="h-9 w-auto max-w-[154px]" />
           </div>
           <button
             type="button"

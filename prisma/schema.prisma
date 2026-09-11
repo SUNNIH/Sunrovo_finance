@@ -1,4 +1,4 @@
-// PLATINUM TRUST BANK (PLT) — Prisma schema
+// FISE Holdings Trust Bank (FHT) — Prisma schema
 //
 // Money rules (data memory):
 //  - No floating-point arithmetic for authoritative financial values.

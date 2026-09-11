@@ -45,7 +45,7 @@ describe("sanitizeRecipientData", () => {
     expect((sanitized as Record<string, unknown>).transactions).toBeUndefined();
   });
 
-  it("falls back to nickname or PLT Customer when full name is missing or blank", () => {
+  it("falls back to nickname or FHT Customer when full name is missing or blank", () => {
     const withNickname = sanitizeRecipientData({
       accountId: "acct_1",
       accountNumber: "999988887777",
@@ -64,7 +64,7 @@ describe("sanitizeRecipientData", () => {
       fullName: null,
       nickname: null,
     });
-    expect(fallback.displayName).toBe("PLT Customer");
+    expect(fallback.displayName).toBe("FHT Customer");
   });
 });
 

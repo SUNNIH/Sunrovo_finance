@@ -75,9 +75,6 @@ export default async function WalletsPage() {
             Your crypto holdings, spot balances, and portfolio valuation.
           </p>
         </div>
-        <Badge variant="warning" className="w-fit shrink-0 sm:mt-1">
-          Demo Environment — Simulated Spot Account
-        </Badge>
       </div>
 
       {/* ── Portfolio Overview Hero Card ──────────────────────────────────── */}
@@ -115,12 +112,12 @@ export default async function WalletsPage() {
                 </span>
                 <span className="text-text-tertiary">·</span>
                 <span className="text-text-tertiary">
-                  Instant settlement on demo trades
+                  Available for trading
                 </span>
               </div>
             </div>
 
-            {/* Quick action buttons with clear PLT hierarchy */}
+            {/* Quick action buttons with clear FHT hierarchy */}
             <div className="flex flex-wrap gap-2.5">
               <Link href="/deposit">
                 <Button variant="primary" size="sm" className="gap-1.5 touch-target sm:min-h-0">
@@ -232,7 +229,7 @@ export default async function WalletsPage() {
                 No crypto assets yet
               </h3>
               <p className="max-w-md text-sm text-text-secondary">
-                Your spot wallet has no funded assets. Deposit demo crypto or convert funds to start trading on simulated markets.
+                Your spot wallet has no funded assets. Deposit crypto or convert funds to start trading.
               </p>
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 <Link href="/deposit">
@@ -285,7 +282,7 @@ export default async function WalletsPage() {
                                 </span>
                                 {asset.meta.isFictional && (
                                   <Badge variant="neutral" className="text-[10px] py-0 px-1.5">
-                                    Demo token
+                                    PLT Token
                                   </Badge>
                                 )}
                               </div>
@@ -394,7 +391,7 @@ export default async function WalletsPage() {
                             </span>
                             {asset.meta.isFictional && (
                               <Badge variant="neutral" className="text-[10px] py-0 px-1.5">
-                                Demo token
+                                PLT Token
                               </Badge>
                             )}
                           </div>

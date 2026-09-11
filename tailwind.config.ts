@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 /**
- * PLT semantic design tokens.
+ * FHT semantic design tokens.
  *
  * Rule (design memory): "Use semantic design tokens. Do not hardcode theme
  * colours repeatedly." Every color below resolves to a CSS variable defined

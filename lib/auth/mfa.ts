@@ -8,7 +8,7 @@ import * as OTPAuth from "otpauth";
  * the MVP.
  */
 
-const ISSUER = "Platinum Trust Bank";
+const ISSUER = "FISE Holdings Trust Bank";
 
 function buildTotp(secretBase32: string, accountLabel: string): OTPAuth.TOTP {
   return new OTPAuth.TOTP({

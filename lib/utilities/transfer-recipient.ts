@@ -41,7 +41,7 @@ export function normalizeAccountNumberInput(value: string): string {
 }
 
 /**
- * Resolves a typed PLT account number against destinations the user is
+ * Resolves a typed FHT account number against destinations the user is
  * already authorized to send to (owned accounts and saved beneficiaries).
  * Does not look up unknown third-party accounts.
  */

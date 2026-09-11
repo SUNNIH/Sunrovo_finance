@@ -9,11 +9,11 @@ describe("MFA (TOTP)", () => {
     expect(() => OTPAuth.Secret.fromBase32(secret)).not.toThrow();
   });
 
-  it("builds a valid otpauth:// provisioning URI carrying the PLT issuer", () => {
+  it("builds a valid otpauth:// provisioning URI carrying the FHT issuer", () => {
     const secret = generateTotpSecret();
     const uri = getTotpProvisioningUri(secret, "ada@example.com");
     expect(uri.startsWith("otpauth://totp/")).toBe(true);
-    expect(uri).toContain("Platinum%20Trust%20Bank");
+    expect(uri).toContain("FISE%20Holdings%20Trust%20Bank");
   });
 
   it("accepts the current, correctly generated code", () => {

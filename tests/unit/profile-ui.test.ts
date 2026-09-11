@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "PL";
-  if (parts.length === 1) return parts[0]?.slice(0, 2).toUpperCase() ?? "PL";
+  if (parts.length === 0) return "FH";
+  if (parts.length === 1) return parts[0]?.slice(0, 2).toUpperCase() ?? "FH";
   const first = parts[0]?.[0] ?? "";
   const last = parts[parts.length - 1]?.[0] ?? "";
   return `${first}${last}`.toUpperCase();
@@ -23,12 +23,12 @@ describe("Profile Initials Helper", () => {
 
   it("handles single-word names by taking first two characters", () => {
     expect(getInitials("John")).toBe("JO");
-    expect(getInitials("Plt")).toBe("PL");
+    expect(getInitials("Fht")).toBe("FH");
   });
 
-  it("falls back to PL for empty or whitespace-only inputs", () => {
-    expect(getInitials("")).toBe("PL");
-    expect(getInitials("   ")).toBe("PL");
+  it("falls back to FH for empty or whitespace-only inputs", () => {
+    expect(getInitials("")).toBe("FH");
+    expect(getInitials("   ")).toBe("FH");
   });
 });
 

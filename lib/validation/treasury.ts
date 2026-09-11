@@ -47,6 +47,28 @@ export const cardSpendingLimitSchema = z.object({
 });
 export type CardSpendingLimitInput = z.infer<typeof cardSpendingLimitSchema>;
 
+export const adminFundingSchema = z
+  .object({
+    targetUserId: z.string().min(1, "Select a user"),
+    targetAccountId: z.string().optional(),
+    targetWalletId: z.string().optional(),
+    assetSymbol: z.string().trim().toUpperCase(),
+    amount: amountSchema,
+    reason: z.string().trim().min(5, "Provide a reason (min 5 characters)").max(200),
+  })
+  .superRefine((input, ctx) => {
+    const hasAccount = Boolean(input.targetAccountId);
+    const hasWallet = Boolean(input.targetWalletId);
+    if ((hasAccount && hasWallet) || (!hasAccount && !hasWallet)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["targetAccountId"],
+        message: "Specify exactly one target: account or wallet.",
+      });
+    }
+  });
+export type AdminFundingInput = z.infer<typeof adminFundingSchema>;
+
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Enter your current password"),

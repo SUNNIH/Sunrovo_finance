@@ -11,7 +11,7 @@ import { getSupportedPair } from "@/lib/bybit/instruments";
 const btc = getSupportedPair("BTCUSDT")!;
 
 describe("normaliseTicker", () => {
-  it("converts a Bybit V5 ticker row into a PLT MarketTicker", () => {
+  it("converts a Bybit V5 ticker row into an FHT MarketTicker", () => {
     const raw = {
       symbol: "BTCUSDT",
       lastPrice: "67123.45",

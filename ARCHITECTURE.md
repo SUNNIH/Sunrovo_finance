@@ -160,7 +160,7 @@ ledger:
 
 - **`own_account`** — between two of the caller's own `BankAccount`s.
 - **`internal_beneficiary`** — a saved beneficiary whose account number
-  resolves to a real PLT `BankAccount` (any user's). Free.
+  resolves to a real FHT `BankAccount` (any user's). Free.
 - **`external_beneficiary`** — a saved beneficiary marked `EXTERNAL_BANK`.
   Since there is no real bank rail to settle against, the sender's leg is
   credited to a platform-owned "External Settlement — Demo" `LedgerAccount`
@@ -179,7 +179,7 @@ one CREDIT for the recipient (a different user, except when transferring
 between your own two accounts) — which is why `Transaction.transferId` is
 not unique: one `Transfer` can have up to two `Transaction` rows pointing
 at it. `external_beneficiary` transfers only ever produce the sender's
-DEBIT row, since there's no PLT-side recipient.
+DEBIT row, since there's no FHT-side recipient.
 
 ## Step-up authentication: two different mechanisms, two different triggers
 
@@ -296,8 +296,8 @@ prices," never a broken page. PLT/USDT never calls Bybit at all — it's a
 fictional token and always uses mock data.
 
 `lib/bybit/websocket.ts` connects **directly from the browser** to
-Bybit's public spot stream, not proxied through a PLT server route. This
-is a deliberate deviation from the "Browser → PLT market-data service →
+Bybit's public spot stream, not proxied through an FHT server route. This
+is a deliberate deviation from the "Browser → FHT market-data service →
 Bybit" diagram in the product spec: Bybit's public topics need no
 authentication, and Next.js's serverless-friendly request/response model
 has no long-running process to hold a persistent upstream WebSocket open
@@ -311,7 +311,7 @@ that runs regardless; the WebSocket is purely a faster-update bonus layered
 on top, satisfying "fall back to periodic REST polling if WebSocket is
 unavailable" by construction rather than by explicit fallback-detection
 logic. A dedicated market-data fan-out service is the natural next step
-if PLT ever needs the fully-proxied architecture — e.g. to add private
+if FHT ever needs the fully-proxied architecture — e.g. to add private
 streams, which *do* require server-side signing and must never run in
 the browser.
 

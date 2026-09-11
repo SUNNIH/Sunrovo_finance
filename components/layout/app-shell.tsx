@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/navigation/sidebar";
 import { TopNavigation } from "@/components/navigation/top-navigation";
 import { MobileBottomNavigation } from "@/components/navigation/mobile-bottom-navigation";
 import { MobileNavDrawer } from "@/components/navigation/mobile-nav-drawer";
+import { cn } from "@/lib/utilities/cn";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -34,9 +35,14 @@ export function AppShell({ children, userName, userInitials }: AppShellProps) {
       <Sidebar collapsed={collapsed} onToggleCollapsed={() => setCollapsed((v) => !v)} />
       <MobileNavDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div
+        className={cn(
+          "flex min-w-0 flex-1 flex-col transition-[margin-left] duration-300 ease-out",
+          collapsed ? "lg:ml-[76px]" : "lg:ml-[248px]"
+        )}
+      >
         <TopNavigation onOpenMobileMenu={() => setDrawerOpen(true)} userName={userName} userInitials={userInitials} />
-        <main id="main-content" className="flex-1 px-4 pb-28 pt-6 sm:px-6 lg:px-8 lg:pb-10">
+        <main id="main-content" className="flex-1 px-4 pt-6 pb-24 sm:px-6 lg:px-8 lg:pb-10" style={{ paddingBottom: 'calc(88px + env(safe-area-inset-bottom, 0px))' }}>
           <div className="mx-auto w-full max-w-[1400px]">{children}</div>
         </main>
         <MobileBottomNavigation />

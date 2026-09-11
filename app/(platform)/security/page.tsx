@@ -46,7 +46,7 @@ export default async function SecurityPage() {
             Authentication &amp; Access Protection
           </h2>
           <p className="text-xs text-text-secondary mt-0.5">
-            Credentials and multi-factor verification required to sign in to your PLT account.
+            Credentials and multi-factor verification required to sign in to your FHT account.
           </p>
         </div>
         <div className="flex flex-col gap-4">

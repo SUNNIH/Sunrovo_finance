@@ -98,7 +98,7 @@ export function CardsClient({ initialCards }: { initialCards: CardView[] }) {
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
         <Button onClick={() => requestCard("VIRTUAL")} disabled={requesting}>
-          <Plus className="h-4 w-4" /> Request virtual card
+          <Plus className="h-4 w-4" /> Request digital card
         </Button>
         <Button variant="outline" onClick={() => requestCard("PHYSICAL")} disabled={requesting}>
           <Plus className="h-4 w-4" /> Request physical card
@@ -125,7 +125,7 @@ export function CardsClient({ initialCards }: { initialCards: CardView[] }) {
               <CardContent className="flex flex-col gap-4 p-5">
                 <div className="rounded-lg bg-gradient-to-br from-primary to-primary-hover p-4 text-primary-foreground">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold">PLT {card.formFactor === "VIRTUAL" ? "Virtual" : "Debit"}</span>
+                    <span className="text-sm font-semibold">FHT {card.formFactor === "VIRTUAL" ? "Digital" : "Debit"}</span>
                     <CreditCard className="h-5 w-5" />
                   </div>
                   <p className="mt-6 font-mono text-lg tracking-widest financial-value">{card.maskedNumber}</p>

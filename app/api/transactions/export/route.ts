@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { listAllTransactionsForExport } from "@/features/banking/transactions";
 import { toCsv } from "@/lib/utilities/csv";
 import { apiError } from "@/lib/utilities/api-response";
+import { transactionTextForDisplay } from "@/lib/utilities/format-transaction";
 import { TRANSACTION_TYPES, TRANSACTION_STATUSES } from "@/lib/validation/banking";
 import type { TransactionType, TransactionStatus } from "@prisma/client";
 
@@ -35,11 +36,10 @@ export async function GET(request: Request) {
       asset: row.assetSymbol,
       amount: row.amount.toString(),
       fee: row.feeAmount.toString(),
-      counterparty: row.counterparty ?? "",
-      narration: row.narration ?? "",
-      demo: row.isDemo ? "yes" : "no",
+      counterparty: transactionTextForDisplay(row.counterparty) ?? "",
+      narration: transactionTextForDisplay(row.narration) ?? "",
     })),
-    ["date", "type", "direction", "status", "asset", "amount", "fee", "counterparty", "narration", "demo"]
+    ["date", "type", "direction", "status", "asset", "amount", "fee", "counterparty", "narration"]
   );
 
   return new Response(csv, {

@@ -14,6 +14,7 @@ import {
 import { postJson, postJsonIdempotent, ApiRequestError } from "@/lib/utilities/api-client";
 import { generateClientId } from "@/lib/utilities/id";
 import { cn } from "@/lib/utilities/cn";
+import { FiseLoader } from "@/components/brand/fise-loader";
 
 interface WalletAssetView {
   assetSymbol: string;
@@ -346,6 +347,13 @@ export function ConvertClient({ assets }: { assets: WalletAssetView[] }) {
             {isQuoteExpired && (
               <div className="rounded-lg bg-danger-soft p-2.5 text-xs text-danger">
                 This quote has expired. Please refresh the quote to receive the current rate.
+              </div>
+            )}
+
+            {/* Processing indicator for confirmation */}
+            {confirming && (
+              <div className="flex flex-col items-center gap-2 rounded-lg border border-primary/30 bg-primary-soft/30 p-4 animate-fade-in">
+                <FiseLoader variant="inline" size="sm" text="Processing conversion..." />
               </div>
             )}
 

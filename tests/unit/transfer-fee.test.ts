@@ -7,7 +7,7 @@ describe("computeTransferFee", () => {
     expect(fee.isZero()).toBe(true);
   });
 
-  it("charges no fee for a transfer to an internal PLT beneficiary", () => {
+  it("charges no fee for a transfer to an internal FHT beneficiary", () => {
     const fee = computeTransferFee("internal_beneficiary", "USD");
     expect(fee.isZero()).toBe(true);
   });

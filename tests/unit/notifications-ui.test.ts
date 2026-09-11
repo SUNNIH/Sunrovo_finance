@@ -77,7 +77,7 @@ describe("Notification Filtering Logic", () => {
     {
       id: "notif_4",
       type: "SYSTEM",
-      title: "Welcome to Platinum Trust Bank",
+      title: "Welcome to FISE Holdings Trust Bank",
       body: "Your account is active.",
       isRead: true,
       createdAt: "2026-09-01T09:00:00.000Z",
@@ -139,7 +139,7 @@ describe("Notification Filtering Logic", () => {
   it("filters SYSTEM correctly", () => {
     const res = filterNotifications(sampleNotifications, "SYSTEM");
     expect(res).toHaveLength(1);
-    expect(res[0]?.title).toBe("Welcome to Platinum Trust Bank");
+    expect(res[0]?.title).toBe("Welcome to FISE Holdings Trust Bank");
   });
 
   it("filters MARKETING correctly", () => {

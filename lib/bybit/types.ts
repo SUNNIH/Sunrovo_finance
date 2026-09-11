@@ -1,5 +1,5 @@
 /**
- * PLT-owned market data types. The UI and all business logic depend only
+ * FHT-owned market data types. The UI and all business logic depend only
  * on these — never on Bybit's raw response shape. `lib/bybit/normalisers.ts`
  * is the one place raw Bybit JSON gets converted into these.
  */

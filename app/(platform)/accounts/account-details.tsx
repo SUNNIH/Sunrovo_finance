@@ -118,7 +118,7 @@ export function AccountDetails({
                   Account Details
                 </h2>
                 <p className="text-xs text-text-secondary">
-                  Official PLT fiat account specifications
+                  Official FHT fiat account specifications
                 </p>
               </div>
             </div>
@@ -137,7 +137,7 @@ export function AccountDetails({
             <DetailRow label="Account Name">{accountName}</DetailRow>
             <DetailRow label="Account Type">{typeLabel}</DetailRow>
             <DetailRow label="Account Holder">{holderName}</DetailRow>
-            <DetailRow label="PLT Account Number" highlight>
+            <DetailRow label="FHT Account Number" highlight>
               <div className="flex items-center justify-between gap-2">
                 <span className="font-mono text-sm tracking-wider financial-value select-all font-semibold text-text-primary">
                   {accountNumber}

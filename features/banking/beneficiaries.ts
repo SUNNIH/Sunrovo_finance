@@ -21,7 +21,7 @@ export async function createBeneficiary(userId: string, input: BeneficiaryCreate
   if (input.type === "INTERNAL_PLT") {
     const destination = await prisma.bankAccount.findUnique({ where: { accountNumber: input.accountNumber } });
     if (!destination) {
-      throw new AuthError("ACCOUNT_NOT_FOUND", "No PLT account was found with that account number.", 404);
+      throw new AuthError("ACCOUNT_NOT_FOUND", "No FHT account was found with that account number.", 404);
     }
     if (destination.userId === userId) {
       throw new AuthError("CANNOT_ADD_SELF", "You can't add one of your own accounts as a beneficiary.", 422);

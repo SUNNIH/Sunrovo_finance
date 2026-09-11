@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Diamond } from "lucide-react";
+import { FiseLogo } from "@/components/brand/fise-logo";
 import { requireUser } from "@/lib/auth/session";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 
@@ -14,12 +14,8 @@ export default async function OnboardingLayout({ children }: { children: React.R
     <div className="flex min-h-screen flex-col bg-surface">
       <header className="flex h-16 items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Diamond className="h-4 w-4" aria-hidden="true" />
-          </div>
-          <span className="text-sm font-semibold tracking-tight text-text-primary">
-            PLATINUM TRUST BANK
-          </span>
+          <FiseLogo variant="mark" className="h-8 w-8" />
+          <FiseLogo className="h-9 w-auto max-w-[154px]" />
         </Link>
         <ThemeToggle />
       </header>

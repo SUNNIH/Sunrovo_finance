@@ -13,6 +13,7 @@ import {
   type TradePreview,
 } from "@/components/financial/trade-helpers";
 import { cn } from "@/lib/utilities/cn";
+import { FiseLoader } from "@/components/brand/fise-loader";
 
 interface WalletAssetView {
   assetSymbol: string;
@@ -334,6 +335,13 @@ export function TradeOrderTicket({
             </p>
           )}
 
+          {/* ── Processing Indicator ─────────────────────────────────────── */}
+          {submitting && (
+            <div className="flex justify-center py-2">
+              <FiseLoader variant="inline" size="sm" text="Placing order..." />
+            </div>
+          )}
+
           {/* ── Submit CTA ─────────────────────────────────────────────────── */}
           <Button
             type="submit"
@@ -362,7 +370,7 @@ export function TradeOrderTicket({
           </Button>
 
           <p className="text-center text-[11px] text-text-tertiary">
-            Simulated Spot Trading · Demo funds only
+            Spot Trading
           </p>
         </form>
       </CardContent>

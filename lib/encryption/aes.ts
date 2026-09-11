@@ -1,7 +1,7 @@
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "node:crypto";
 
 /**
- * Generic at-rest encryption for sensitive strings PLT must store but
+ * Generic at-rest encryption for sensitive strings FHT must store but
  * never expose in plaintext (MFA TOTP secrets today; provider API
  * credentials in a later phase). Security memory: "Encrypt sensitive
  * integration credentials at rest using a server-side key-management

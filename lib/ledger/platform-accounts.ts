@@ -18,7 +18,7 @@ export function demoFundingPoolName(assetSymbol: string): string {
   return `Demo Funding Pool (${assetSymbol})`;
 }
 
-/** Where a simulated external-bank transfer's funds are recorded as having "left" PLT. */
+/** Where a simulated external-bank transfer's funds are recorded as having "left" FHT. */
 export function externalSettlementPoolName(assetSymbol: string): string {
   return `External Settlement — Demo (${assetSymbol})`;
 }

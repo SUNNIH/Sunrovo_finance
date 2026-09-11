@@ -2,13 +2,13 @@
 
 ## Product safety boundaries
 
-- PLT is an original application. It does not use the Bybit name, logo,
+- FHT is an original application. It does not use the Bybit name, logo,
   wordmark, or copy Bybit's screens; Bybit is used only as a public
   spot-market data source and functional layout reference.
 - A persistent "Demo Environment — no real funds are held or transferred"
   notice is shown on every authenticated screen until real, licensed,
   regulated providers are connected.
-- PLT never asks for a user's Bybit (or any third-party exchange)
+- FHT never asks for a user's Bybit (or any third-party exchange)
   credentials, and never stores them.
 - Mainnet crypto withdrawals, leveraged/margin/futures/options trading,
   copy trading, and real customer custody are out of scope for the MVP

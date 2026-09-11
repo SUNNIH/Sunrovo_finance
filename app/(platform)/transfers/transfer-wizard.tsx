@@ -26,7 +26,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CurrencyValue } from "@/components/financial/currency-value";
 import { TextField } from "@/components/forms/text-field";
-import { maskAccountNumber, BANK_ACCOUNT_TYPE_LABELS } from "@/lib/utilities/format-account";
+import { accountDisplayName, BANK_ACCOUNT_TYPE_LABELS, maskAccountNumber } from "@/lib/utilities/format-account";
 import {
   resolveAuthorizedRecipient,
   type TransferAccountOption,
@@ -34,6 +34,7 @@ import {
 } from "@/lib/utilities/transfer-recipient";
 import type { TransferPreview } from "@/features/banking/transfers";
 import { cn } from "@/lib/utilities/cn";
+import { FiseLoader } from "@/components/brand/fise-loader";
 
 type AccountView = TransferAccountOption;
 type BeneficiaryView = TransferBeneficiaryOption;
@@ -149,7 +150,7 @@ export function TransferWizard({
         status: "beneficiary",
         beneficiaryId: localMatch.beneficiary.id,
         displayName: localMatch.label,
-        accountType: localMatch.beneficiary.type === "INTERNAL_PLT" ? "PLT Account" : "External Account",
+        accountType: localMatch.beneficiary.type === "INTERNAL_PLT" ? "FHT Account" : "External Account",
         currencySymbol: sourceAccount?.currencySymbol ?? "USD",
         maskedAccountNumber: localMatch.maskedNumber,
         bankName: localMatch.beneficiary.bankName,
@@ -394,15 +395,14 @@ export function TransferWizard({
                   Select Source Account
                 </h2>
                 <p className="mt-0.5 text-sm text-text-secondary">
-                  Choose the PLT fiat account to transfer funds from.
+                  Choose the FHT fiat account to transfer funds from.
                 </p>
               </div>
 
               <div className="flex flex-col gap-2.5">
                 {accounts.map((account) => {
                   const isSelected = sourceAccountId === account.id;
-                  const displayName =
-                    account.nickname ?? BANK_ACCOUNT_TYPE_LABELS[account.type] ?? "PLT Account";
+                  const displayName = accountDisplayName(account.nickname, account.type);
 
                   return (
                     <label
@@ -509,19 +509,19 @@ export function TransferWizard({
                 ))}
               </div>
 
-              {/* TAB 1: PLT ACCOUNT NUMBER LOOKUP */}
+              {/* TAB 1: FHT ACCOUNT NUMBER LOOKUP */}
               {destinationTab === "plt_number" && (
                 <div className="flex flex-col gap-3.5">
                   <TextField
                     id="plt-account-number"
-                    label="PLT Account Number"
+                    label="FHT Account Number"
                     value={pltAccountNumber}
                     onChange={(e) => setPltAccountNumber(e.target.value)}
-                    placeholder="Enter 10 or 12-digit PLT account number"
+                    placeholder="Enter 10 or 12-digit FHT account number"
                     autoComplete="off"
                     spellCheck={false}
                     className="font-mono financial-value"
-                    hint="Enter any unique PLT account number to securely verify recipient details."
+                    hint="Enter any unique FHT account number to securely verify recipient details."
                   />
 
                   {/* Verification Spinner */}
@@ -531,11 +531,11 @@ export function TransferWizard({
                       className="flex items-center gap-2.5 rounded-xl border border-border bg-surface/60 p-3.5 text-xs text-text-secondary animate-pulse"
                     >
                       <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                      <span>Verifying PLT recipient account...</span>
+                      <span>Verifying FHT recipient account...</span>
                     </div>
                   )}
 
-                  {/* Verification Card: Verified PLT Customer / Internal Account */}
+                  {/* Verification Card: Verified FHT Customer / Internal Account */}
                   {!isVerifyingRecipient && serverRecipient?.status === "internal_account" && (
                     <div
                       role="status"
@@ -544,11 +544,11 @@ export function TransferWizard({
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
                           <CheckCircle2 className="h-4 w-4" />
-                          <span>Account Verified · PLT Customer</span>
+                          <span>Account Verified · FHT Customer</span>
                         </div>
                         <Badge variant="primary" className="text-[10px] gap-1 py-0.5">
                           <Landmark className="h-2.5 w-2.5" />
-                          <span>PLT Internal</span>
+                          <span>FHT Internal</span>
                         </Badge>
                       </div>
                       <p className="mt-2 text-base font-semibold text-text-primary">
@@ -637,7 +637,7 @@ export function TransferWizard({
                     >
                       <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
                       <div className="flex-1 leading-relaxed">
-                        No valid PLT recipient account matches that number. Please verify the account number and try again.
+                        No valid FHT recipient account matches that number. Please verify the account number and try again.
                       </div>
                     </div>
                   )}
@@ -709,7 +709,7 @@ export function TransferWizard({
                                   variant={b.type === "INTERNAL_PLT" ? "primary" : "neutral"}
                                   className="text-[10px] px-1.5 py-0"
                                 >
-                                  {b.type === "INTERNAL_PLT" ? "PLT" : "External"}
+                                  {b.type === "INTERNAL_PLT" ? "FHT" : "External"}
                                 </Badge>
                               </div>
                               <p className="truncate text-xs text-text-secondary">{b.accountName}</p>
@@ -746,8 +746,7 @@ export function TransferWizard({
                       .filter((a) => a.id !== sourceAccountId)
                       .map((account) => {
                         const isSelected = destinationAccountId === account.id;
-                        const displayName =
-                          account.nickname ?? BANK_ACCOUNT_TYPE_LABELS[account.type] ?? "PLT Account";
+                        const displayName = accountDisplayName(account.nickname, account.type);
 
                         return (
                           <label
@@ -838,7 +837,7 @@ export function TransferWizard({
                       Sending from
                     </p>
                     <p className="text-xs font-semibold text-text-primary">
-                      {sourceAccount.nickname ?? BANK_ACCOUNT_TYPE_LABELS[sourceAccount.type]}
+                      {accountDisplayName(sourceAccount.nickname, sourceAccount.type)}
                     </p>
                   </div>
                 </div>
@@ -938,7 +937,7 @@ export function TransferWizard({
                 {[
                   {
                     label: "From Account",
-                    value: sourceAccount.nickname ?? BANK_ACCOUNT_TYPE_LABELS[sourceAccount.type],
+                    value: accountDisplayName(sourceAccount.nickname, sourceAccount.type),
                     sub: maskAccountNumber(sourceAccount.accountNumber),
                   },
                   {
@@ -1011,7 +1010,16 @@ export function TransferWizard({
               )}
 
               {/* Transaction PIN Authorization Box */}
-              <div className="rounded-xl border border-border bg-surface p-4 sm:p-5">
+              {submitting && (
+                <div className="flex flex-col items-center gap-3 rounded-xl border border-primary/30 bg-primary-soft/30 p-5 animate-fade-in">
+                  <FiseLoader variant="inline" size="md" text="Processing transfer on ledger..." />
+                  <p className="text-xs text-text-secondary">
+                    Please wait while your transfer is being posted.
+                  </p>
+                </div>
+              )}
+
+              <div className={cn("rounded-xl border border-border bg-surface p-4 sm:p-5", submitting && "opacity-50")}>
                 <div className="flex items-center gap-2.5 mb-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-soft text-primary">
                     <Lock className="h-4 w-4" />
@@ -1078,13 +1086,10 @@ export function TransferWizard({
                   Transfer Successful
                 </h2>
                 <p className="mt-1 text-sm text-text-secondary">
-                  Your funds have been posted to the PLT double-entry ledger.
+                  Your funds have been posted to the FHT double-entry ledger.
                 </p>
               </div>
 
-              <Badge variant="warning" className="text-xs font-semibold px-3 py-1">
-                Demo environment — simulated money movement
-              </Badge>
 
               {/* Receipt Summary Card */}
               {preview && (

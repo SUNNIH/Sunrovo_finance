@@ -49,7 +49,7 @@ describe("Deposit Receipt Invariants", () => {
       assetSymbol: "USD",
       status: "COMPLETED",
       createdAt: "2026-09-08T21:00:00.000Z",
-      destinationLabel: "PLT Checking Account",
+      destinationLabel: "FHT Checking Account",
     };
 
     expect(mockDeposit.id).toBe("dep_fiat_test_123");

@@ -27,7 +27,7 @@ export default async function TransfersPage({ searchParams }: TransfersPageProps
           Transfer Money
         </h1>
         <p className="text-sm text-text-secondary max-w-2xl">
-          Move funds between your PLT accounts or send to authorized beneficiaries. All transfers are verified and logged on the PLT ledger.
+          Move funds between your FHT accounts or send to authorized beneficiaries. All transfers are verified and logged on the FHT ledger.
         </p>
       </div>
 

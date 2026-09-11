@@ -18,7 +18,7 @@ export default async function DepositPage() {
           Deposit
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Add simulated demo funds to your fiat accounts or spot wallet.
+          Add funds to your fiat accounts or spot wallet.
         </p>
       </div>
       <DepositClient

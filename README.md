@@ -1,11 +1,11 @@
-# PLATINUM TRUST BANK (PLT)
+# FISE Holdings Trust Bank (FHT)
 
 A digital banking and cryptocurrency application. Original brand, original UI —
 Bybit is used only as a functional/layout reference for the crypto surfaces
-and as a public spot-market data provider; PLT never presents itself as
+and as a public spot-market data provider; FHT never presents itself as
 Bybit or reproduces Bybit branding.
 
-> **Demo Environment.** No real funds are held or transferred. PLT is not
+> **Demo Environment.** No real funds are held or transferred. FHT is not
 > currently licensed, insured, or regulated. See `SECURITY.md` and the
 > in-app "Demo Environment" badge.
 

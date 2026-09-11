@@ -180,7 +180,7 @@ export function BeneficiariesClient({
                   {[
                     {
                       value: "INTERNAL_PLT" as const,
-                      label: "PLT Account",
+                      label: "FHT Account",
                       desc: "Instant internal ledger transfer",
                       icon: Landmark,
                     },
@@ -244,7 +244,7 @@ export function BeneficiariesClient({
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <TextField
-                  label={currentType === "INTERNAL_PLT" ? "PLT Account Number" : "Account Number / IBAN"}
+                  label={currentType === "INTERNAL_PLT" ? "FHT Account Number" : "Account Number / IBAN"}
                   placeholder={currentType === "INTERNAL_PLT" ? "e.g. 1000000001" : "e.g. 9876543210"}
                   error={errors.accountNumber?.message}
                   className="font-mono financial-value"
@@ -334,7 +334,7 @@ export function BeneficiariesClient({
             </h3>
             <p className="mt-1 max-w-sm text-sm text-text-secondary">
               {beneficiaries.length === 0
-                ? "Add trusted PLT or external bank accounts to transfer money quickly without typing numbers every time."
+                ? "Add trusted FHT or external bank accounts to transfer money quickly without typing numbers every time."
                 : `No saved recipients match "${search}". Try searching with a different name or account number.`}
             </p>
             {beneficiaries.length === 0 ? (
@@ -398,7 +398,7 @@ export function BeneficiariesClient({
                           variant={b.type === "INTERNAL_PLT" ? "primary" : "neutral"}
                           className="shrink-0 text-[10px] px-1.5 py-0"
                         >
-                          {b.type === "INTERNAL_PLT" ? "PLT" : "External"}
+                          {b.type === "INTERNAL_PLT" ? "FHT" : "External"}
                         </Badge>
                       </div>
                       <p className="truncate text-xs font-medium text-text-secondary mt-0.5">

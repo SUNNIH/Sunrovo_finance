@@ -89,7 +89,7 @@ export function RegisterForm() {
   return (
     <SignupCard
       title="Create your account"
-      description="Open a PLT profile to manage accounts, transfers, and wallets in one secure place."
+      description="Open an FHT profile to manage accounts, transfers, and wallets in one secure place."
     >
       <form
         onSubmit={handleSubmit(onSubmit)}

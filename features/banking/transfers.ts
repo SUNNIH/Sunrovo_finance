@@ -13,6 +13,7 @@ import type { TransferInput } from "@/lib/validation/banking";
 import { computeTransferFee } from "./transfer-pricing";
 import { getOwnedAccountOrThrow } from "./accounts";
 import { AuthError } from "@/features/authentication/errors";
+import { accountNicknameForDisplay } from "@/lib/utilities/format-account";
 
 interface ResolvedDestination {
   kind: "own_account" | "internal_beneficiary" | "external_beneficiary";
@@ -36,7 +37,7 @@ async function resolveDestination(
     }
     return {
       kind: "own_account",
-      label: dest.nickname ?? "Your account",
+      label: accountNicknameForDisplay(dest.nickname) ?? "Your account",
       destinationBankAccount: { id: dest.id, userId: dest.userId, nickname: dest.nickname },
     };
   }
@@ -47,7 +48,7 @@ async function resolveDestination(
       include: { user: { include: { profile: true } } },
     });
     if (!dest) {
-      throw new AuthError("ACCOUNT_NOT_FOUND", "The destination PLT account could not be found.", 404);
+      throw new AuthError("ACCOUNT_NOT_FOUND", "The destination FHT account could not be found.", 404);
     }
     if (dest.id === sourceAccount.id) {
       throw new AuthError("SAME_ACCOUNT", "Choose a different destination account.", 422);
@@ -57,8 +58,8 @@ async function resolveDestination(
     }
     const label =
       dest.userId === userId
-        ? (dest.nickname ?? "Your account")
-        : (dest.user.profile?.fullName ?? dest.nickname ?? "PLT Customer");
+        ? (accountNicknameForDisplay(dest.nickname) ?? "Your account")
+        : (dest.user.profile?.fullName ?? accountNicknameForDisplay(dest.nickname) ?? "FHT Customer");
 
     return {
       kind: "internal_beneficiary",
@@ -75,7 +76,7 @@ async function resolveDestination(
   if (beneficiary.type === "INTERNAL_PLT") {
     const dest = await prisma.bankAccount.findUnique({ where: { accountNumber: beneficiary.accountNumber } });
     if (!dest) {
-      throw new AuthError("ACCOUNT_NOT_FOUND", "The destination PLT account could not be found.", 404);
+      throw new AuthError("ACCOUNT_NOT_FOUND", "The destination FHT account could not be found.", 404);
     }
     if (dest.currencySymbol !== sourceAccount.currencySymbol) {
       throw new AuthError("CURRENCY_MISMATCH", "This beneficiary's account uses a different currency.", 422);
@@ -316,7 +317,7 @@ export async function createTransfer(
               status: "COMPLETED",
               assetSymbol: currency,
               amount: amountMoney.toFixed(precision),
-              counterparty: sourceAccount.nickname ?? "PLT transfer",
+              counterparty: sourceAccount.nickname ?? "FHT transfer",
               narration: input.narration,
               referenceType: "Transfer",
               referenceId: transfer.id,
@@ -331,7 +332,7 @@ export async function createTransfer(
               userId: resolved.destinationBankAccount!.userId,
               type: "TRANSACTION",
               title: "Money received",
-              body: `You received ${amountMoney.toFixed(precision)} ${currency} via a PLT transfer.`,
+              body: `You received ${amountMoney.toFixed(precision)} ${currency} via an FHT transfer.`,
             },
           });
         } else if (resolved.kind !== "external_beneficiary" && isSelfTransfer) {

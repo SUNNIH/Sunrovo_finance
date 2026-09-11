@@ -1,147 +1,158 @@
 import Link from "next/link";
-import { Diamond, Shield, Wallet, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {
+  type LucideIcon,
+  ArrowUpRight,
+  BarChart3,
+  ChevronRight,
+  Landmark,
+  LockKeyhole,
+  RefreshCw,
+  Send,
+  ShieldCheck,
+  WalletCards,
+} from "lucide-react";
+import { FiseLogo } from "@/components/brand/fise-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { CurrencyValue, PercentChange } from "@/components/financial/currency-value";
+import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
   { label: "Markets", href: "#markets" },
   { label: "Security", href: "#security" },
-  { label: "Help", href: "#help" },
-];
+] as const;
 
-const FEATURES = [
-  {
-    icon: Wallet,
-    title: "Everyday banking",
-    body: "Current and savings accounts, transfers, beneficiaries and bill-ready cards in one place.",
-  },
-  {
-    icon: Zap,
-    title: "Spot crypto, simplified",
-    body: "Live market data, clear asset pages and straightforward buy, sell and convert flows.",
-  },
-  {
-    icon: Shield,
-    title: "Security by default",
-    body: "Step-up authentication, device recognition and an auditable trail on every sensitive action.",
-  },
-];
+type ProductFeature = {
+  icon: LucideIcon;
+  title: string;
+  body: string;
+  id?: string;
+};
+
+const PRODUCT_FEATURES: readonly ProductFeature[] = [
+  { icon: Landmark, title: "Accounts", body: "View your FHT bank accounts and the balances available to you." },
+  { icon: Send, title: "Transfers", body: "Move funds between your accounts or to verified beneficiaries." },
+  { icon: WalletCards, title: "Wallets", body: "Manage supported digital asset balances alongside your banking profile." },
+  { id: "markets", icon: BarChart3, title: "Markets", body: "Follow public spot-market data through clear, focused market views." },
+  { icon: ArrowUpRight, title: "Trade", body: "Use the supported spot trading workspace for straightforward order flows." },
+  { icon: RefreshCw, title: "Convert", body: "Preview and execute supported asset conversions from one workspace." },
+  { id: "security", icon: ShieldCheck, title: "Security", body: "Manage passwords, MFA, trusted devices, sessions, and account protections." },
+] as const;
+
+const WORKSPACE_ITEMS = [
+  { icon: Landmark, label: "Accounts", detail: "Banking overview" },
+  { icon: Send, label: "Transfers", detail: "Verified movement" },
+  { icon: WalletCards, label: "Wallets", detail: "Digital assets" },
+] as const;
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="border-b border-border">
-        <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-6 px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Diamond className="h-4 w-4" aria-hidden="true" />
-            </div>
-            <span className="text-sm font-semibold tracking-tight text-text-primary">
-              PLATINUM TRUST BANK
-            </span>
+    <div className="min-h-screen overflow-x-hidden bg-background text-text-primary">
+      <header className="sticky top-0 z-30 border-b border-border/70 bg-surface-elevated/80 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-2 px-4 sm:gap-5 sm:px-6 lg:px-8">
+          <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="FISE Holdings Trust Bank home">
+            <FiseLogo variant="mark" className="h-8 w-8" alt="" />
+            <FiseLogo className="hidden h-9 w-auto max-w-[154px] sm:block" />
           </Link>
 
-          <nav aria-label="Marketing" className="hidden gap-6 md:flex">
+          <nav aria-label="Marketing" className="hidden items-center gap-1 lg:flex">
             {NAV_LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-sm font-medium text-text-secondary hover:text-text-primary"
-              >
+              <a key={link.href} href={link.href} className="rounded-md px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary">
                 {link.label}
               </a>
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
             <ThemeToggle />
-            <Link href="/login">
-              <Button variant="ghost" size="sm">
-                Sign In
-              </Button>
-            </Link>
+            <Link href="/login"><Button variant="ghost" size="sm" className="px-2.5 sm:px-3">Sign In</Button></Link>
             <Link href="/register">
-              <Button variant="primary" size="sm">
-                Create Account
+              <Button size="sm" className="px-3 shadow-sm sm:px-4">
+                <span className="hidden sm:inline">Create Account</span><span className="sm:hidden">Join</span>
               </Button>
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="flex-1">
-        <section className="mx-auto grid max-w-[1400px] grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
-          <div>
-            <span className="inline-flex items-center rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
-              Demo Environment — no real funds are held or transferred
-            </span>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-text-primary sm:text-5xl">
-              Bank. Trade. Invest. Grow.
-            </h1>
-            <p className="mt-4 max-w-lg text-base text-text-secondary sm:text-lg">
-              PLATINUM TRUST BANK brings everyday banking and simplified crypto access
-              together in one trusted, modern platform.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/register">
-                <Button variant="primary" size="lg">
-                  Create your account
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button variant="outline" size="lg">
-                  Sign in
-                </Button>
-              </Link>
+      <main>
+        <section className="relative isolate overflow-hidden border-b border-border bg-surface">
+          <div className="pointer-events-none absolute inset-0 -z-10 opacity-70 plt-grid-texture" aria-hidden="true" />
+          <div className="pointer-events-none absolute -left-24 top-12 -z-10 h-72 w-72 rounded-full bg-primary/15 blur-3xl" aria-hidden="true" />
+          <div className="pointer-events-none absolute -right-20 top-20 -z-10 h-80 w-80 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+
+          <div className="mx-auto grid max-w-[1440px] items-center gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(440px,1.1fr)] lg:gap-16 lg:px-8 lg:py-28">
+            <div className="max-w-2xl animate-fade-in-up">
+              <FiseLogo className="h-12 w-auto max-w-[220px]" />
+              <p className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Finance · Investment · Security · Equity</p>
+              <h1 className="mt-4 text-4xl font-bold tracking-[-0.035em] text-text-primary sm:text-5xl lg:text-6xl lg:leading-[1.08]">Banking and digital assets, brought into focus.</h1>
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-text-secondary sm:text-lg">FISE Holdings Trust Bank gives you one considered workspace for accounts, transfers, wallets, markets, and supported digital asset activity.</p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href="/register" className="w-full sm:w-auto"><Button size="lg" className="w-full shadow-md shadow-primary/20 transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25 sm:w-auto">Create your account<ChevronRight className="h-4 w-4" aria-hidden="true" /></Button></Link>
+                <Link href="/login" className="w-full sm:w-auto"><Button variant="outline" size="lg" className="w-full bg-surface-elevated/80 shadow-sm sm:w-auto">Sign in securely</Button></Link>
+              </div>
+              <p className="mt-5 text-body-sm text-text-tertiary">A non-production environment for supported banking and digital asset features.</p>
+            </div>
+
+            <div className="relative mx-auto w-full max-w-xl animate-fade-in-up [animation-delay:100ms]">
+              <div className="absolute -inset-4 rounded-[2rem] bg-primary/10 blur-2xl" aria-hidden="true" />
+              <div className="relative overflow-hidden rounded-2xl border border-border bg-surface-elevated/90 p-4 shadow-xl shadow-primary/10 backdrop-blur-sm sm:p-5">
+                <div className="flex items-center justify-between border-b border-border pb-4">
+                  <div className="flex items-center gap-3"><FiseLogo variant="mark" className="h-9 w-9" alt="" /><div><p className="text-sm font-semibold text-text-primary">Your FISE workspace</p><p className="text-body-sm text-text-secondary">A clear view of what matters</p></div></div>
+                  <span className="rounded-full border border-primary/20 bg-primary-soft px-2.5 py-1 text-label font-semibold text-primary">FHT</span>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-[1.2fr_0.8fr]">
+                  <div className="rounded-xl border border-border bg-surface p-3 sm:p-4">
+                    <div className="flex items-center justify-between"><p className="text-label font-semibold uppercase tracking-[0.13em] text-text-tertiary">Banking</p><Landmark className="h-4 w-4 text-primary" aria-hidden="true" /></div>
+                    <div className="mt-4 space-y-2">
+                      {WORKSPACE_ITEMS.map((item) => (
+                        <div key={item.label} className="flex items-center gap-3 rounded-lg border border-border/70 bg-surface-elevated px-3 py-2.5">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary-soft text-primary"><item.icon className="h-4 w-4" aria-hidden="true" /></span>
+                          <span className="min-w-0"><span className="block text-sm font-medium text-text-primary">{item.label}</span><span className="block text-body-sm text-text-secondary">{item.detail}</span></span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col justify-between rounded-xl border border-primary/20 bg-primary-soft/45 p-3 sm:p-4">
+                    <div><div className="flex items-center justify-between"><p className="text-label font-semibold uppercase tracking-[0.13em] text-primary">Market tools</p><BarChart3 className="h-4 w-4 text-primary" aria-hidden="true" /></div>
+                      <div className="mt-5 space-y-3">{[["Markets", "Spot data"], ["Trade", "Order workspace"], ["Convert", "Asset exchange"]].map(([label, detail]) => <div key={label}><p className="text-sm font-semibold text-text-primary">{label}</p><p className="text-body-sm text-text-secondary">{detail}</p></div>)}</div>
+                    </div>
+                    <div className="mt-5 border-t border-primary/15 pt-3"><div className="flex items-center gap-2 text-body-sm text-text-secondary"><LockKeyhole className="h-3.5 w-3.5 text-primary" aria-hidden="true" />Security controls stay close at hand.</div></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </section>
 
-          <div className="rounded-xl border border-border bg-surface-elevated p-5 shadow-sm">
-            <p className="text-body-sm text-text-secondary">Total balance</p>
-            <div className="mt-1 flex items-baseline gap-2">
-              <CurrencyValue amount="12,560,450.00" assetSymbol="NGN" className="text-2xl font-semibold text-text-primary" />
-              <PercentChange value={4.25} />
-            </div>
-            <div className="mt-5 grid grid-cols-3 gap-3 text-sm">
-              {[
-                { symbol: "BTC/USDT", price: "67,231.45", change: 2.35 },
-                { symbol: "ETH/USDT", price: "3,245.67", change: 1.25 },
-                { symbol: "PLT/USDT", price: "0.1234", change: -1.15 },
-              ].map((row) => (
-                <div key={row.symbol} className="rounded-md border border-border p-3">
-                  <p className="text-body-sm text-text-secondary">{row.symbol}</p>
-                  <CurrencyValue amount={row.price} assetSymbol="USD" showSymbol={false} className="mt-1 block text-sm font-semibold text-text-primary" />
-                  <PercentChange value={row.change} className="mt-1" />
-                </div>
+        <section id="features" className="scroll-mt-20 border-b border-border bg-background">
+          <div className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+            <div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">One connected platform</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">The tools you use, arranged with intention.</h2><p className="mt-4 text-base leading-relaxed text-text-secondary">Every FISE surface is designed to make the next step clear while keeping your banking and digital asset activity in one place.</p></div>
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {PRODUCT_FEATURES.map((feature, index) => (
+                <article key={feature.title} id={feature.id} className="group scroll-mt-20 rounded-xl border border-border bg-surface-elevated p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md animate-fade-in-up" style={{ animationDelay: `${index * 45}ms` }}>
+                  <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-primary/15 bg-primary-soft text-primary"><feature.icon className="h-5 w-5" aria-hidden="true" /></span>
+                  <h3 className="mt-5 text-card-title text-text-primary">{feature.title}</h3><p className="mt-1.5 text-sm leading-relaxed text-text-secondary">{feature.body}</p>
+                </article>
               ))}
             </div>
           </div>
         </section>
 
-        <section id="features" className="border-t border-border bg-surface">
-          <div className="mx-auto max-w-[1400px] px-4 py-16 sm:px-6">
-            <h2 className="text-section-title text-text-primary">
-              Everything you need, nothing you don&rsquo;t
-            </h2>
-            <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
-              {FEATURES.map((feature) => (
-                <div key={feature.title} className="rounded-lg border border-border bg-surface-elevated p-5">
-                  <feature.icon className="h-6 w-6 text-primary" aria-hidden="true" />
-                  <h3 className="mt-3 text-card-title text-text-primary">{feature.title}</h3>
-                  <p className="mt-1.5 text-sm text-text-secondary">{feature.body}</p>
-                </div>
-              ))}
-            </div>
+        <section className="relative overflow-hidden bg-surface">
+          <div className="pointer-events-none absolute inset-0 opacity-40 plt-grid-texture" aria-hidden="true" />
+          <div className="relative mx-auto grid max-w-[1440px] gap-8 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1fr_auto] lg:items-end lg:px-8">
+            <div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">FISE Holdings Trust Bank</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Start with a workspace made for clarity.</h2><p className="mt-4 text-base leading-relaxed text-text-secondary">Create an account to access the supported banking and digital asset tools available in FHT.</p></div>
+            <Link href="/register" className="w-full lg:w-auto"><Button size="lg" className="w-full shadow-md shadow-primary/20 lg:w-auto">Create your account<ChevronRight className="h-4 w-4" aria-hidden="true" /></Button></Link>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto max-w-[1400px] px-4 py-8 text-sm text-text-secondary sm:px-6">
-          <p>PLATINUM TRUST BANK (PLT) is a demonstration application. No real funds are held or transferred, and PLT is not currently licensed, insured, or regulated as a bank or exchange.</p>
-          <p className="mt-2">&copy; {new Date().getFullYear()} PLATINUM TRUST BANK. All rights reserved.</p>
+      <footer className="border-t border-border bg-surface-elevated">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-8 text-body-sm text-text-secondary sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
+          <div className="flex items-center gap-2"><FiseLogo variant="mark" className="h-7 w-7" alt="" /><FiseLogo className="h-7 w-auto max-w-[128px]" /></div>
+          <div className="max-w-3xl lg:text-right"><p>FISE Holdings Trust Bank (FHT) operates in a non-production environment. No real funds are held or transferred.</p><p className="mt-1 text-text-tertiary">&copy; {new Date().getFullYear()} FISE Holdings Trust Bank. All rights reserved.</p></div>
         </div>
       </footer>
     </div>

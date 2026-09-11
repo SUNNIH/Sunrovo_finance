@@ -1,4 +1,5 @@
-import { Diamond, Fingerprint, Lock, Shield } from "lucide-react";
+import { Fingerprint, Lock, Shield } from "lucide-react";
+import { FiseLogo } from "@/components/brand/fise-logo";
 import { cn } from "@/lib/utilities/cn";
 
 const TRUST_ITEMS = [
@@ -36,13 +37,9 @@ export function SignupCard({
         )}
       >
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Diamond className="h-4 w-4" aria-hidden="true" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold tracking-tight text-text-primary">
-              PLATINUM TRUST BANK
-            </p>
+          <FiseLogo variant="mark" className="h-9 w-9" />
+          <div className="min-w-0">
+            <FiseLogo className="h-8 w-auto max-w-[154px]" />
             <p className="text-xs text-text-secondary">Secure digital banking</p>
           </div>
         </div>

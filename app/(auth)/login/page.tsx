@@ -13,10 +13,10 @@ export default function LoginPage() {
       <div className="relative grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-14">
         <section className="animate-fade-in-up max-w-xl">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            Platinum Trust Bank
+            FISE Holdings Trust Bank
           </p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl lg:text-5xl">
-            Welcome back to PLT
+            Welcome back to FHT
           </h2>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-text-secondary sm:text-base">
             Sign in to manage your accounts, transfers, wallets and digital assets securely.

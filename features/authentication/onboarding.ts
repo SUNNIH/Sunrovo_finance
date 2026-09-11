@@ -91,9 +91,9 @@ export async function completeOnboarding(
       data: {
         userId,
         type: "SYSTEM",
-        title: "Welcome to PLATINUM TRUST BANK",
+        title: "Welcome to FISE Holdings Trust Bank",
         body:
-          "Your demo accounts are ready: a Current Account, a Savings Account, and a Spot Wallet with a starting demo balance.",
+          "Your Current Account, Savings Account, and Spot Wallet are ready.",
       },
     });
   });

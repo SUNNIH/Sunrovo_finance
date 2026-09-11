@@ -1,6 +1,6 @@
 import { Money } from "@/lib/money/money";
 
-/** Flat demo fee for simulated external-bank transfers. Internal PLT transfers are free. */
+/** Flat demo fee for simulated external-bank transfers. Internal FHT transfers are free. */
 export const EXTERNAL_TRANSFER_FEE = "2.50";
 
 export type TransferDestinationKind = "own_account" | "internal_beneficiary" | "external_beneficiary";

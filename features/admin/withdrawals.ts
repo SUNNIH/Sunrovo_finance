@@ -38,7 +38,7 @@ export async function reviewWithdrawal(
     if (claimed.count !== 1) throw new AuthError("WITHDRAWAL_ALREADY_REVIEWED", "This withdrawal was just reviewed by another administrator.", 409);
 
     if (decision === "APPROVE") {
-      await tx.withdrawal.update({ where: { id: withdrawal.id }, data: { status: "COMPLETED" } });
+      const updatedWithdrawal = await tx.withdrawal.update({ where: { id: withdrawal.id }, data: { status: "COMPLETED" } });
       await tx.transaction.updateMany({
         where: { userId: withdrawal.userId, referenceType: "Withdrawal", referenceId: withdrawal.id },
         data: { status: "COMPLETED", narration: "Simulated withdrawal approved by review" },
@@ -46,7 +46,7 @@ export async function reviewWithdrawal(
       await tx.notification.create({
         data: { userId: withdrawal.userId, type: "TRANSACTION", title: "Withdrawal approved", body: `Your withdrawal of ${withdrawal.amount.toString()} ${withdrawal.assetSymbol} was approved.` },
       });
-      return { withdrawal, decision, reversalLedgerGroupId: null };
+      return { withdrawal: updatedWithdrawal, decision, reversalLedgerGroupId: null };
     }
 
     const ledgerAccount = isFiatAsset(withdrawal.assetSymbol)
@@ -86,7 +86,7 @@ export async function reviewWithdrawal(
       await tx.assetBalance.update({ where: { id: balance.id }, data: { available: { increment: totalRefund } } });
     }
 
-    await tx.withdrawal.update({
+    const updatedWithdrawal = await tx.withdrawal.update({
       where: { id: withdrawal.id },
       data: { status: "REJECTED", rejectionReason: rejectionReason?.trim() || "Rejected during withdrawal review", reversalLedgerGroupId: groupId },
     });
@@ -97,7 +97,7 @@ export async function reviewWithdrawal(
     await tx.notification.create({
       data: { userId: withdrawal.userId, type: "TRANSACTION", title: "Withdrawal rejected", body: `Your withdrawal of ${amount} ${withdrawal.assetSymbol} was rejected and the full debit, including fee, was returned.` },
     });
-    return { withdrawal, decision, reversalLedgerGroupId: groupId };
+    return { withdrawal: updatedWithdrawal, decision, reversalLedgerGroupId: groupId };
   });
 
   await writeAuditLog({

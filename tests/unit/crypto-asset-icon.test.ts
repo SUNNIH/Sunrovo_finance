@@ -11,9 +11,9 @@ describe("crypto-asset-icon metadata", () => {
     expect(KNOWN_CRYPTO_ASSETS.PLT).toBeDefined();
   });
 
-  it("identifies PLT accurately as PLT Demo Token with isFictional flag", () => {
+  it("identifies PLT accurately as PLT Token with isFictional flag", () => {
     const pltMeta = getCryptoAssetMeta("PLT");
-    expect(pltMeta.name).toBe("PLT Demo Token");
+    expect(pltMeta.name).toBe("PLT Token");
     expect(pltMeta.isFictional).toBe(true);
     expect(pltMeta.symbol).toBe("PLT");
   });

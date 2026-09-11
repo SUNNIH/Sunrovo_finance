@@ -53,7 +53,7 @@ export function LoginForm() {
     <SignupCard
       eyebrow="Returning customer"
       title="Sign in to your account"
-      description="Enter your credentials to access your PLT accounts, transfers, and wallets."
+      description="Enter your credentials to access your FHT accounts, transfers, and wallets."
     >
       <form
         onSubmit={handleSubmit(onSubmit)}

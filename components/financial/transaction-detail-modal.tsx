@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { TransactionStatusBadge } from "./transaction-status-badge";
 import { formatMoney } from "@/lib/money/format";
 import { cn } from "@/lib/utilities/cn";
+import { transactionTextForDisplay } from "@/lib/utilities/format-transaction";
 
 export interface TransactionView {
   id: string;
@@ -88,6 +89,8 @@ export function TransactionDetailModal({
 
   const isCredit = transaction.direction === "CREDIT";
   const typeLabel = TYPE_DISPLAY_NAMES[transaction.type] ?? transaction.type;
+  const counterparty = transactionTextForDisplay(transaction.counterparty);
+  const narration = transactionTextForDisplay(transaction.narration);
 
   let hasFee = false;
   try {
@@ -212,21 +215,21 @@ export function TransactionDetailModal({
           )}
 
           {/* Counterparty (only if present) */}
-          {transaction.counterparty && transaction.counterparty.trim() !== "" && (
+          {counterparty && counterparty.trim() !== "" && (
             <div className="flex items-center justify-between py-2.5">
               <dt className="text-text-secondary">Counterparty</dt>
-              <dd className="font-medium text-text-primary text-right max-w-[200px] truncate" title={transaction.counterparty}>
-                {transaction.counterparty}
+              <dd className="font-medium text-text-primary text-right max-w-[200px] truncate" title={counterparty}>
+                {counterparty}
               </dd>
             </div>
           )}
 
           {/* Narration (only if present) */}
-          {transaction.narration && transaction.narration.trim() !== "" && (
+          {narration && narration.trim() !== "" && (
             <div className="flex items-center justify-between py-2.5">
               <dt className="text-text-secondary">Note / Description</dt>
-              <dd className="font-medium text-text-primary text-right max-w-[200px] truncate" title={transaction.narration}>
-                {transaction.narration}
+              <dd className="font-medium text-text-primary text-right max-w-[200px] truncate" title={narration}>
+                {narration}
               </dd>
             </div>
           )}
@@ -247,15 +250,6 @@ export function TransactionDetailModal({
             </dd>
           </div>
         </dl>
-
-        {/* Demo Indicator (only if isDemo === true) */}
-        {transaction.isDemo && (
-          <div className="rounded-lg border border-warning/30 bg-warning-soft/40 p-3 text-center">
-            <p className="text-xs text-text-secondary">
-              <span className="font-semibold text-warning">Demo Environment:</span> This transaction is simulated. No real funds were involved.
-            </p>
-          </div>
-        )}
 
         {/* Dialog footer action */}
         <div className="flex items-center gap-2 border-t border-border/60 pt-3">

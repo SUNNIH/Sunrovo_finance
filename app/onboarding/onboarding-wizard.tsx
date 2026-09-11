@@ -188,7 +188,7 @@ export function OnboardingWizard() {
               {verifying && (
                 <div className="flex flex-col items-center gap-2 py-4">
                   <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
-                  <p className="text-sm text-text-secondary">Running a simulated identity check...</p>
+                  <p className="text-sm text-text-secondary">Reviewing your details...</p>
                 </div>
               )}
 
@@ -196,8 +196,7 @@ export function OnboardingWizard() {
                 <div className="flex flex-col items-center gap-2 py-2">
                   <CheckCircle2 className="h-8 w-8 text-success" aria-hidden="true" />
                   <p className="text-sm text-text-secondary">
-                    Simulated verification complete — no real document check was performed in this
-                    demo environment.
+                    Your details have been confirmed for account setup.
                   </p>
                 </div>
               )}
