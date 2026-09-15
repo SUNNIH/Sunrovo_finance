@@ -2,13 +2,14 @@ import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
 import { prisma } from "@/lib/db/prisma";
 import { createWithdrawal } from "@/features/treasury/withdrawals";
 import * as transactionPin from "@/lib/auth/transaction-pin";
-import * as bybitClient from "@/lib/bybit/client";
 import Decimal from "decimal.js";
 
 /**
  * Withdrawal Minimum Policy Tests
  *
  * Verify that all withdrawals must meet the $100 USD equivalent minimum.
+ * 
+ * Phase 8: Crypto withdrawals removed. Only fiat withdrawal tests remain.
  */
 
 // Mock transaction PIN verification to always succeed
@@ -83,6 +84,7 @@ describe("withdrawal minimum policy - $100 USD equivalent", () => {
         createWithdrawal(
           userId,
           {
+            sourceAccountId: accountId,
             assetSymbol: "USD",
             amount: "99.99",
             destination: "External Bank Account",
@@ -92,11 +94,22 @@ describe("withdrawal minimum policy - $100 USD equivalent", () => {
         )
       ).rejects.toThrow("Minimum withdrawal is $100 USD equivalent");
 
-      // Verify no financial posting occurred
+      // Verify no financial posting occurred for this user
       const withdrawals = await prisma.withdrawal.findMany({ where: { userId } });
       expect(withdrawals.length).toBe(0);
 
-      const ledgerEntries = await prisma.ledgerEntry.findMany({});
+      // Verify no ledger entries were created for this user's accounts
+      const userLedgerAccounts = await prisma.ledgerAccount.findMany({
+        where: { bankAccountId: accountId },
+        select: { id: true },
+      });
+      const userLedgerAccountIds = userLedgerAccounts.map((la) => la.id);
+      
+      const ledgerEntries = await prisma.ledgerEntry.findMany({
+        where: {
+          ledgerAccountId: { in: userLedgerAccountIds },
+        },
+      });
       expect(ledgerEntries.length).toBe(0);
 
       // Balance should be unchanged
@@ -108,6 +121,7 @@ describe("withdrawal minimum policy - $100 USD equivalent", () => {
       const withdrawal = await createWithdrawal(
         userId,
         {
+          sourceAccountId: accountId,
           assetSymbol: "USD",
           amount: "100.00",
           destination: "External Bank Account",
@@ -128,6 +142,7 @@ describe("withdrawal minimum policy - $100 USD equivalent", () => {
       const withdrawal = await createWithdrawal(
         userId,
         {
+          sourceAccountId: accountId,
           assetSymbol: "USD",
           amount: "500.00",
           destination: "External Bank Account",
@@ -142,6 +157,8 @@ describe("withdrawal minimum policy - $100 USD equivalent", () => {
   });
 
   describe("GBP withdrawals (FX conversion)", () => {
+    let gbpAccountId: string;
+
     beforeEach(async () => {
       // Create GBP account
       const gbpAccount = await prisma.bankAccount.create({
@@ -154,13 +171,14 @@ describe("withdrawal minimum policy - $100 USD equivalent", () => {
           balanceCache: "50000.00",
         },
       });
+      gbpAccountId = gbpAccount.id;
 
       await prisma.ledgerAccount.create({
         data: {
           assetSymbol: "GBP",
           type: "ASSET",
           name: `Customer GBP ${userId}`,
-          bankAccountId: gbpAccount.id,
+          bankAccountId: gbpAccountId,
         },
       });
     });
@@ -171,6 +189,7 @@ describe("withdrawal minimum policy - $100 USD equivalent", () => {
         createWithdrawal(
           userId,
           {
+            sourceAccountId: gbpAccountId,
             assetSymbol: "GBP",
             amount: "78.74",
             destination: "UK Bank Account",
@@ -186,6 +205,7 @@ describe("withdrawal minimum policy - $100 USD equivalent", () => {
       const withdrawal = await createWithdrawal(
         userId,
         {
+          sourceAccountId: gbpAccountId,
           assetSymbol: "GBP",
           amount: "78.75",
           destination: "UK Bank Account",
@@ -198,11 +218,11 @@ describe("withdrawal minimum policy - $100 USD equivalent", () => {
     });
   });
 
-  describe("Crypto withdrawals (market pricing)", () => {
+  describe("Crypto withdrawal rejection (Phase 8)", () => {
     let walletId: string;
 
     beforeEach(async () => {
-      // Create crypto wallet with BTC and ETH
+      // Create crypto wallet with BTC and USDT for testing rejection
       const wallet = await prisma.cryptoWallet.create({
         data: { userId },
       });
@@ -227,154 +247,7 @@ describe("withdrawal minimum policy - $100 USD equivalent", () => {
         },
       });
 
-      // ETH balance
-      await prisma.assetBalance.create({
-        data: {
-          walletId,
-          assetSymbol: "ETH",
-          available: "100.0",
-          locked: "0.0",
-        },
-      });
-
-      await prisma.ledgerAccount.create({
-        data: {
-          assetSymbol: "ETH",
-          type: "ASSET",
-          name: `Customer ETH ${userId}`,
-          cryptoWalletId: walletId,
-        },
-      });
-    });
-
-    it("rejects BTC withdrawal below $100 equivalent (mocked price)", async () => {
-      // Mock BTC price at $50,000
-      vi.spyOn(bybitClient, "getTicker").mockResolvedValue({
-        symbol: "BTCUSDT",
-        baseAsset: "BTC",
-        quoteAsset: "USDT",
-        lastPrice: "50000",
-        bestBid: "49999",
-        bestAsk: "50001",
-        change24hPercent: "2.04",
-        high24h: "51000",
-        low24h: "49000",
-        volume24h: "1000",
-        updatedAt: new Date().toISOString(),
-        isStale: false,
-      });
-
-      // 0.001 BTC * $50,000 = $50 (below minimum)
-      await expect(
-        createWithdrawal(
-          userId,
-          {
-            assetSymbol: "BTC",
-            amount: "0.001",
-            destination: "bc1qexternaladdress",
-            transactionPin: "123456",
-          },
-          `test-min-btc-${Date.now()}`
-        )
-      ).rejects.toThrow("Minimum withdrawal is $100 USD equivalent");
-    });
-
-    it("allows BTC withdrawal at $100 equivalent (mocked price)", async () => {
-      // Mock BTC price at $50,000
-      vi.spyOn(bybitClient, "getTicker").mockResolvedValue({
-        symbol: "BTCUSDT",
-        baseAsset: "BTC",
-        quoteAsset: "USDT",
-        lastPrice: "50000",
-        bestBid: "49999",
-        bestAsk: "50001",
-        change24hPercent: "2.04",
-        high24h: "51000",
-        low24h: "49000",
-        volume24h: "1000",
-        updatedAt: new Date().toISOString(),
-        isStale: false,
-      });
-
-      // 0.002 BTC * $50,000 = $100
-      const withdrawal = await createWithdrawal(
-        userId,
-        {
-          assetSymbol: "BTC",
-          amount: "0.002",
-          destination: "bc1qexternaladdress",
-          transactionPin: "123456",
-        },
-        `test-min-btc-${Date.now()}`
-      );
-
-      expect(withdrawal.status).toBe("PENDING");
-    });
-
-    it("allows BTC withdrawal above $100 equivalent (mocked price)", async () => {
-      // Mock BTC price at $50,000
-      vi.spyOn(bybitClient, "getTicker").mockResolvedValue({
-        symbol: "BTCUSDT",
-        baseAsset: "BTC",
-        quoteAsset: "USDT",
-        lastPrice: "50000",
-        bestBid: "49999",
-        bestAsk: "50001",
-        change24hPercent: "2.04",
-        high24h: "51000",
-        low24h: "49000",
-        volume24h: "1000",
-        updatedAt: new Date().toISOString(),
-        isStale: false,
-      });
-
-      // 0.01 BTC * $50,000 = $500
-      const withdrawal = await createWithdrawal(
-        userId,
-        {
-          assetSymbol: "BTC",
-          amount: "0.01",
-          destination: "bc1qexternaladdress",
-          transactionPin: "123456",
-        },
-        `test-min-btc-${Date.now()}`
-      );
-
-      expect(withdrawal.status).toBe("PENDING");
-    });
-
-    it("fails safely when crypto pricing is unavailable", async () => {
-      // Mock getTicker to fail
-      vi.spyOn(bybitClient, "getTicker").mockRejectedValue(new Error("API unavailable"));
-
-      await expect(
-        createWithdrawal(
-          userId,
-          {
-            assetSymbol: "BTC",
-            amount: "1.0",
-            destination: "bc1qexternaladdress",
-            transactionPin: "123456",
-          },
-          `test-min-btc-fail-${Date.now()}`
-        )
-      ).rejects.toThrow("Unable to verify minimum withdrawal amount");
-
-      // Verify no financial posting occurred
-      const withdrawals = await prisma.withdrawal.findMany({ where: { userId } });
-      expect(withdrawals.length).toBe(0);
-    });
-  });
-
-  describe("USDT withdrawals (1:1 with USD)", () => {
-    let walletId: string;
-
-    beforeEach(async () => {
-      const wallet = await prisma.cryptoWallet.create({
-        data: { userId },
-      });
-      walletId = wallet.id;
-
+      // USDT balance
       await prisma.assetBalance.create({
         data: {
           walletId,
@@ -394,34 +267,38 @@ describe("withdrawal minimum policy - $100 USD equivalent", () => {
       });
     });
 
-    it("rejects USDT withdrawal below $100 (99.99 USDT)", async () => {
+    it("rejects BTC withdrawal - crypto withdrawals no longer supported", async () => {
+      // Phase 8: All crypto withdrawals rejected at service level
       await expect(
         createWithdrawal(
           userId,
           {
+            sourceAccountId: "placeholder-crypto-will-be-rejected",
+            assetSymbol: "BTC",
+            amount: "0.001",
+            destination: "bc1qexternaladdress",
+            transactionPin: "123456",
+          },
+          `test-crypto-btc-${Date.now()}`
+        )
+      ).rejects.toThrow("Crypto withdrawals are no longer supported");
+    });
+
+    it("rejects USDT withdrawal - crypto withdrawals no longer supported", async () => {
+      // Phase 8: Even stablecoins rejected (crypto withdrawal feature removed)
+      await expect(
+        createWithdrawal(
+          userId,
+          {
+            sourceAccountId: "placeholder-crypto-will-be-rejected",
             assetSymbol: "USDT",
-            amount: "99.99",
+            amount: "100.00",
             destination: "0xexternaladdress",
             transactionPin: "123456",
           },
-          `test-min-usdt-${Date.now()}`
+          `test-crypto-usdt-${Date.now()}`
         )
-      ).rejects.toThrow("Minimum withdrawal is $100 USD equivalent");
-    });
-
-    it("allows USDT withdrawal of exactly $100", async () => {
-      const withdrawal = await createWithdrawal(
-        userId,
-        {
-          assetSymbol: "USDT",
-          amount: "100.00",
-          destination: "0xexternaladdress",
-          transactionPin: "123456",
-        },
-        `test-min-usdt-${Date.now()}`
-      );
-
-      expect(withdrawal.status).toBe("PENDING");
+      ).rejects.toThrow("Crypto withdrawals are no longer supported");
     });
   });
 
@@ -437,6 +314,7 @@ describe("withdrawal minimum policy - $100 USD equivalent", () => {
       const withdrawal = await createWithdrawal(
         userId,
         {
+          sourceAccountId: accountId,
           assetSymbol: "USD",
           amount: testCase.amount,
           destination: "External Bank Account",

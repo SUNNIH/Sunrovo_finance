@@ -10,7 +10,6 @@ const CATEGORIES = [
   { id: "transfers", label: "Transfers" },
   { id: "deposits-withdrawals", label: "Deposits & Withdrawals" },
   { id: "wallets", label: "Wallets" },
-  { id: "trade-convert", label: "Trade & Convert" },
   { id: "security", label: "Security" },
   { id: "profile", label: "Profile" },
 ] as const;

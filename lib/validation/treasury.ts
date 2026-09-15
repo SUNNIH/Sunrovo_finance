@@ -28,10 +28,10 @@ export const cryptoDepositSchema = z.object({
 export type CryptoDepositInput = z.infer<typeof cryptoDepositSchema>;
 
 export const withdrawalSchema = z.object({
+  sourceAccountId: z.string().min(1, "Select a source account"),
   assetSymbol: z.string().trim().toUpperCase(),
   amount: amountSchema,
   destination: z.string().trim().min(4, "Enter a valid destination").max(120),
-  network: z.string().trim().max(40).optional(),
   transactionPin: z.string().regex(/^\d{4,6}$/, "Enter your 4-6 digit transaction PIN"),
 });
 export type WithdrawalInput = z.infer<typeof withdrawalSchema>;

@@ -155,7 +155,7 @@ describe("Admin funding", () => {
       include: { ledgerAccount: true },
     });
 
-    await fundUserAccount(
+    const result = await fundUserAccount(
       adminId,
       {
         targetUserId: targetId,
@@ -167,17 +167,11 @@ describe("Admin funding", () => {
       `test-key-${Date.now()}`
     );
 
+    // Get ledger entries for this specific transaction's group
+    expect(result.ledgerGroupId).toBeTruthy();
     const ledgerEntries = await prisma.ledgerEntry.findMany({
       where: {
-        OR: [
-          { ledgerAccountId: account!.ledgerAccount!.id },
-          {
-            ledgerAccount: {
-              name: ADMIN_FUNDING_POOL_NAME("USD"),
-              assetSymbol: "USD",
-            },
-          },
-        ],
+        groupId: result.ledgerGroupId!,
       },
     });
 
@@ -410,5 +404,70 @@ describe("Admin funding", () => {
         `test-key-${Date.now()}`
       )
     ).rejects.toThrow(AuthError);
+  });
+
+  it("prevents concurrent duplicate funding with database-enforced uniqueness", async () => {
+    const adminId = (globalThis as any).__testAdminId;
+    const targetId = (globalThis as any).__testTargetUserId;
+
+    const account = await prisma.bankAccount.findFirst({
+      where: { userId: targetId, type: "CURRENT" },
+    });
+    expect(account).toBeTruthy();
+
+    const idempotencyKey = `concurrent-test-${Date.now()}`;
+
+    // Simulate concurrent requests with Promise.all
+    const concurrentRequests = Array(3)
+      .fill(null)
+      .map(() =>
+        fundUserAccount(
+          adminId,
+          {
+            targetUserId: targetId,
+            targetAccountId: account!.id,
+            assetSymbol: "USD",
+            amount: "500.00",
+            reason: "Concurrent funding test",
+          },
+          idempotencyKey
+        ).catch((error) => ({ error: error.message }))
+      );
+
+    const results = await Promise.all(concurrentRequests);
+
+    // At least one should succeed
+    const successfulResults = results.filter((r) => !("error" in r));
+    expect(successfulResults.length).toBeGreaterThanOrEqual(1);
+
+    // All successful results should have the same transaction ID (idempotency)
+    const transactionIds = successfulResults.map((r: any) => r.transactionId);
+    const uniqueTransactionIds = new Set(transactionIds);
+    expect(uniqueTransactionIds.size).toBe(1);
+
+    // Verify only ONE ledger group was created
+    const transactions = await prisma.transaction.findMany({
+      where: { 
+        referenceType: "AdminFunding",
+        referenceId: `admin-funding:${adminId}:${idempotencyKey}`,
+      },
+    });
+    expect(transactions.length).toBe(1);
+
+    // Verify balance was incremented exactly once
+    const updatedAccount = await prisma.bankAccount.findUnique({
+      where: { id: account!.id },
+    });
+    expect(updatedAccount?.balanceCache.toString()).toBe("500");
+
+    // Verify only ONE audit log entry
+    const auditLogs = await prisma.auditLog.findMany({
+      where: { 
+        actorUserId: adminId, 
+        action: "admin.fund_account",
+        targetId: account!.id,
+      },
+    });
+    expect(auditLogs.length).toBe(1);
   });
 });

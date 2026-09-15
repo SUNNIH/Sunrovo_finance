@@ -7,25 +7,30 @@ import { meetsMinimumWithdrawal, MINIMUM_WITHDRAWAL_USD } from "@/lib/money/usd-
 import { verifyTransactionPin } from "@/lib/auth/transaction-pin";
 import { postLedgerEntries } from "@/lib/ledger/postLedgerEntries";
 import { getOrCreatePlatformLedgerAccount, externalSettlementPoolName, feeRevenuePoolName } from "@/lib/ledger/platform-accounts";
-import { ensureAssetBalanceAndLedgerAccount } from "@/features/crypto/wallet-helpers";
 import { withIdempotentFallback } from "@/lib/ledger/idempotency";
-import { writeAuditLog } from "@/lib/audit/log";
 import type { WithdrawalInput } from "@/lib/validation/treasury";
 import { AuthError } from "@/features/authentication/errors";
 
 const WITHDRAWAL_FEE_RATE = "0.005"; // 0.5% flat demo fee
 
 function isValidDestinationFormat(assetSymbol: string, destination: string): boolean {
-  if (isFiatAsset(assetSymbol)) return destination.trim().length >= 4;
-  // Loose crypto-address-shaped heuristic — long enough, no whitespace.
-  // A real integration would validate per-network checksum rules.
-  return /^\S{10,120}$/.test(destination.trim());
+  // Fiat only - bank account/routing identifier
+  return destination.trim().length >= 4;
 }
 
 export async function createWithdrawal(userId: string, input: WithdrawalInput, idempotencyKey: string) {
   const namespacedKey = `${userId}:${idempotencyKey}`;
   const existing = await prisma.withdrawal.findUnique({ where: { idempotencyKey: namespacedKey } });
   if (existing) return existing;
+
+  // Phase 8: Reject crypto withdrawals - only fiat withdrawals are supported
+  if (!isFiatAsset(input.assetSymbol)) {
+    throw new AuthError(
+      "CRYPTO_WITHDRAWAL_NOT_SUPPORTED",
+      "Crypto withdrawals are no longer supported. Only fiat withdrawals to bank accounts are available.",
+      422
+    );
+  }
 
   if (!isValidDestinationFormat(input.assetSymbol, input.destination)) {
     throw new AuthError("INVALID_DESTINATION", "That destination doesn't look valid.", 422);
@@ -48,7 +53,7 @@ export async function createWithdrawal(userId: string, input: WithdrawalInput, i
         userId,
         destination: input.destination.trim(),
         OR: [{ assetSymbol: input.assetSymbol }, { assetSymbol: "" }],
-        AND: [{ OR: [{ network: input.network ?? "" }, { network: "" }] }],
+        AND: [{ OR: [{ network: "" }] }],
       },
       select: { id: true },
     });
@@ -84,33 +89,28 @@ export async function createWithdrawal(userId: string, input: WithdrawalInput, i
   const fee = new Decimal(input.amount).mul(WITHDRAWAL_FEE_RATE).toFixed(precision);
   const totalDebit = new Decimal(input.amount).add(fee).toFixed(precision);
 
-  const fiat = isFiatAsset(input.assetSymbol);
-
   const result = await withIdempotentFallback(
     () =>
       prisma.$transaction(async (tx) => {
-        let ledgerAccountId: string;
-
-        if (fiat) {
-          const account = await tx.bankAccount.findFirst({ where: { userId, currencySymbol: input.assetSymbol } });
-          if (!account) throw new AuthError("ACCOUNT_NOT_FOUND", `No ${input.assetSymbol} account found.`, 404);
-          if (new Decimal(account.balanceCache.toString()).lt(totalDebit)) {
-            throw new AuthError("INSUFFICIENT_FUNDS", "Your available balance is lower than the amount required.", 422);
-          }
-          const ledgerAccount = await tx.ledgerAccount.findUnique({ where: { bankAccountId: account.id } });
-          if (!ledgerAccount) throw new Error(`Account ${account.id} has no ledger account`);
-          ledgerAccountId = ledgerAccount.id;
-          await tx.bankAccount.update({ where: { id: account.id }, data: { balanceCache: { decrement: totalDebit } } });
-        } else {
-          const wallet = await tx.cryptoWallet.findFirst({ where: { userId } });
-          if (!wallet) throw new AuthError("WALLET_NOT_FOUND", "No crypto wallet found for this account.", 404);
-          const { balance, ledgerAccount } = await ensureAssetBalanceAndLedgerAccount(tx, wallet.id, input.assetSymbol);
-          if (new Decimal(balance.available.toString()).lt(totalDebit)) {
-            throw new AuthError("INSUFFICIENT_FUNDS", `Insufficient ${input.assetSymbol} balance.`, 422);
-          }
-          ledgerAccountId = ledgerAccount.id;
-          await tx.assetBalance.update({ where: { id: balance.id }, data: { available: { decrement: totalDebit } } });
+        // Fiat only - find exact specified bank account
+        const account = await tx.bankAccount.findFirst({
+          where: {
+            id: input.sourceAccountId,
+            userId,
+            currencySymbol: input.assetSymbol,
+          },
+        });
+        if (!account) throw new AuthError("ACCOUNT_NOT_FOUND", `No ${input.assetSymbol} account found.`, 404);
+        if (new Decimal(account.balanceCache.toString()).lt(totalDebit)) {
+          throw new AuthError("INSUFFICIENT_FUNDS", "Your available balance is lower than the amount required.", 422);
         }
+        const ledgerAccount = await tx.ledgerAccount.findUnique({ where: { bankAccountId: account.id } });
+        if (!ledgerAccount) throw new Error(`Account ${account.id} has no ledger account`);
+        
+        const ledgerAccountId = ledgerAccount.id;
+        const sourceAccountId = account.id;
+
+        await tx.bankAccount.update({ where: { id: account.id }, data: { balanceCache: { decrement: totalDebit } } });
 
         const settlementPool = await getOrCreatePlatformLedgerAccount(tx, {
           type: "EQUITY",
@@ -132,9 +132,11 @@ export async function createWithdrawal(userId: string, input: WithdrawalInput, i
             amount: input.amount,
             feeAmount: fee,
             destination: input.destination,
-            network: input.network,
+            network: null, // Fiat withdrawals have no network
             status,
             idempotencyKey: namespacedKey,
+            sourceAccountId,
+            sourceWalletId: null, // Fiat withdrawals have no wallet
           },
         });
 
@@ -174,21 +176,24 @@ export async function createWithdrawal(userId: string, input: WithdrawalInput, i
           },
         });
 
+        // Atomic audit log for critical financial operation
+        await tx.auditLog.create({
+          data: {
+            actorUserId: userId,
+            actorRole: "USER",
+            action: "treasury.withdrawal_request",
+            targetType: "Withdrawal",
+            targetId: withdrawal.id,
+            metadata: { assetSymbol: input.assetSymbol, requiresReview: true },
+          },
+        });
+
         return withdrawal;
       }),
     () => prisma.withdrawal.findUnique({ where: { idempotencyKey: namespacedKey } })
   );
 
   if (!result) throw new Error("Withdrawal could not be created or recovered after a duplicate-key conflict.");
-
-  await writeAuditLog({
-    actorUserId: userId,
-    actorRole: "USER",
-    action: "treasury.withdrawal_request",
-    targetType: "Withdrawal",
-    targetId: result.id,
-    metadata: { assetSymbol: input.assetSymbol, requiresReview: true },
-  });
 
   return result;
 }

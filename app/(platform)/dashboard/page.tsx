@@ -8,7 +8,6 @@ import {
   ChevronRight,
   Download,
   Plus,
-  Repeat,
   Wallet as WalletIcon,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,7 +48,6 @@ const QUICK_ACTIONS = [
   { label: "Deposit", href: "/deposit", icon: Download, variant: "primary" as const },
   { label: "Transfer", href: "/transfers", icon: ArrowLeftRight, variant: "outline" as const },
   { label: "Withdraw", href: "/withdraw", icon: ArrowUpRight, variant: "outline" as const },
-  { label: "Convert", href: "/convert", icon: Repeat, variant: "outline" as const },
 ] as const;
 
 // ─── Page ────────────────────────────────────────────────────────────────────
@@ -323,7 +321,7 @@ export default async function DashboardPage() {
                 <div>
                   <p className="text-sm font-medium text-text-primary">No transactions yet</p>
                   <p className="mt-0.5 text-body-sm text-text-secondary">
-                    Your transfers, deposits, and trades will appear here.
+                    Your transfers, deposits, and withdrawals will appear here.
                   </p>
                 </div>
                 <Link href="/deposit">

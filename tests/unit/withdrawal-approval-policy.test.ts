@@ -97,6 +97,7 @@ describe("withdrawal approval policy - all withdrawals require admin review", ()
     const withdrawal = await createWithdrawal(
       userId,
       {
+        sourceAccountId: accountId,
         assetSymbol: "USD",
         amount: "100.00",
         destination: "External Bank Account",
@@ -128,6 +129,7 @@ describe("withdrawal approval policy - all withdrawals require admin review", ()
     const withdrawal = await createWithdrawal(
       userId,
       {
+        sourceAccountId: accountId,
         assetSymbol: "USD",
         amount: "1000.00",
         destination: "External Bank Account",
@@ -149,6 +151,7 @@ describe("withdrawal approval policy - all withdrawals require admin review", ()
     const withdrawal = await createWithdrawal(
       userId,
       {
+        sourceAccountId: accountId,
         assetSymbol: "USD",
         amount: "5000.00",
         destination: "External Bank Account",
@@ -171,6 +174,7 @@ describe("withdrawal approval policy - all withdrawals require admin review", ()
     const withdrawal = await createWithdrawal(
       userId,
       {
+        sourceAccountId: accountId,
         assetSymbol: "USD",
         amount: "100.00",
         destination: "External Bank Account",
@@ -211,6 +215,7 @@ describe("withdrawal approval policy - all withdrawals require admin review", ()
     const withdrawal = await createWithdrawal(
       userId,
       {
+        sourceAccountId: accountId,
         assetSymbol: "USD",
         amount: "100.00",
         destination: "External Bank Account",
@@ -285,6 +290,7 @@ describe("withdrawal approval policy - all withdrawals require admin review", ()
     const first = await createWithdrawal(
       userId,
       {
+        sourceAccountId: accountId,
         assetSymbol: "USD",
         amount: "100.00",
         destination: "External Bank Account",
@@ -296,6 +302,7 @@ describe("withdrawal approval policy - all withdrawals require admin review", ()
     const second = await createWithdrawal(
       userId,
       {
+        sourceAccountId: accountId,
         assetSymbol: "USD",
         amount: "100.00",
         destination: "External Bank Account",
@@ -319,6 +326,7 @@ describe("withdrawal approval policy - all withdrawals require admin review", ()
     const withdrawal = await createWithdrawal(
       userId,
       {
+        sourceAccountId: accountId,
         assetSymbol: "USD",
         amount: "200.00",
         destination: "External Bank Account",
@@ -356,6 +364,7 @@ describe("withdrawal approval policy - all withdrawals require admin review", ()
       const withdrawal = await createWithdrawal(
         userId,
         {
+          sourceAccountId: accountId,
           assetSymbol: "USD",
           amount,
           destination: "External Bank Account",

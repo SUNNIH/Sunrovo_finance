@@ -1,6 +1,5 @@
 import "server-only";
 import { prisma } from "@/lib/db/prisma";
-import { getTicker } from "@/lib/bybit/client";
 import { writeAuditLog } from "@/lib/audit/log";
 
 export async function getPlatformSettings() {
@@ -51,27 +50,4 @@ export async function setAnnouncementActive(adminId: string, id: string, isActiv
 
 export async function listProviderHealth() {
   return prisma.apiConnection.findMany({ orderBy: { provider: "asc" } });
-}
-
-export async function refreshBybitHealth(adminId: string) {
-  const checkedAt = new Date();
-  try {
-    const ticker = await getTicker("BTCUSDT");
-    const status = ticker.isStale ? "degraded" : "healthy";
-    const connection = await prisma.apiConnection.upsert({
-      where: { provider: "bybit" },
-      update: { status, lastHealthCheckAt: checkedAt, metadata: { scope: "spot-market-data-only", lastTickerStale: ticker.isStale } },
-      create: { provider: "bybit", mode: "public", status, lastHealthCheckAt: checkedAt, metadata: { scope: "spot-market-data-only", lastTickerStale: ticker.isStale } },
-    });
-    await writeAuditLog({ actorUserId: adminId, actorRole: "ADMIN", action: "admin.refresh_provider_health", targetType: "ApiConnection", targetId: connection.id, metadata: { status } });
-    return connection;
-  } catch {
-    const connection = await prisma.apiConnection.upsert({
-      where: { provider: "bybit" },
-      update: { status: "unhealthy", lastHealthCheckAt: checkedAt },
-      create: { provider: "bybit", mode: "public", status: "unhealthy", lastHealthCheckAt: checkedAt },
-    });
-    await writeAuditLog({ actorUserId: adminId, actorRole: "ADMIN", action: "admin.refresh_provider_health", targetType: "ApiConnection", targetId: connection.id, metadata: { status: "unhealthy" } });
-    return connection;
-  }
 }

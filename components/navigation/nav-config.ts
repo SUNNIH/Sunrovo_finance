@@ -3,12 +3,11 @@ import {
   ArrowLeftRight,
   Banknote,
   Bell,
-  CandlestickChart,
   CreditCard,
+  Download,
   Home,
   LayoutGrid,
   LifeBuoy,
-  Repeat,
   Settings,
   Shield,
   Users,
@@ -45,10 +44,8 @@ export const SIDEBAR_NAV: NavGroup[] = [
   {
     label: "Crypto",
     items: [
-      { label: "Markets", href: "/markets", icon: CandlestickChart },
-      { label: "Trade", href: "/trade", icon: CandlestickChart },
-      { label: "Convert", href: "/convert", icon: Repeat },
       { label: "Wallets", href: "/wallets", icon: Wallet },
+      { label: "Deposit", href: "/deposit", icon: Download },
     ],
   },
   {
@@ -67,11 +64,11 @@ export const SUPPORT_NAV_ITEM: NavItem = {
   icon: LifeBuoy,
 };
 
-/** Mobile bottom navigation (design memory: Home, Markets, Transfer, Wallets, More). */
+/** Mobile bottom navigation (design memory: Home, Wallets, Transfer, Accounts, More). */
 export const MOBILE_NAV: NavItem[] = [
   { label: "Home", href: "/dashboard", icon: Home },
-  { label: "Markets", href: "/markets", icon: CandlestickChart },
-  { label: "Transfer", href: "/transfers", icon: ArrowLeftRight },
   { label: "Wallets", href: "/wallets", icon: Wallet },
+  { label: "Transfer", href: "/transfers", icon: ArrowLeftRight },
+  { label: "Accounts", href: "/accounts", icon: Banknote },
   { label: "More", href: "/profile", icon: Settings },
 ];

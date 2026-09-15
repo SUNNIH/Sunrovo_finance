@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import Decimal from "decimal.js";
 import { isDestinationAllowlisted } from "@/lib/treasury/withdrawal-allowlist";
-import { NETWORK_BY_ASSET } from "@/features/treasury/demo-address";
+import { NETWORK_BY_ASSET } from "@/features/treasury/deposit-networks";
 
 describe("Withdrawal Form Validation", () => {
   function isValidAmount(val: string): boolean {

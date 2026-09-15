@@ -4,7 +4,6 @@ import {
   AlertTriangle,
   ArrowLeftRight,
   Banknote,
-  CandlestickChart,
   ChevronDown,
   Info,
   Mail,
@@ -111,7 +110,7 @@ export default async function SupportPage() {
           />
           <FaqItem
             question="What is the difference between available and locked balance?"
-            answer="Available balance is immediately usable for transactions. Locked balance represents funds reserved for pending withdrawals, trades, or other in-flight operations."
+            answer="Available balance is immediately usable for transactions. Locked balance represents funds reserved for pending withdrawals or other in-flight operations."
           />
           <FaqItem
             question="How do I update my preferred currency?"
@@ -167,7 +166,7 @@ export default async function SupportPage() {
           />
           <FaqItem
             question="How do I withdraw funds?"
-            answer="Navigate to Withdraw, select the account or wallet, enter the destination (bank account or crypto address), amount, and confirm. Withdrawal allowlist may apply if enabled in Security Settings."
+            answer="Navigate to Withdraw, select your bank account, enter the destination bank account details, amount, and confirm with your transaction PIN. Withdrawal allowlist may apply if enabled in Security Settings. All withdrawals require administrator review before completion."
           />
           <FaqItem
             question="What is the withdrawal allowlist?"
@@ -195,7 +194,7 @@ export default async function SupportPage() {
           />
           <FaqItem
             question="What cryptocurrencies does FHT support?"
-            answer="FHT currently supports BTC, ETH, USDT, USDC, and other select digital assets. Available assets are displayed on the Wallets and Markets pages."
+            answer="FHT currently supports BTC, ETH, USDT, USDC, and other select digital assets. Available assets are displayed on the Wallets page."
           />
           <FaqItem
             question="Can I deposit crypto from an external wallet?"
@@ -204,38 +203,6 @@ export default async function SupportPage() {
           <FaqItem
             question="How do I send crypto to an external wallet?"
             answer="Use the Withdraw page, select your crypto wallet, enter the recipient's address and amount, and confirm. Always verify the address and network before confirming."
-          />
-        </div>
-      </section>
-
-      {/* Trade & Convert */}
-      <section data-category="trade-convert">
-        <div className="flex items-center gap-2.5 mb-4">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
-            <CandlestickChart className="h-4 w-4" aria-hidden="true" />
-          </div>
-          <h2 className="text-base font-semibold text-text-primary">Trade &amp; Convert</h2>
-        </div>
-        <div className="flex flex-col gap-3">
-          <FaqItem
-            question="How do I trade cryptocurrencies?"
-            answer="Navigate to Trade from the sidebar or Markets page. Select a trading pair, choose market or limit order, enter quantity, and submit. Your wallet must have sufficient balance."
-          />
-          <FaqItem
-            question="What is the difference between market and limit orders?"
-            answer="Market orders execute immediately at the current market price. Limit orders execute only when the market reaches your specified price, and remain open until filled or canceled."
-          />
-          <FaqItem
-            question="How do I cancel an open order?"
-            answer="Go to the Trade page and view your Open Orders section. Click Cancel next to the order you want to remove. Funds are immediately returned to your available balance."
-          />
-          <FaqItem
-            question="What is Convert?"
-            answer="Convert allows instant exchange between supported assets at the current market rate, without placing a limit order. Navigate to Convert, select assets, enter amount, review the quote, and confirm."
-          />
-          <FaqItem
-            question="Are there trading fees?"
-            answer="Yes. Trading fees apply to all executed trades and are deducted from your proceeds. Fee rates depend on your account type and trading volume."
           />
         </div>
       </section>
@@ -259,7 +226,7 @@ export default async function SupportPage() {
           />
           <FaqItem
             question="What is a transaction PIN?"
-            answer="A transaction PIN is a separate 6-digit code required to authorize financial operations like transfers, withdrawals, and trades. Set it up in Security Settings."
+            answer="A transaction PIN is a separate 6-digit code required to authorize financial operations like transfers and withdrawals. Set it up in Security Settings."
           />
           <FaqItem
             question="How do I change my password?"

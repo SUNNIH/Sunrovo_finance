@@ -327,8 +327,9 @@ model BankAccount {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
-  ledgerAccount    LedgerAccount?
-  outgoingTransfers Transfer[]   @relation("SourceAccount")
+  ledgerAccount         LedgerAccount?
+  outgoingTransfers     Transfer[]        @relation("SourceAccount")
+  sourceWithdrawals     Withdrawal[]      @relation("WithdrawalSourceAccount")
 
   @@index([userId])
   @@map("bank_accounts")
@@ -342,8 +343,9 @@ model CryptoWallet {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  balances       AssetBalance[]
-  ledgerAccounts LedgerAccount[]
+  balances          AssetBalance[]
+  ledgerAccounts    LedgerAccount[]
+  sourceWithdrawals Withdrawal[]      @relation("WithdrawalSourceWallet")
 
   @@index([userId])
   @@map("crypto_wallets")
@@ -569,26 +571,33 @@ model Deposit {
 }
 
 model Withdrawal {
-  id                  String           @id @default(cuid())
-  userId              String
-  user                User             @relation("UserWithdrawals", fields: [userId], references: [id], onDelete: Cascade)
-  assetSymbol         String
-  amount              Decimal          @db.Decimal(36, 18)
-  feeAmount           Decimal          @default(0) @db.Decimal(36, 18)
-  destination         String
-  network             String?
-  status              WithdrawalStatus @default(PENDING)
-  idempotencyKey      String           @unique
-  ledgerGroupId       String?
-  reviewedByAdminId   String?
-  reviewedByAdmin     User?            @relation("AdminReviewedWithdrawals", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
-  reviewedAt          DateTime?
-  rejectionReason     String?
+  id                    String           @id @default(cuid())
+  userId                String
+  user                  User             @relation("UserWithdrawals", fields: [userId], references: [id], onDelete: Cascade)
+  assetSymbol           String
+  amount                Decimal          @db.Decimal(36, 18)
+  feeAmount             Decimal          @default(0) @db.Decimal(36, 18)
+  destination           String
+  network               String?
+  status                WithdrawalStatus @default(PENDING)
+  idempotencyKey        String           @unique
+  ledgerGroupId         String?
+  // Source tracking for exact refund provenance
+  sourceAccountId       String?
+  sourceAccount         BankAccount?     @relation("WithdrawalSourceAccount", fields: [sourceAccountId], references: [id], onDelete: SetNull)
+  sourceWalletId        String?
+  sourceWallet          CryptoWallet?    @relation("WithdrawalSourceWallet", fields: [sourceWalletId], references: [id], onDelete: SetNull)
+  reviewedByAdminId     String?
+  reviewedByAdmin       User?            @relation("AdminReviewedWithdrawals", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+  reviewedAt            DateTime?
+  rejectionReason       String?
   reversalLedgerGroupId String?
-  createdAt           DateTime         @default(now())
+  createdAt             DateTime         @default(now())
 
   @@index([userId, createdAt])
   @@index([status])
+  @@index([sourceAccountId])
+  @@index([sourceWalletId])
   @@map("withdrawals")
 }
 

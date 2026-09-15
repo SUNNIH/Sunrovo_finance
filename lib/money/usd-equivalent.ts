@@ -1,7 +1,6 @@
 import "server-only";
 import Decimal from "decimal.js";
 import { isFiatAsset } from "./asset-kind";
-import { getTicker } from "@/lib/bybit/client";
 
 /**
  * Approximate FX rates for fiat currencies to USD.
@@ -24,13 +23,14 @@ export const MINIMUM_WITHDRAWAL_USD = new Decimal(100);
 /**
  * Estimate the USD-equivalent value of an amount in any asset.
  *
+ * Phase 8: Crypto withdrawals removed from product surface. This function is now
+ * only used for fiat withdrawal minimum enforcement.
+ *
  * For fiat: uses approximate FX rates.
- * For crypto: fetches live ticker from Bybit (via USDT pair).
- * For USDT: 1:1 with USD.
+ * For USDT: 1:1 with USD (stablecoin) - kept defensively though crypto withdrawals removed.
+ * For other crypto: throws error (defensive - should not be reached since crypto withdrawals rejected at service level).
  *
- * If pricing cannot be obtained for crypto, throws an error (fail-safe).
- *
- * @param assetSymbol - The asset symbol (USD, BTC, ETH, etc.)
+ * @param assetSymbol - The asset symbol (USD, GBP, etc.)
  * @param amount - The amount as a string
  * @returns USD-equivalent value as Decimal
  * @throws Error if pricing cannot be determined
@@ -47,19 +47,19 @@ export async function estimateUsdValue(assetSymbol: string, amount: string): Pro
     return amountDecimal.mul(rate);
   }
 
-  // USDT is 1:1 with USD
+  // USDT is 1:1 with USD (stablecoin)
   if (assetSymbol === "USDT") {
     return amountDecimal;
   }
 
-  // Other crypto assets: price via Bybit ticker
-  try {
-    const ticker = await getTicker(`${assetSymbol}USDT`);
-    return amountDecimal.mul(ticker.lastPrice);
-  } catch (error) {
-    // Fail safe: if we can't get pricing, reject the withdrawal
-    throw new Error(`Unable to determine USD equivalent for ${assetSymbol}: ${error instanceof Error ? error.message : String(error)}`);
-  }
+  // Phase 8: Crypto withdrawals removed from product surface
+  // This error is defensive - should not be reached since crypto withdrawals
+  // are rejected at the service level before reaching pricing logic
+  throw new Error(
+    `Crypto withdrawal pricing is no longer supported. ` +
+    `Asset ${assetSymbol} is not a supported fiat currency. ` +
+    `Only fiat withdrawals to bank accounts are available.`
+  );
 }
 
 /**

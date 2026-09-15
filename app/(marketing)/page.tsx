@@ -1,12 +1,9 @@
 import Link from "next/link";
 import {
   type LucideIcon,
-  ArrowUpRight,
-  BarChart3,
   ChevronRight,
   Landmark,
   LockKeyhole,
-  RefreshCw,
   Send,
   ShieldCheck,
   WalletCards,
@@ -17,7 +14,6 @@ import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
-  { label: "Markets", href: "#markets" },
   { label: "Security", href: "#security" },
 ] as const;
 
@@ -31,11 +27,9 @@ type ProductFeature = {
 const PRODUCT_FEATURES: readonly ProductFeature[] = [
   { icon: Landmark, title: "Accounts", body: "View your FHT bank accounts and the balances available to you." },
   { icon: Send, title: "Transfers", body: "Move funds between your accounts or to verified beneficiaries." },
-  { icon: WalletCards, title: "Wallets", body: "Manage supported digital asset balances alongside your banking profile." },
-  { id: "markets", icon: BarChart3, title: "Markets", body: "Follow public spot-market data through clear, focused market views." },
-  { icon: ArrowUpRight, title: "Trade", body: "Use the supported spot trading workspace for straightforward order flows." },
-  { icon: RefreshCw, title: "Convert", body: "Preview and execute supported asset conversions from one workspace." },
+  { icon: WalletCards, title: "Wallets", body: "Manage digital asset balances with deposit and withdrawal capabilities." },
   { id: "security", icon: ShieldCheck, title: "Security", body: "Manage passwords, MFA, trusted devices, sessions, and account protections." },
+  { icon: LockKeyhole, title: "Deposits", body: "Fund your accounts and wallets with straightforward deposit flows." },
 ] as const;
 
 const WORKSPACE_ITEMS = [
@@ -84,13 +78,13 @@ export default function LandingPage() {
             <div className="max-w-2xl animate-fade-in-up">
               <FiseLogo className="h-12 w-auto max-w-[220px]" />
               <p className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Finance · Investment · Security · Equity</p>
-              <h1 className="mt-4 text-4xl font-bold tracking-[-0.035em] text-text-primary sm:text-5xl lg:text-6xl lg:leading-[1.08]">Banking and digital assets, brought into focus.</h1>
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-text-secondary sm:text-lg">FISE Holdings Trust Bank gives you one considered workspace for accounts, transfers, wallets, markets, and supported digital asset activity.</p>
+              <h1 className="mt-4 text-4xl font-bold tracking-[-0.035em] text-text-primary sm:text-5xl lg:text-6xl lg:leading-[1.08]">Banking and digital assets, brought together.</h1>
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-text-secondary sm:text-lg">FISE Holdings Trust Bank provides one workspace for your accounts, transfers, wallets, and crypto deposits.</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link href="/register" className="w-full sm:w-auto"><Button size="lg" className="w-full shadow-md shadow-primary/20 transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25 sm:w-auto">Create your account<ChevronRight className="h-4 w-4" aria-hidden="true" /></Button></Link>
                 <Link href="/login" className="w-full sm:w-auto"><Button variant="outline" size="lg" className="w-full bg-surface-elevated/80 shadow-sm sm:w-auto">Sign in securely</Button></Link>
               </div>
-              <p className="mt-5 text-body-sm text-text-tertiary">A non-production environment for supported banking and digital asset features.</p>
+              <p className="mt-5 text-body-sm text-text-tertiary">Reliable environment for supported banking and digital asset features.</p>
             </div>
 
             <div className="relative mx-auto w-full max-w-xl animate-fade-in-up [animation-delay:100ms]">
@@ -114,9 +108,9 @@ export default function LandingPage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col justify-between rounded-xl border border-primary/20 bg-primary-soft/45 p-3 sm:p-4">
-                    <div><div className="flex items-center justify-between"><p className="text-label font-semibold uppercase tracking-[0.13em] text-primary">Market tools</p><BarChart3 className="h-4 w-4 text-primary" aria-hidden="true" /></div>
-                      <div className="mt-5 space-y-3">{[["Markets", "Spot data"], ["Trade", "Order workspace"], ["Convert", "Asset exchange"]].map(([label, detail]) => <div key={label}><p className="text-sm font-semibold text-text-primary">{label}</p><p className="text-body-sm text-text-secondary">{detail}</p></div>)}</div>
+                  <div className="rounded-xl border border-primary/20 bg-primary-soft/45 p-3 sm:p-4">
+                    <div><div className="flex items-center justify-between"><p className="text-label font-semibold uppercase tracking-[0.13em] text-primary">Crypto Banking</p><WalletCards className="h-4 w-4 text-primary" aria-hidden="true" /></div>
+                      <div className="mt-5 space-y-3">{[["Wallets", "Asset balances"], ["Deposit", "Funding"], ["Withdraw", "Account access"]].map(([label, detail]) => <div key={label}><p className="text-sm font-semibold text-text-primary">{label}</p><p className="text-body-sm text-text-secondary">{detail}</p></div>)}</div>
                     </div>
                     <div className="mt-5 border-t border-primary/15 pt-3"><div className="flex items-center gap-2 text-body-sm text-text-secondary"><LockKeyhole className="h-3.5 w-3.5 text-primary" aria-hidden="true" />Security controls stay close at hand.</div></div>
                   </div>
@@ -128,7 +122,7 @@ export default function LandingPage() {
 
         <section id="features" className="scroll-mt-20 border-b border-border bg-background">
           <div className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
-            <div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">One connected platform</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">The tools you use, arranged with intention.</h2><p className="mt-4 text-base leading-relaxed text-text-secondary">Every FISE surface is designed to make the next step clear while keeping your banking and digital asset activity in one place.</p></div>
+            <div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">One connected platform</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">The tools you use, arranged with intention.</h2><p className="mt-4 text-base leading-relaxed text-text-secondary">Every FISE surface is designed to make the next step clear while keeping your banking and digital asset wallets in one place.</p></div>
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {PRODUCT_FEATURES.map((feature, index) => (
                 <article key={feature.title} id={feature.id} className="group scroll-mt-20 rounded-xl border border-border bg-surface-elevated p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md animate-fade-in-up" style={{ animationDelay: `${index * 45}ms` }}>
@@ -143,7 +137,7 @@ export default function LandingPage() {
         <section className="relative overflow-hidden bg-surface">
           <div className="pointer-events-none absolute inset-0 opacity-40 plt-grid-texture" aria-hidden="true" />
           <div className="relative mx-auto grid max-w-[1440px] gap-8 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1fr_auto] lg:items-end lg:px-8">
-            <div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">FISE Holdings Trust Bank</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Start with a workspace made for clarity.</h2><p className="mt-4 text-base leading-relaxed text-text-secondary">Create an account to access the supported banking and digital asset tools available in FHT.</p></div>
+            <div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">FISE Holdings Trust Bank</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Start with a workspace made for clarity.</h2><p className="mt-4 text-base leading-relaxed text-text-secondary">Create an account to access banking and digital asset wallet tools in FHT.</p></div>
             <Link href="/register" className="w-full lg:w-auto"><Button size="lg" className="w-full shadow-md shadow-primary/20 lg:w-auto">Create your account<ChevronRight className="h-4 w-4" aria-hidden="true" /></Button></Link>
           </div>
         </section>
@@ -152,7 +146,7 @@ export default function LandingPage() {
       <footer className="border-t border-border bg-surface-elevated">
         <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-8 text-body-sm text-text-secondary sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
           <div className="flex items-center gap-2"><FiseLogo variant="mark" className="h-7 w-7" alt="" /><FiseLogo className="h-7 w-auto max-w-[128px]" /></div>
-          <div className="max-w-3xl lg:text-right"><p>FISE Holdings Trust Bank (FHT) operates in a non-production environment. No real funds are held or transferred.</p><p className="mt-1 text-text-tertiary">&copy; {new Date().getFullYear()} FISE Holdings Trust Bank. All rights reserved.</p></div>
+          <div className="max-w-3xl lg:text-right"><p>FISE Holdings Trust Bank (FHT).</p><p className="mt-1 text-text-tertiary">&copy; {new Date().getFullYear()} FISE Holdings Trust Bank. All rights reserved.</p></div>
         </div>
       </footer>
     </div>

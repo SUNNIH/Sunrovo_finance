@@ -17,7 +17,7 @@ import {
   Wallet,
 } from "lucide-react";
 import Decimal from "decimal.js";
-import { SUPPORTED_PAIRS } from "@/lib/bybit/instruments";
+import { QRCodeSVG } from "qrcode.react";
 import { TextField } from "@/components/forms/text-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +30,14 @@ import { generateClientId } from "@/lib/utilities/id";
 import { accountDisplayName } from "@/lib/utilities/format-account";
 import { formatMoney } from "@/lib/money/format";
 import { cn } from "@/lib/utilities/cn";
+import { NETWORK_BY_ASSET } from "@/features/treasury/deposit-networks";
+
+/**
+ * Phase 4: Functional deposit QR
+ * 
+ * Crypto assets sourced from deposit-networks configuration (browser-safe).
+ * QR code encodes the actual deposit address.
+ */
 
 export interface AccountView {
   id: string;
@@ -40,7 +48,8 @@ export interface AccountView {
   balanceCache?: string;
 }
 
-const CRYPTO_ASSETS = ["USDT", ...SUPPORTED_PAIRS.map((p) => p.baseAsset)];
+// Source supported crypto assets from network configuration
+const CRYPTO_ASSETS = Object.keys(NETWORK_BY_ASSET);
 
 const FIAT_PRESETS = ["500", "1000", "5000", "10000"];
 
@@ -718,12 +727,25 @@ function CryptoDeposit() {
 
         {/* Deposit Address Presentation Card */}
         <div className="flex flex-col items-center gap-3.5 rounded-xl border border-border bg-surface/60 p-4 text-center">
-          {/* QR Code Container (presentation only) */}
+          {/* QR Code Container */}
           <div
-            className="relative flex h-36 w-36 items-center justify-center rounded-xl border-2 border-dashed border-border-strong bg-surface-elevated text-text-tertiary shadow-2xs"
-            aria-label={`QR Code representation for ${asset} deposit address`}
+            className="relative flex h-36 w-36 items-center justify-center rounded-xl border-2 border-border bg-surface-elevated shadow-2xs p-2"
+            aria-label={`QR Code for ${asset} deposit address`}
           >
-            <QrCode className="h-20 w-20 text-text-primary/70" aria-hidden="true" />
+            {loadingAddress ? (
+              <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
+            ) : address ? (
+              <QRCodeSVG
+                value={address.address}
+                size={128}
+                level="M"
+                includeMargin={false}
+                className="w-full h-full"
+                aria-label={`Scannable QR code containing ${asset} deposit address`}
+              />
+            ) : (
+              <QrCode className="h-20 w-20 text-text-primary/30" aria-hidden="true" />
+            )}
           </div>
 
           {/* Network label from backend */}

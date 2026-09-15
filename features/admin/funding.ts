@@ -85,11 +85,11 @@ export async function fundUserAccount(
   // Namespace idempotency key with admin ID to prevent cross-admin collisions
   const namespacedKey = `admin-funding:${adminUserId}:${idempotencyKey}`;
 
-  // Check for existing funding transaction with this key
+  // Check for existing funding transaction with this idempotency key
   const existing = await prisma.transaction.findFirst({
     where: {
       referenceType: "AdminFunding",
-      ledgerGroupId: namespacedKey,
+      referenceId: namespacedKey,
     },
   });
 
@@ -200,13 +200,30 @@ async function fundBankAccount(
           },
         });
 
+        // Atomic audit log within the same transaction
+        await tx.auditLog.create({
+          data: {
+            actorUserId: adminUserId,
+            actorRole: "ADMIN",
+            action: "admin.fund_account",
+            targetType: "BankAccount",
+            targetId: account.id,
+            metadata: {
+              targetUserId: input.targetUserId,
+              assetSymbol: input.assetSymbol,
+              amount: input.amount,
+              reason: input.reason,
+            },
+          },
+        });
+
         return { transactionId: transaction.id, ledgerGroupId: groupId };
       }),
     async () => {
       const tx = await prisma.transaction.findFirst({
         where: {
           referenceType: "AdminFunding",
-          ledgerGroupId: idempotencyKey,
+          referenceId: idempotencyKey,
         },
       });
       return tx
@@ -220,21 +237,6 @@ async function fundBankAccount(
       "Admin funding could not be created or recovered after a duplicate-key conflict."
     );
   }
-
-  // Audit log
-  await writeAuditLog({
-    actorUserId: adminUserId,
-    actorRole: "ADMIN",
-    action: "admin.fund_account",
-    targetType: "BankAccount",
-    targetId: account.id,
-    metadata: {
-      targetUserId: input.targetUserId,
-      assetSymbol: input.assetSymbol,
-      amount: input.amount,
-      reason: input.reason,
-    },
-  });
 
   return { ...result, alreadyProcessed: false };
 }
@@ -323,13 +325,30 @@ async function fundCryptoWallet(
           },
         });
 
+        // Atomic audit log within the same transaction
+        await tx.auditLog.create({
+          data: {
+            actorUserId: adminUserId,
+            actorRole: "ADMIN",
+            action: "admin.fund_wallet",
+            targetType: "CryptoWallet",
+            targetId: wallet.id,
+            metadata: {
+              targetUserId: input.targetUserId,
+              assetSymbol: input.assetSymbol,
+              amount: input.amount,
+              reason: input.reason,
+            },
+          },
+        });
+
         return { transactionId: transaction.id, ledgerGroupId: groupId };
       }),
     async () => {
       const tx = await prisma.transaction.findFirst({
         where: {
           referenceType: "AdminFunding",
-          ledgerGroupId: idempotencyKey,
+          referenceId: idempotencyKey,
         },
       });
       return tx
@@ -343,21 +362,6 @@ async function fundCryptoWallet(
       "Admin funding could not be created or recovered after a duplicate-key conflict."
     );
   }
-
-  // Audit log
-  await writeAuditLog({
-    actorUserId: adminUserId,
-    actorRole: "ADMIN",
-    action: "admin.fund_wallet",
-    targetType: "CryptoWallet",
-    targetId: wallet.id,
-    metadata: {
-      targetUserId: input.targetUserId,
-      assetSymbol: input.assetSymbol,
-      amount: input.amount,
-      reason: input.reason,
-    },
-  });
 
   return { ...result, alreadyProcessed: false };
 }

@@ -46,17 +46,43 @@ export async function reviewWithdrawal(
       await tx.notification.create({
         data: { userId: withdrawal.userId, type: "TRANSACTION", title: "Withdrawal approved", body: `Your withdrawal of ${withdrawal.amount.toString()} ${withdrawal.assetSymbol} was approved.` },
       });
+
+      // Atomic audit log for approval
+      await tx.auditLog.create({
+        data: {
+          actorUserId: adminId,
+          actorRole: "ADMIN",
+          action: "admin.approve_withdrawal",
+          targetType: "Withdrawal",
+          targetId: withdrawalId,
+          metadata: { reversalLedgerGroupId: null },
+        },
+      });
+
       return { withdrawal: updatedWithdrawal, decision, reversalLedgerGroupId: null };
     }
 
-    const ledgerAccount = isFiatAsset(withdrawal.assetSymbol)
-      ? await tx.ledgerAccount.findFirst({
-          where: { bankAccount: { userId: withdrawal.userId, currencySymbol: withdrawal.assetSymbol } },
-        })
-      : await tx.ledgerAccount.findFirst({
-          where: { cryptoWallet: { userId: withdrawal.userId }, assetSymbol: withdrawal.assetSymbol },
-        });
-    if (!ledgerAccount) throw new Error(`Withdrawal ${withdrawal.id} has no customer ledger account.`);
+    // Get exact source account from withdrawal record (fiat only now)
+    let ledgerAccount: { id: string } | null = null;
+    if (withdrawal.sourceAccountId) {
+      ledgerAccount = await tx.ledgerAccount.findUnique({
+        where: { bankAccountId: withdrawal.sourceAccountId },
+        select: { id: true },
+      });
+    } else if (withdrawal.sourceWalletId) {
+      // Historical crypto withdrawal - still need to handle refunds for old records
+      ledgerAccount = await tx.ledgerAccount.findFirst({
+        where: { 
+          cryptoWalletId: withdrawal.sourceWalletId,
+          assetSymbol: withdrawal.assetSymbol
+        },
+        select: { id: true },
+      });
+    }
+
+    if (!ledgerAccount) {
+      throw new Error(`Withdrawal ${withdrawal.id} has no traceable customer ledger account.`);
+    }
 
     const settlementPool = await getOrCreatePlatformLedgerAccount(tx, {
       type: "EQUITY", assetSymbol: withdrawal.assetSymbol, name: externalSettlementPoolName(withdrawal.assetSymbol),
@@ -76,14 +102,25 @@ export async function reviewWithdrawal(
     ]);
 
     const totalRefund = new Decimal(amount).add(fee).toFixed();
-    if (isFiatAsset(withdrawal.assetSymbol)) {
-      const account = await tx.bankAccount.findFirst({ where: { userId: withdrawal.userId, currencySymbol: withdrawal.assetSymbol } });
-      if (!account) throw new Error(`Withdrawal ${withdrawal.id} has no customer bank account.`);
-      await tx.bankAccount.update({ where: { id: account.id }, data: { balanceCache: { increment: totalRefund } } });
+    if (withdrawal.sourceAccountId) {
+      await tx.bankAccount.update({ 
+        where: { id: withdrawal.sourceAccountId }, 
+        data: { balanceCache: { increment: totalRefund } } 
+      });
+    } else if (withdrawal.sourceWalletId) {
+      const balance = await tx.assetBalance.findFirst({ 
+        where: { 
+          walletId: withdrawal.sourceWalletId,
+          assetSymbol: withdrawal.assetSymbol
+        } 
+      });
+      if (!balance) throw new Error(`Withdrawal ${withdrawal.id} has no asset balance for refund.`);
+      await tx.assetBalance.update({ 
+        where: { id: balance.id }, 
+        data: { available: { increment: totalRefund } } 
+      });
     } else {
-      const balance = await tx.assetBalance.findFirst({ where: { wallet: { userId: withdrawal.userId }, assetSymbol: withdrawal.assetSymbol } });
-      if (!balance) throw new Error(`Withdrawal ${withdrawal.id} has no customer asset balance.`);
-      await tx.assetBalance.update({ where: { id: balance.id }, data: { available: { increment: totalRefund } } });
+      throw new Error(`Withdrawal ${withdrawal.id} has no source tracking for refund.`);
     }
 
     const updatedWithdrawal = await tx.withdrawal.update({
@@ -97,16 +134,21 @@ export async function reviewWithdrawal(
     await tx.notification.create({
       data: { userId: withdrawal.userId, type: "TRANSACTION", title: "Withdrawal rejected", body: `Your withdrawal of ${amount} ${withdrawal.assetSymbol} was rejected and the full debit, including fee, was returned.` },
     });
+
+    // Atomic audit log for critical financial operation
+    await tx.auditLog.create({
+      data: {
+        actorUserId: adminId,
+        actorRole: "ADMIN",
+         action: "admin.reject_withdrawal",
+        targetType: "Withdrawal",
+        targetId: withdrawalId,
+        metadata: { reversalLedgerGroupId: groupId, reasonProvided: Boolean(rejectionReason?.trim()) },
+      },
+    });
+
     return { withdrawal: updatedWithdrawal, decision, reversalLedgerGroupId: groupId };
   });
 
-  await writeAuditLog({
-    actorUserId: adminId,
-    actorRole: "ADMIN",
-    action: decision === "APPROVE" ? "admin.approve_withdrawal" : "admin.reject_withdrawal",
-    targetType: "Withdrawal",
-    targetId: withdrawalId,
-    metadata: { reversalLedgerGroupId: result.reversalLedgerGroupId, reasonProvided: Boolean(rejectionReason?.trim()) },
-  });
   return result;
 }
