@@ -60,6 +60,8 @@ desktop.ini
 *.sql
 *.dump
 *.backup
+# Prisma migration SQL must be version controlled
+!prisma/migrations/**/*.sql
 
 # Archives / local backups
 *.zip
