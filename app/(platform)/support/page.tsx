@@ -295,7 +295,7 @@ export default async function SupportPage() {
               Support Email
             </p>
             <p className="text-sm font-semibold text-text-primary font-mono">
-              support@fiseholdings.example
+              fiseholdings@supportplt.com
             </p>
             <p className="text-xs text-text-secondary mt-2 leading-relaxed">
               For account inquiries, technical issues, KYC updates, and general assistance.
@@ -307,7 +307,7 @@ export default async function SupportPage() {
               Compliance Inquiries
             </p>
             <p className="text-sm font-semibold text-text-primary font-mono">
-              compliance@fiseholdings.example
+              fiseholdings@supportplt.com
             </p>
             <p className="text-xs text-text-secondary mt-2 leading-relaxed">
               For identity verification updates, regulatory questions, and KYC document submissions.

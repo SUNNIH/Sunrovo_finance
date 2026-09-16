@@ -152,3 +152,18 @@ export default function LandingPage() {
     </div>
   );
 }
+<div className="flex flex-wrap gap-4">
+  <Link
+    href="/terms"
+    className="hover:text-primary hover:underline"
+  >
+    Terms
+  </Link>
+
+  <Link
+    href="/privacy"
+    className="hover:text-primary hover:underline"
+  >
+    Privacy Policy
+  </Link>
+</div>

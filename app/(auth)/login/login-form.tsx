@@ -122,21 +122,6 @@ export function LoginForm() {
           )}
         </Button>
 
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-body-sm text-text-tertiary">or continue with</span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Button variant="outline" disabled title="Coming soon">
-            Google
-          </Button>
-          <Button variant="outline" disabled title="Coming soon">
-            Apple
-          </Button>
-        </div>
-
         <p className="text-center text-sm text-text-secondary">
           Don&rsquo;t have an account?{" "}
           <Link href="/register" className="font-medium text-primary hover:underline">

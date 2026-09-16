@@ -461,7 +461,7 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
  * CRYPTO DEPOSIT FLOW
  * ───────────────────────────────────────────────────────────────────────────── */
 function CryptoDeposit() {
-  const [asset, setAsset] = React.useState("USDT");
+  const [asset, setAsset] = React.useState("BTC");
   const [address, setAddress] = React.useState<{ address: string; network: string } | null>(null);
   const [loadingAddress, setLoadingAddress] = React.useState(true);
   const [amount, setAmount] = React.useState("");
@@ -481,23 +481,36 @@ function CryptoDeposit() {
     };
   }, []);
 
-  React.useEffect(() => {
-    setLoadingAddress(true);
-    fetch(`/api/deposits/crypto?asset=${asset}`)
-      .then((r) => {
-        if (!r.ok) throw new Error("Failed to load deposit address");
-        return r.json();
-      })
-      .then((payload) => {
-        setAddress(payload.data);
-      })
-      .catch(() => {
-        setAddress(null);
-      })
-      .finally(() => {
-        setLoadingAddress(false);
-      });
-  }, [asset]);
+React.useEffect(() => {
+  setAddress(null);
+  setCopied(false);
+
+  // Only BTC wallet-transfer deposits are currently available.
+  if (asset !== "BTC") {
+    setLoadingAddress(false);
+    return;
+  }
+
+  setLoadingAddress(true);
+
+  fetch(`/api/deposits/crypto?asset=${asset}`)
+    .then((r) => {
+      if (!r.ok) {
+        throw new Error("Failed to load deposit address");
+      }
+
+      return r.json();
+    })
+    .then((payload) => {
+      setAddress(payload.data);
+    })
+    .catch(() => {
+      setAddress(null);
+    })
+    .finally(() => {
+      setLoadingAddress(false);
+    });
+}, [asset]);
 
   async function copyAddress() {
     if (!address) return;
@@ -675,7 +688,7 @@ function CryptoDeposit() {
               {busy ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  <span>Simulating...</span>
+                  <span>Processing...</span>
                 </>
               ) : (
                 <>
@@ -803,10 +816,10 @@ function CryptoDeposit() {
         <form onSubmit={handleReview} className="flex flex-col gap-4 border-t border-border/80 pt-4">
           <div>
             <h3 className="text-sm font-semibold text-text-primary">
-              Simulate Incoming Deposit
+              Incoming Deposit
             </h3>
             <p className="text-xs text-text-secondary mt-0.5">
-              Enter an amount to simulate receiving on-chain {asset} into your spot wallet.
+              Enter an amount to deposit on-chain {asset} into your spot wallet.
             </p>
           </div>
 

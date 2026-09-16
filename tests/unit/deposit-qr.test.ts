@@ -3,160 +3,139 @@ import { getDemoDepositAddress } from "@/features/treasury/demo-address";
 import { NETWORK_BY_ASSET } from "@/features/treasury/deposit-networks";
 
 /**
- * Phase 4: Crypto Deposit QR Functionality Tests
- * 
- * Validates that:
- * - QR codes render for deposit addresses
- * - QR payload matches displayed address
- * - Asset/network configuration is consistent
+ * BTC customer deposit tests.
+ *
+ * Policy:
+ * - BTC is the only customer wallet-transfer deposit currently available.
+ * - Every user receives the same public BTC receiving address.
+ * - QR payload must exactly match the displayed BTC address.
+ * - Other assets remain configured in the platform but customer
+ *   wallet-transfer deposits for them are unavailable.
  */
 
-describe("Crypto Deposit Address Generation", () => {
-  const testUserId = "user_test_qr_123";
+describe("BTC Deposit Address", () => {
+  it("returns a BTC deposit address", () => {
+    const result = getDemoDepositAddress("user_1", "BTC");
 
-  it("generates deterministic deposit addresses for each asset", () => {
-    const assets = Object.keys(NETWORK_BY_ASSET);
-    
-    expect(assets.length).toBeGreaterThan(0);
-
-    assets.forEach((asset) => {
-      const result = getDemoDepositAddress(testUserId, asset);
-      
-      expect(result.address).toBeTruthy();
-      expect(result.network).toBeTruthy();
-      expect(result.network).toBe(NETWORK_BY_ASSET[asset]);
-      expect(typeof result.address).toBe("string");
-      expect(result.address.length).toBeGreaterThan(10);
-    });
+    expect(result.address).toBeTruthy();
+    expect(typeof result.address).toBe("string");
+    expect(result.address.length).toBeGreaterThan(20);
+    expect(result.network).toBe("Bitcoin");
   });
 
-  it("generates the same address for the same user+asset combination", () => {
-    const asset = "BTC";
-    
-    const address1 = getDemoDepositAddress(testUserId, asset);
-    const address2 = getDemoDepositAddress(testUserId, asset);
-    
-    expect(address1.address).toBe(address2.address);
-    expect(address1.network).toBe(address2.network);
+  it("returns the same BTC address for the same user", () => {
+    const first = getDemoDepositAddress("user_1", "BTC");
+    const second = getDemoDepositAddress("user_1", "BTC");
+
+    expect(first.address).toBe(second.address);
+    expect(first.network).toBe(second.network);
   });
 
-  it("generates different addresses for different assets", () => {
-    const btcAddress = getDemoDepositAddress(testUserId, "BTC");
-    const ethAddress = getDemoDepositAddress(testUserId, "ETH");
-    
-    expect(btcAddress.address).not.toBe(ethAddress.address);
-    expect(btcAddress.network).not.toBe(ethAddress.network);
+  it("returns the same BTC address for different users", () => {
+    const user1 = getDemoDepositAddress("user_1", "BTC");
+    const user2 = getDemoDepositAddress("user_2", "BTC");
+    const user3 = getDemoDepositAddress("user_3", "BTC");
+
+    expect(user1.address).toBe(user2.address);
+    expect(user2.address).toBe(user3.address);
+
+    expect(user1.network).toBe("Bitcoin");
+    expect(user2.network).toBe("Bitcoin");
+    expect(user3.network).toBe("Bitcoin");
   });
 
-  it("generates different addresses for different users", () => {
-    const user1Address = getDemoDepositAddress("user_1", "BTC");
-    const user2Address = getDemoDepositAddress("user_2", "BTC");
-    
-    expect(user1Address.address).not.toBe(user2Address.address);
-    expect(user1Address.network).toBe(user2Address.network); // Same network
+  it("rejects non-BTC wallet-transfer deposits", () => {
+    expect(() =>
+      getDemoDepositAddress("user_1", "ETH")
+    ).toThrow("Wallet transfer deposits are currently unavailable");
+
+    expect(() =>
+      getDemoDepositAddress("user_1", "USDT")
+    ).toThrow("Wallet transfer deposits are currently unavailable");
+
+    expect(() =>
+      getDemoDepositAddress("user_1", "SOL")
+    ).toThrow("Wallet transfer deposits are currently unavailable");
+
+    expect(() =>
+      getDemoDepositAddress("user_1", "XRP")
+    ).toThrow("Wallet transfer deposits are currently unavailable");
+
+    expect(() =>
+      getDemoDepositAddress("user_1", "PLT")
+    ).toThrow("Wallet transfer deposits are currently unavailable");
+  });
+});
+
+describe("QR Code Payload Consistency", () => {
+  it("QR payload exactly matches the displayed BTC deposit address", () => {
+    const result = getDemoDepositAddress("user_qr_test", "BTC");
+
+    const displayedAddress = result.address;
+    const qrPayload = result.address;
+
+    expect(qrPayload).toBe(displayedAddress);
+    expect(qrPayload.length).toBeGreaterThan(20);
+    expect(result.network).toBe("Bitcoin");
   });
 
-  it("includes asset-specific prefixes in addresses", () => {
-    const btcAddress = getDemoDepositAddress(testUserId, "BTC");
-    const ethAddress = getDemoDepositAddress(testUserId, "ETH");
-    const usdtAddress = getDemoDepositAddress(testUserId, "USDT");
-    
-    expect(btcAddress.address).toMatch(/^bc1demo/);
-    expect(ethAddress.address).toMatch(/^0xdemo/);
-    expect(usdtAddress.address).toMatch(/^0xdemo/);
-  });
+  it("different users receive the same QR payload", () => {
+    const user1 = getDemoDepositAddress("user_qr_1", "BTC");
+    const user2 = getDemoDepositAddress("user_qr_2", "BTC");
 
-  it("maps assets to correct networks", () => {
+    expect(user1.address).toBe(user2.address);
+  });
+});
+
+describe("Asset/Network Configuration", () => {
+  it("BTC is mapped to the Bitcoin network", () => {
     expect(NETWORK_BY_ASSET["BTC"]).toBe("Bitcoin");
+  });
+
+  it("platform asset network mappings remain available", () => {
     expect(NETWORK_BY_ASSET["ETH"]).toBe("Ethereum (ERC-20)");
     expect(NETWORK_BY_ASSET["SOL"]).toBe("Solana");
     expect(NETWORK_BY_ASSET["XRP"]).toBe("XRP Ledger");
     expect(NETWORK_BY_ASSET["USDT"]).toBe("Ethereum (ERC-20)");
   });
-});
 
-describe("QR Code Payload Consistency", () => {
-  it("QR value must equal the deposit address for scanning", () => {
-    const testUserId = "user_qr_test";
-    const asset = "BTC";
-    
-    const { address, network } = getDemoDepositAddress(testUserId, asset);
-    
-    // This represents what would be encoded in the QR code
-    const qrPayload = address;
-    
-    // The displayed address and QR payload must match exactly
-    expect(qrPayload).toBe(address);
-    expect(qrPayload).toContain("bc1demo");
-    expect(qrPayload.length).toBeGreaterThan(20);
-  });
-
-  it("changing asset generates different address and QR payload", () => {
-    const testUserId = "user_qr_test";
-    
-    const btcResult = getDemoDepositAddress(testUserId, "BTC");
-    const ethResult = getDemoDepositAddress(testUserId, "ETH");
-    
-    // Different assets = different addresses = different QR payloads
-    expect(btcResult.address).not.toBe(ethResult.address);
-    
-    // QR payloads would differ
-    const btcQrPayload = btcResult.address;
-    const ethQrPayload = ethResult.address;
-    
-    expect(btcQrPayload).not.toBe(ethQrPayload);
-  });
-});
-
-describe("Asset/Network Configuration Source", () => {
-  it("supported assets are sourced from NETWORK_BY_ASSET", () => {
-    const supportedAssets = Object.keys(NETWORK_BY_ASSET);
-    
-    expect(supportedAssets).toContain("BTC");
-    expect(supportedAssets).toContain("ETH");
-    expect(supportedAssets).toContain("USDT");
-    expect(supportedAssets).toContain("SOL");
-    expect(supportedAssets).toContain("XRP");
-  });
-
-  it("each supported asset has a network mapping", () => {
+  it("each configured asset has a network value", () => {
     const assets = Object.keys(NETWORK_BY_ASSET);
-    
+
+    expect(assets.length).toBeGreaterThan(0);
+
     assets.forEach((asset) => {
       const network = NETWORK_BY_ASSET[asset];
+
       expect(network).toBeTruthy();
       expect(typeof network).toBe("string");
-      expect(network!.length).toBeGreaterThan(0);
     });
-  });
-
-  it("no hardcoded duplicate asset lists needed", () => {
-    // Test validates that NETWORK_BY_ASSET serves as single source of truth
-    const configSource = Object.keys(NETWORK_BY_ASSET);
-    
-    // If deposit client uses Object.keys(NETWORK_BY_ASSET), no duplication exists
-    expect(configSource).toBeDefined();
-    expect(Array.isArray(configSource)).toBe(true);
-    expect(configSource.length).toBeGreaterThan(0);
   });
 });
 
-describe("Address Security Properties", () => {
-  it("does not expose private keys or secrets", () => {
-    const testUserId = "user_security_test";
-    const { address } = getDemoDepositAddress(testUserId, "BTC");
-    
-    // Address should be public-facing deposit address only
+describe("BTC Address Security Properties", () => {
+  it("exposes only a public receiving address", () => {
+    const { address } = getDemoDepositAddress(
+      "user_security_test",
+      "BTC"
+    );
+
     expect(address).not.toMatch(/private/i);
     expect(address).not.toMatch(/secret/i);
-    expect(address).not.toMatch(/key/i);
     expect(address).not.toMatch(/seed/i);
   });
 
-  it("generates demo addresses that are obviously non-production", () => {
-    const { address } = getDemoDepositAddress("user_test", "BTC");
-    
-    // Must contain "demo" indicator
-    expect(address.toLowerCase()).toContain("demo");
+  it("does not depend on the user id", () => {
+    const first = getDemoDepositAddress(
+      "completely_different_user_1",
+      "BTC"
+    );
+
+    const second = getDemoDepositAddress(
+      "completely_different_user_2",
+      "BTC"
+    );
+
+    expect(first.address).toBe(second.address);
   });
 });

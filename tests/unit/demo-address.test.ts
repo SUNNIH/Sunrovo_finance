@@ -3,30 +3,50 @@ import { getDemoDepositAddress } from "@/features/treasury/demo-address";
 
 describe("getDemoDepositAddress", () => {
   it("is deterministic for the same user+asset", () => {
-    const a = getDemoDepositAddress("user_1", "BTC");
-    const b = getDemoDepositAddress("user_1", "BTC");
-    expect(a.address).toBe(b.address);
+    const first = getDemoDepositAddress("user_1", "BTC");
+    const second = getDemoDepositAddress("user_1", "BTC");
+
+    expect(first.address).toBe(second.address);
+    expect(first.network).toBe(second.network);
   });
 
-  it("differs between users", () => {
+  it("uses the same BTC receiving address for all users", () => {
     const a = getDemoDepositAddress("user_1", "BTC");
     const b = getDemoDepositAddress("user_2", "BTC");
-    expect(a.address).not.toBe(b.address);
+
+    expect(a.address).toBe(b.address);
+    expect(a.network).toBe("Bitcoin");
+    expect(b.network).toBe("Bitcoin");
   });
 
-  it("differs between assets for the same user", () => {
-    const btc = getDemoDepositAddress("user_1", "BTC");
-    const eth = getDemoDepositAddress("user_1", "ETH");
-    expect(btc.address).not.toBe(eth.address);
+  it("returns the configured BTC receiving address", () => {
+    const result = getDemoDepositAddress("user_1", "BTC");
+
+    expect(result.address).toBeTruthy();
+    expect(typeof result.address).toBe("string");
+    expect(result.address.length).toBeGreaterThan(20);
+    expect(result.network).toBe("Bitcoin");
   });
 
-  it("uses an asset-appropriate prefix so it's visually distinguishable, never a real address", () => {
-    expect(getDemoDepositAddress("user_1", "BTC").address.startsWith("bc1demo")).toBe(true);
-    expect(getDemoDepositAddress("user_1", "ETH").address.startsWith("0xdemo")).toBe(true);
+  it("rejects ETH wallet-transfer deposits", () => {
+    expect(() =>
+      getDemoDepositAddress("user_1", "ETH")
+    ).toThrow("Wallet transfer deposits are currently unavailable");
   });
 
-  it("labels the network for every supported asset", () => {
-    expect(getDemoDepositAddress("user_1", "BTC").network).toBe("Bitcoin");
-    expect(getDemoDepositAddress("user_1", "SOL").network).toBe("Solana");
+  it("rejects USDT wallet-transfer deposits", () => {
+    expect(() =>
+      getDemoDepositAddress("user_1", "USDT")
+    ).toThrow("Wallet transfer deposits are currently unavailable");
+  });
+
+  it("rejects all other unsupported customer wallet-transfer assets", () => {
+    const unsupportedAssets = ["SOL", "XRP", "PLT"];
+
+    unsupportedAssets.forEach((asset) => {
+      expect(() =>
+        getDemoDepositAddress("user_1", asset)
+      ).toThrow("Wallet transfer deposits are currently unavailable");
+    });
   });
 });
