@@ -57,4 +57,32 @@ describe("Deposit Receipt Invariants", () => {
     expect(mockDeposit.status).toBe("COMPLETED");
     expect(mockDeposit.assetSymbol).toBe("USD");
   });
+
+  it("handles PENDING incoming transfer receipt correctly", () => {
+    const pendingReceipt = {
+      id: "dep_incoming_pending_456",
+      amount: "2500.00",
+      assetSymbol: "USD",
+      status: "PENDING",
+      createdAt: "2026-09-16T18:00:00.000Z",
+      destinationLabel: "FHT Checking Account (USD)",
+      destinationDetail: "Acc: 1234567890",
+      sendingBank: "Barclays Bank",
+      senderName: "John Doe",
+      transferReference: "WIRE-REF-9988",
+      title: "Transfer Notice Submitted",
+      description:
+        "Your incoming transfer has been submitted for verification. Your account balance will be updated after the transfer is confirmed.",
+      amountLabel: "Transfer Amount",
+      isPending: true,
+    };
+
+    expect(pendingReceipt.status).toBe("PENDING");
+    expect(pendingReceipt.isPending).toBe(true);
+    expect(pendingReceipt.title).toBe("Transfer Notice Submitted");
+    expect(pendingReceipt.amountLabel).toBe("Transfer Amount");
+    expect(pendingReceipt.description).toContain("submitted for verification");
+    expect(pendingReceipt.description).not.toContain("credited to your account");
+  });
 });
+

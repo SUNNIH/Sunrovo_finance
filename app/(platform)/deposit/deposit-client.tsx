@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Check,
   CheckCircle2,
+  Clock,
   Coins,
   Copy,
   History,
@@ -79,6 +80,13 @@ interface DepositReceiptData {
   destinationLabel: string;
   destinationDetail?: string;
   network?: string;
+  sendingBank?: string;
+  senderName?: string;
+  transferReference?: string;
+  title?: string;
+  description?: string;
+  amountLabel?: string;
+  isPending?: boolean;
 }
 
 export function DepositClient({ accounts }: { accounts: AccountView[] }) {
@@ -157,6 +165,10 @@ export function DepositClient({ accounts }: { accounts: AccountView[] }) {
 function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
   const [accountId, setAccountId] = React.useState(accounts[0]?.id ?? "");
   const [amount, setAmount] = React.useState("");
+  const [sendingBank, setSendingBank] = React.useState("");
+  const [senderName, setSenderName] = React.useState("");
+  const [transferReference, setTransferReference] = React.useState("");
+  const [customerNote, setCustomerNote] = React.useState("");
   const [step, setStep] = React.useState<"input" | "review" | "receipt">("input");
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -171,7 +183,7 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
           </div>
           <h2 className="text-base font-semibold text-text-primary">No Accounts Available</h2>
           <p className="mt-1 text-sm text-text-secondary">
-            You do not have any active fiat accounts to deposit funds into.
+            You do not have any active fiat accounts to receive incoming transfers.
           </p>
           <Link href="/accounts" className="mt-5">
             <Button variant="outline" size="sm">
@@ -196,6 +208,18 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
       setError("Enter a valid amount greater than zero.");
       return;
     }
+    if (!sendingBank.trim()) {
+      setError("Enter the sending bank name.");
+      return;
+    }
+    if (!senderName.trim()) {
+      setError("Enter the sender / account name.");
+      return;
+    }
+    if (!transferReference.trim()) {
+      setError("Enter the external transfer reference.");
+      return;
+    }
     setStep("review");
   }
 
@@ -209,10 +233,24 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
           amount: string;
           assetSymbol: string;
           status: string;
-          completedAt?: string;
+          completedAt?: string | null;
           createdAt: string;
+          sendingBank?: string | null;
+          senderName?: string | null;
+          transferReference?: string | null;
         };
-      }>("/api/deposits/fiat", { accountId, amount }, generateClientId());
+      }>(
+        "/api/deposits/fiat",
+        {
+          accountId,
+          amount,
+          sendingBank: sendingBank.trim(),
+          senderName: senderName.trim(),
+          transferReference: transferReference.trim(),
+          customerNote: customerNote.trim() || undefined,
+        },
+        generateClientId()
+      );
 
       const deposit = response.deposit;
       setReceipt({
@@ -220,15 +258,27 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
         amount: deposit.amount.toString(),
         assetSymbol: deposit.assetSymbol,
         status: deposit.status,
-        createdAt: deposit.completedAt ?? deposit.createdAt,
+        createdAt: deposit.createdAt,
         destinationLabel: selectedAccountDisplayName,
         destinationDetail: selectedAccount.accountNumber
           ? `Acc: ${selectedAccount.accountNumber}`
           : undefined,
+        sendingBank: deposit.sendingBank ?? sendingBank.trim(),
+        senderName: deposit.senderName ?? senderName.trim(),
+        transferReference: deposit.transferReference ?? transferReference.trim(),
+        title: "Transfer Notice Submitted",
+        description:
+          "Your incoming transfer has been submitted for verification. Your account balance will be updated after the transfer is confirmed.",
+        amountLabel: "Transfer Amount",
+        isPending: true,
       });
       setStep("receipt");
     } catch (err) {
-      setError(err instanceof ApiRequestError ? err.message : "Deposit failed. Please try again.");
+      setError(
+        err instanceof ApiRequestError
+          ? err.message
+          : "Transfer submission failed. Please try again."
+      );
     } finally {
       setBusy(false);
     }
@@ -236,6 +286,10 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
 
   function handleReset() {
     setAmount("");
+    setSendingBank("");
+    setSenderName("");
+    setTransferReference("");
+    setCustomerNote("");
     setError(null);
     setReceipt(null);
     setStep("input");
@@ -261,10 +315,10 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
           <div className="flex items-center justify-between border-b border-border/60 pb-4">
             <div>
               <h2 className="text-base font-semibold tracking-tight text-text-primary sm:text-lg">
-                Review Fiat Deposit
+                Review Incoming Transfer
               </h2>
               <p className="text-xs text-text-secondary">
-                Review deposit details before crediting your account.
+                Please verify your transfer notice details before submitting.
               </p>
             </div>
           </div>
@@ -272,7 +326,7 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
           {/* Amount Overview */}
           <div className="flex flex-col items-center justify-center rounded-xl border border-border/80 bg-surface/50 p-4 text-center">
             <span className="text-label uppercase tracking-wider text-text-tertiary font-medium">
-              Deposit Amount
+              Transfer Amount
             </span>
             <div className="mt-1 flex items-baseline gap-1">
               <span className="financial-value text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
@@ -284,7 +338,7 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
           {/* Detail Breakdown */}
           <dl className="flex flex-col divide-y divide-border/60 text-sm">
             <div className="flex items-center justify-between py-2.5">
-              <dt className="text-text-secondary">Destination Account</dt>
+              <dt className="text-text-secondary">Receiving FHT Account</dt>
               <dd className="font-medium text-text-primary text-right">
                 {selectedAccountDisplayName}
                 {selectedAccount.accountNumber && (
@@ -303,14 +357,41 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
             </div>
 
             <div className="flex items-center justify-between py-2.5">
-              <dt className="text-text-secondary">Funding Method</dt>
-              <dd className="font-medium text-text-primary">
-                Account Credit
+              <dt className="text-text-secondary">Sending Bank</dt>
+              <dd className="font-medium text-text-primary text-right">
+                {sendingBank}
               </dd>
             </div>
+
+            <div className="flex items-center justify-between py-2.5">
+              <dt className="text-text-secondary">Sender Name</dt>
+              <dd className="font-medium text-text-primary text-right">
+                {senderName}
+              </dd>
+            </div>
+
+            <div className="flex items-center justify-between py-2.5">
+              <dt className="text-text-secondary">Transfer Reference</dt>
+              <dd className="font-mono text-xs font-medium text-text-primary text-right">
+                {transferReference}
+              </dd>
+            </div>
+
+            {customerNote.trim() && (
+              <div className="flex items-center justify-between py-2.5">
+                <dt className="text-text-secondary">Note</dt>
+                <dd className="font-medium text-text-primary text-right max-w-[240px] truncate">
+                  {customerNote.trim()}
+                </dd>
+              </div>
+            )}
           </dl>
 
-          {/* Safety Notice */}
+          <div className="rounded-xl border border-border/80 bg-surface/60 p-3.5 text-xs text-text-secondary">
+            <p>
+              <strong>Notice:</strong> Your incoming transfer notice will be verified by our operations team before funds are credited.
+            </p>
+          </div>
 
           {error && (
             <p role="alert" className="text-sm font-medium text-danger">
@@ -343,11 +424,11 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
               {busy ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  <span>Crediting...</span>
+                  <span>Submitting...</span>
                 </>
               ) : (
                 <>
-                  <span>Confirm Deposit</span>
+                  <span>Submit Incoming Transfer</span>
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </>
               )}
@@ -362,19 +443,26 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
   return (
     <Card className="rounded-2xl border-border bg-surface-elevated shadow-xs">
       <CardContent className="flex flex-col gap-5 p-5 sm:p-7">
-        {/* Environment Badge */}
         <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-text-primary">
+              Incoming Bank Transfer
+            </h2>
+            <p className="text-xs text-text-secondary mt-0.5">
+              Notify us of an incoming wire or bank transfer to your account.
+            </p>
+          </div>
           <span className="text-xs text-text-tertiary">Step 1 of 2</span>
         </div>
 
-        <form onSubmit={handleReview} className="flex flex-col gap-5">
+        <form onSubmit={handleReview} className="flex flex-col gap-4">
           {/* Account Selector */}
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="deposit-account"
               className="text-sm font-medium text-text-primary"
             >
-              Destination Account
+              Receiving FHT Account
             </label>
             <select
               id="deposit-account"
@@ -390,7 +478,7 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
               ))}
             </select>
 
-            {/* Read-only balance hint (does not calculate client-side) */}
+            {/* Read-only balance hint */}
             {selectedAccount?.balanceCache && (
               <p className="mt-0.5 text-xs text-text-secondary">
                 Current Balance:{" "}
@@ -417,7 +505,7 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
               className="financial-value font-mono text-base font-semibold"
             />
 
-            {/* Quick Amount Presets (UI helpers only, string-safe) */}
+            {/* Quick Amount Presets */}
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
               <span className="text-xs text-text-tertiary mr-1">Quick:</span>
               {FIAT_PRESETS.map((preset) => (
@@ -436,6 +524,51 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
             </div>
           </div>
 
+          {/* Sending Bank */}
+          <TextField
+            label="Sending Bank"
+            placeholder="e.g. Chase, Barclays, First Bank"
+            value={sendingBank}
+            onChange={(e) => {
+              setSendingBank(e.target.value);
+              setError(null);
+            }}
+          />
+
+          {/* Sender / Account Name */}
+          <TextField
+            label="Sender / Account Name"
+            placeholder="Full name on originating bank account"
+            value={senderName}
+            onChange={(e) => {
+              setSenderName(e.target.value);
+              setError(null);
+            }}
+          />
+
+          {/* Transfer Reference */}
+          <TextField
+            label="Transfer Reference"
+            placeholder="Wire or transaction reference number"
+            value={transferReference}
+            onChange={(e) => {
+              setTransferReference(e.target.value);
+              setError(null);
+            }}
+            className="font-mono"
+          />
+
+          {/* Optional Note */}
+          <TextField
+            label="Note (Optional)"
+            placeholder="Additional notes for verification"
+            value={customerNote}
+            onChange={(e) => {
+              setCustomerNote(e.target.value);
+              setError(null);
+            }}
+          />
+
           {error && (
             <p role="alert" className="text-sm font-medium text-danger">
               {error}
@@ -446,10 +579,10 @@ function FiatDeposit({ accounts }: { accounts: AccountView[] }) {
             type="submit"
             variant="primary"
             size="lg"
-            disabled={!amount.trim()}
+            disabled={!amount.trim() || !sendingBank.trim() || !senderName.trim() || !transferReference.trim()}
             className="w-full font-semibold shadow-xs mt-1"
           >
-            Review Deposit
+            Review Transfer Notice
           </Button>
         </form>
       </CardContent>
@@ -922,23 +1055,41 @@ function DepositReceiptCard({
       <CardContent className="flex flex-col gap-6 p-6 sm:p-8">
         {/* Header */}
         <div className="flex flex-col items-center text-center">
-          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-success-soft text-success shadow-xs ring-4 ring-success/10">
-            <CheckCircle2 className="h-8 w-8" aria-hidden="true" />
-          </div>
-          <h2 className="text-section-title text-text-primary">Deposit Confirmed</h2>
-          <p className="mt-1 text-xs text-text-secondary sm:text-sm">
-            Your deposit has been credited to your account.
+          {receipt.isPending ? (
+            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary shadow-xs ring-4 ring-primary/10">
+              <Clock className="h-8 w-8" aria-hidden="true" />
+            </div>
+          ) : (
+            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-success-soft text-success shadow-xs ring-4 ring-success/10">
+              <CheckCircle2 className="h-8 w-8" aria-hidden="true" />
+            </div>
+          )}
+          <h2 className="text-section-title text-text-primary">
+            {receipt.title ?? (receipt.isPending ? "Transfer Notice Submitted" : "Deposit Confirmed")}
+          </h2>
+          <p className="mt-1 text-xs text-text-secondary sm:text-sm max-w-md">
+            {receipt.description ??
+              (receipt.isPending
+                ? "Your incoming transfer has been submitted for verification. Your account balance will be updated after the transfer is confirmed."
+                : "Your deposit has been credited to your account.")}
           </p>
         </div>
 
         {/* Amount Hero */}
         <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-surface-elevated p-4 text-center">
           <span className="text-label uppercase tracking-wider text-text-tertiary font-medium">
-            Credited Amount
+            {receipt.amountLabel ?? (receipt.isPending ? "Transfer Amount" : "Credited Amount")}
           </span>
           <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="financial-value font-mono text-2xl font-bold tracking-tight text-success sm:text-3xl">
-              +{formatMoney(receipt.amount, receipt.assetSymbol)}
+            <span
+              className={cn(
+                "financial-value font-mono text-2xl font-bold tracking-tight sm:text-3xl",
+                receipt.isPending ? "text-text-primary" : "text-success"
+              )}
+            >
+              {receipt.isPending
+                ? formatMoney(receipt.amount, receipt.assetSymbol)
+                : `+${formatMoney(receipt.amount, receipt.assetSymbol)}`}
             </span>
           </div>
         </div>
@@ -951,7 +1102,9 @@ function DepositReceiptCard({
           </div>
 
           <div className="flex items-center justify-between py-2.5">
-            <span className="text-text-tertiary">Destination</span>
+            <span className="text-text-tertiary">
+              {receipt.isPending ? "Receiving Account" : "Destination"}
+            </span>
             <span className="font-medium text-text-primary text-right">
               {receipt.destinationLabel}
               {receipt.destinationDetail && (
@@ -961,6 +1114,27 @@ function DepositReceiptCard({
               )}
             </span>
           </div>
+
+          {receipt.sendingBank && (
+            <div className="flex items-center justify-between py-2.5">
+              <span className="text-text-tertiary">Sending Bank</span>
+              <span className="font-medium text-text-primary">{receipt.sendingBank}</span>
+            </div>
+          )}
+
+          {receipt.senderName && (
+            <div className="flex items-center justify-between py-2.5">
+              <span className="text-text-tertiary">Sender Name</span>
+              <span className="font-medium text-text-primary">{receipt.senderName}</span>
+            </div>
+          )}
+
+          {receipt.transferReference && (
+            <div className="flex items-center justify-between py-2.5">
+              <span className="text-text-tertiary">Transfer Reference</span>
+              <span className="font-mono text-[11px] text-text-primary">{receipt.transferReference}</span>
+            </div>
+          )}
 
           {receipt.network && (
             <div className="flex items-center justify-between py-2.5">
@@ -1011,7 +1185,7 @@ function DepositReceiptCard({
             className="touch-target w-full font-semibold cursor-pointer shadow-xs"
           >
             <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />
-            Make Another Deposit
+            {receipt.isPending ? "Submit Another Transfer" : "Make Another Deposit"}
           </Button>
 
           <div className="grid grid-cols-2 gap-2">

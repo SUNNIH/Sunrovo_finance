@@ -191,8 +191,10 @@ model User {
   conversionQuotes  ConversionQuote[]
   conversions       Conversion[]
   deposits          Deposit[]
+  reviewedDeposits  Deposit[]           @relation("AdminReviewedDeposits")
   withdrawals       Withdrawal[]        @relation("UserWithdrawals")
   reviewedWithdrawals Withdrawal[]      @relation("AdminReviewedWithdrawals")
+  reviewedTransfers   Transfer[]        @relation("AdminReviewedTransfers")
   withdrawalAllowlistEntries WithdrawalAllowlistEntry[]
   announcementsCreated Announcement[]   @relation("AdminCreatedAnnouncements")
 
@@ -330,6 +332,7 @@ model BankAccount {
   ledgerAccount         LedgerAccount?
   outgoingTransfers     Transfer[]        @relation("SourceAccount")
   sourceWithdrawals     Withdrawal[]      @relation("WithdrawalSourceAccount")
+  deposits              Deposit[]
 
   @@index([userId])
   @@map("bank_accounts")
@@ -433,26 +436,32 @@ model Beneficiary {
 }
 
 model Transfer {
-  id              String         @id @default(cuid())
-  userId          String
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sourceAccountId String
-  sourceAccount   BankAccount    @relation("SourceAccount", fields: [sourceAccountId], references: [id], onDelete: Restrict)
-  beneficiaryId   String?
-  beneficiary     Beneficiary?   @relation(fields: [beneficiaryId], references: [id], onDelete: SetNull)
-  currencySymbol  String
-  amount          Decimal        @db.Decimal(36, 18)
-  feeAmount       Decimal        @default(0) @db.Decimal(36, 18)
-  narration       String?
-  status          TransferStatus @default(PENDING)
-  idempotencyKey  String         @unique
-  ledgerGroupId   String?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id                    String         @id @default(cuid())
+  userId                String
+  user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceAccountId       String
+  sourceAccount         BankAccount    @relation("SourceAccount", fields: [sourceAccountId], references: [id], onDelete: Restrict)
+  beneficiaryId         String?
+  beneficiary           Beneficiary?   @relation(fields: [beneficiaryId], references: [id], onDelete: SetNull)
+  currencySymbol        String
+  amount                Decimal        @db.Decimal(36, 18)
+  feeAmount             Decimal        @default(0) @db.Decimal(36, 18)
+  narration             String?
+  status                TransferStatus @default(PENDING)
+  idempotencyKey        String         @unique
+  ledgerGroupId         String?
+  reviewedByAdminId     String?
+  reviewedByAdmin       User?          @relation("AdminReviewedTransfers", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+  reviewedAt            DateTime?
+  rejectionReason       String?
+  reversalLedgerGroupId String?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
 
   transactions Transaction[]
 
   @@index([userId, createdAt])
+  @@index([status])
   @@map("transfers")
 }
 
@@ -553,20 +562,32 @@ model Conversion {
 }
 
 model Deposit {
-  id             String        @id @default(cuid())
-  userId         String
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assetSymbol    String
-  amount         Decimal       @db.Decimal(36, 18)
-  network        String?
-  demoAddress    String?
-  status         DepositStatus @default(PENDING)
-  idempotencyKey String        @unique
-  ledgerGroupId  String?
-  createdAt      DateTime      @default(now())
-  completedAt    DateTime?
+  id                String        @id @default(cuid())
+  userId            String
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetSymbol       String
+  amount            Decimal       @db.Decimal(36, 18)
+  network           String?
+  demoAddress       String?
+  status            DepositStatus @default(PENDING)
+  idempotencyKey    String        @unique
+  ledgerGroupId     String?
+  bankAccountId     String?
+  bankAccount       BankAccount?  @relation(fields: [bankAccountId], references: [id], onDelete: SetNull)
+  sendingBank       String?
+  senderName        String?
+  transferReference String?
+  customerNote      String?
+  reviewedByAdminId String?
+  reviewedByAdmin   User?         @relation("AdminReviewedDeposits", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+  reviewedAt        DateTime?
+  rejectionReason   String?
+  createdAt         DateTime      @default(now())
+  completedAt       DateTime?
 
   @@index([userId, createdAt])
+  @@index([status])
+  @@index([bankAccountId])
   @@map("deposits")
 }
 

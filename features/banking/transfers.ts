@@ -176,6 +176,11 @@ export async function createTransfer(
   const result = await withIdempotentFallback(
     () =>
       prisma.$transaction(async (tx) => {
+        // Determine if this transfer requires admin approval
+        // Only EXTERNAL_BANK beneficiary transfers need approval
+        const requiresApproval = resolved.kind === "external_beneficiary";
+        const transferStatus = requiresApproval ? "PENDING" : "COMPLETED";
+
         const transfer = await tx.transfer.create({
           data: {
             userId,
@@ -185,7 +190,7 @@ export async function createTransfer(
             amount: amountMoney.toFixed(precision),
             feeAmount: fee.toFixed(precision),
             narration: input.narration,
-            status: "COMPLETED",
+            status: transferStatus,
             idempotencyKey: namespacedKey,
           },
         });
@@ -294,12 +299,12 @@ export async function createTransfer(
             userId,
             type: "TRANSFER",
             direction: "DEBIT",
-            status: "COMPLETED",
+            status: transferStatus === "PENDING" ? "PENDING" : "COMPLETED",
             assetSymbol: currency,
             amount: amountMoney.toFixed(precision),
             feeAmount: fee.toFixed(precision),
             counterparty: resolved.label,
-            narration: input.narration,
+            narration: requiresApproval ? "Transfer pending administrator review" : input.narration,
             referenceType: "Transfer",
             referenceId: transfer.id,
             ledgerGroupId: groupId,
@@ -308,7 +313,16 @@ export async function createTransfer(
           },
         });
 
-        if (resolved.kind !== "external_beneficiary" && !isSelfTransfer) {
+        if (requiresApproval) {
+          await tx.notification.create({
+            data: {
+              userId,
+              type: "TRANSACTION",
+              title: "Transfer pending review",
+              body: `Your transfer of ${amountMoney.toFixed(precision)} ${currency} to ${resolved.label} is pending administrator review.`,
+            },
+          });
+        } else if (resolved.kind !== "external_beneficiary" && !isSelfTransfer) {
           await tx.transaction.create({
             data: {
               userId: resolved.destinationBankAccount!.userId,
@@ -372,7 +386,7 @@ export async function createTransfer(
     targetId: result.id,
     ipAddress: meta.ipAddress,
     userAgent: meta.userAgent,
-    metadata: { destinationKind: resolved.kind, currency },
+    metadata: { destinationKind: resolved.kind, currency, requiresApproval: resolved.kind === "external_beneficiary" },
   });
 
   return result;

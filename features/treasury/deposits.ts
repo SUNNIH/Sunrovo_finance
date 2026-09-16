@@ -11,6 +11,7 @@ import { writeAuditLog } from "@/lib/audit/log";
 import type { FiatDepositInput, CryptoDepositInput } from "@/lib/validation/treasury";
 import { getDemoDepositAddress } from "./demo-address";
 import { AuthError } from "@/features/authentication/errors";
+import { isFiatAsset } from "@/lib/money/asset-kind";
 
 export async function createFiatDeposit(userId: string, input: FiatDepositInput, idempotencyKey: string) {
   const namespacedKey = `${userId}:${idempotencyKey}`;
@@ -18,53 +19,64 @@ export async function createFiatDeposit(userId: string, input: FiatDepositInput,
   if (existing) return existing;
 
   const account = await getOwnedAccountOrThrow(userId, input.accountId);
+  if (!isFiatAsset(account.currencySymbol)) {
+    throw new AuthError("INVALID_CURRENCY", "Account currency is not a supported fiat currency.", 422);
+  }
   const precision = getAssetPrecision(account.currencySymbol);
 
   const result = await withIdempotentFallback(
     () =>
       prisma.$transaction(async (tx) => {
-        const ledgerAccount = await tx.ledgerAccount.findUnique({ where: { bankAccountId: account.id } });
-        if (!ledgerAccount) throw new Error(`Account ${account.id} has no ledger account`);
-
-        const fundingPool = await getOrCreatePlatformLedgerAccount(tx, {
-          type: "EQUITY",
-          assetSymbol: account.currencySymbol,
-          name: demoFundingPoolName(account.currencySymbol),
-        });
-
         const deposit = await tx.deposit.create({
           data: {
             userId,
+            bankAccountId: account.id,
             assetSymbol: account.currencySymbol,
             amount: input.amount,
-            status: "COMPLETED",
+            sendingBank: input.sendingBank.trim(),
+            senderName: input.senderName.trim(),
+            transferReference: input.transferReference.trim(),
+            customerNote: input.customerNote?.trim() || null,
+            status: "PENDING",
             idempotencyKey: namespacedKey,
-            completedAt: new Date(),
+            completedAt: null,
+            ledgerGroupId: null,
           },
         });
-
-        const { groupId } = await postLedgerEntries(tx, [
-          { ledgerAccountId: ledgerAccount.id, direction: "DEBIT", assetSymbol: account.currencySymbol, amount: input.amount, referenceType: "Deposit", referenceId: deposit.id },
-          { ledgerAccountId: fundingPool.id, direction: "CREDIT", assetSymbol: account.currencySymbol, amount: input.amount, referenceType: "Deposit", referenceId: deposit.id },
-        ]);
-
-        await tx.deposit.update({ where: { id: deposit.id }, data: { ledgerGroupId: groupId } });
-        await tx.bankAccount.update({ where: { id: account.id }, data: { balanceCache: { increment: input.amount } } });
 
         await tx.transaction.create({
           data: {
             userId,
             type: "DEPOSIT",
             direction: "CREDIT",
-            status: "COMPLETED",
+            status: "PENDING",
             assetSymbol: account.currencySymbol,
             amount: new Decimal(input.amount).toFixed(precision),
-            counterparty: "Demo funding",
-            narration: "Simulated fiat deposit",
+            counterparty: input.sendingBank.trim(),
+            narration: `Incoming bank transfer from ${input.sendingBank.trim()} (Ref: ${input.transferReference.trim()})`,
             referenceType: "Deposit",
             referenceId: deposit.id,
-            ledgerGroupId: groupId,
+            ledgerGroupId: null,
             isDemo: true,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorUserId: userId,
+            actorRole: "USER",
+            action: "treasury.fiat_deposit_requested",
+            targetType: "Deposit",
+            targetId: deposit.id,
+            metadata: {
+              bankAccountId: account.id,
+              assetSymbol: account.currencySymbol,
+              amount: input.amount,
+              sendingBank: input.sendingBank.trim(),
+              senderName: input.senderName.trim(),
+              transferReference: input.transferReference.trim(),
+              status: "PENDING",
+            },
           },
         });
 
@@ -75,7 +87,6 @@ export async function createFiatDeposit(userId: string, input: FiatDepositInput,
 
   if (!result) throw new Error("Deposit could not be created or recovered after a duplicate-key conflict.");
 
-  await writeAuditLog({ actorUserId: userId, actorRole: "USER", action: "treasury.fiat_deposit", targetType: "Deposit", targetId: result.id });
   return result;
 }
 

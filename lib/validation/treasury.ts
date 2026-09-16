@@ -18,6 +18,26 @@ const amountSchema = z
 export const fiatDepositSchema = z.object({
   accountId: z.string().min(1, "Select an account"),
   amount: amountSchema,
+  sendingBank: z
+    .string()
+    .trim()
+    .min(1, "Enter sending bank name")
+    .max(100, "Bank name cannot exceed 100 characters"),
+  senderName: z
+    .string()
+    .trim()
+    .min(1, "Enter sender name")
+    .max(100, "Sender name cannot exceed 100 characters"),
+  transferReference: z
+    .string()
+    .trim()
+    .min(1, "Enter transfer reference")
+    .max(100, "Reference cannot exceed 100 characters"),
+  customerNote: z
+    .string()
+    .trim()
+    .max(500, "Note cannot exceed 500 characters")
+    .optional(),
 });
 export type FiatDepositInput = z.infer<typeof fiatDepositSchema>;
 
@@ -68,6 +88,25 @@ export const adminFundingSchema = z
     }
   });
 export type AdminFundingInput = z.infer<typeof adminFundingSchema>;
+
+export const adminDepositReviewSchema = z
+  .object({
+    depositId: z.string().min(1, "Deposit ID is required"),
+    action: z.enum(["APPROVE", "REJECT"], {
+      errorMap: () => ({ message: "Action must be either APPROVE or REJECT." }),
+    }),
+    rejectionReason: z.string().trim().max(500, "Reason cannot exceed 500 characters").optional(),
+  })
+  .superRefine((input, ctx) => {
+    if (input.action === "REJECT" && (!input.rejectionReason || input.rejectionReason.trim().length === 0)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["rejectionReason"],
+        message: "Provide a rejection reason.",
+      });
+    }
+  });
+export type AdminDepositReviewInput = z.infer<typeof adminDepositReviewSchema>;
 
 export const changePasswordSchema = z
   .object({
