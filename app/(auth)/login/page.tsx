@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { AuthBackground } from "@/components/auth/auth-background";
 import { AuthFeatureList } from "@/components/auth/auth-feature-list";
 import { SignedInAuthChoice } from "@/components/auth/signed-in-auth-choice";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -20,8 +19,6 @@ export default async function LoginPage() {
 
     return (
       <div data-auth-split className="relative w-full animate-fade-in">
-        <AuthBackground />
-
         <div className="relative grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-14">
           <section className="animate-fade-in-up max-w-xl">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
@@ -54,8 +51,6 @@ export default async function LoginPage() {
 
   return (
     <div data-auth-split className="relative w-full animate-fade-in">
-      <AuthBackground />
-
       <div className="relative grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-14">
         <section className="animate-fade-in-up max-w-xl">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">

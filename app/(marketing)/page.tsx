@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   WalletCards,
 } from "lucide-react";
+import { BrandPeopleCarousel } from "@/components/brand/brand-people-carousel";
 import { FiseLogo } from "@/components/brand/fise-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -70,11 +71,12 @@ export default function LandingPage() {
 
       <main>
         <section className="relative isolate overflow-hidden border-b border-border bg-surface">
+          <BrandPeopleCarousel variant="hero" />
           <div className="pointer-events-none absolute inset-0 -z-10 opacity-70 plt-grid-texture" aria-hidden="true" />
           <div className="pointer-events-none absolute -left-24 top-12 -z-10 h-72 w-72 rounded-full bg-primary/15 blur-3xl" aria-hidden="true" />
           <div className="pointer-events-none absolute -right-20 top-20 -z-10 h-80 w-80 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
 
-          <div className="mx-auto grid max-w-[1440px] items-center gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(440px,1.1fr)] lg:gap-16 lg:px-8 lg:py-28">
+          <div className="relative z-10 mx-auto grid max-w-[1440px] items-center gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(440px,1.1fr)] lg:gap-16 lg:px-8 lg:py-28">
             <div className="max-w-2xl animate-fade-in-up">
               <FiseLogo className="h-12 w-auto max-w-[220px]" />
               <p className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Finance · Investment · Security · Equity</p>
@@ -146,24 +148,17 @@ export default function LandingPage() {
       <footer className="border-t border-border bg-surface-elevated">
         <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-8 text-body-sm text-text-secondary sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
           <div className="flex items-center gap-2"><FiseLogo variant="mark" className="h-7 w-7" alt="" /><FiseLogo className="h-7 w-auto max-w-[128px]" /></div>
+          <div className="flex flex-wrap gap-4">
+            <Link href="/terms" className="hover:text-primary hover:underline">
+              Terms
+            </Link>
+            <Link href="/privacy" className="hover:text-primary hover:underline">
+              Privacy Policy
+            </Link>
+          </div>
           <div className="max-w-3xl lg:text-right"><p>FISE Holdings Trust Bank (FHT).</p><p className="mt-1 text-text-tertiary">&copy; {new Date().getFullYear()} FISE Holdings Trust Bank. All rights reserved.</p></div>
         </div>
       </footer>
     </div>
   );
 }
-<div className="flex flex-wrap gap-4">
-  <Link
-    href="/terms"
-    className="hover:text-primary hover:underline"
-  >
-    Terms
-  </Link>
-
-  <Link
-    href="/privacy"
-    className="hover:text-primary hover:underline"
-  >
-    Privacy Policy
-  </Link>
-</div>
