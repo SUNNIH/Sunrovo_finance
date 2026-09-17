@@ -14,6 +14,8 @@ import {
   Wallet,
 } from "lucide-react";
 
+import { CARDS_ENABLED } from "@/lib/feature-flags";
+
 export interface NavItem {
   label: string;
   href: string;
@@ -38,7 +40,7 @@ export const SIDEBAR_NAV: NavGroup[] = [
       { label: "Transfers", href: "/transfers", icon: ArrowLeftRight },
       { label: "Beneficiaries", href: "/beneficiaries", icon: Users },
       { label: "Transactions", href: "/transactions", icon: LayoutGrid },
-      { label: "Cards", href: "/cards", icon: CreditCard },
+      ...(CARDS_ENABLED ? [{ label: "Cards", href: "/cards", icon: CreditCard }] : []),
     ],
   },
   {

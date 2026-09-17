@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { CARDS_ENABLED } from "@/lib/feature-flags";
 import { getCurrentUser } from "@/lib/auth/session";
 import { listCards } from "@/features/treasury/cards";
 import { CardsClient } from "./cards-client";
@@ -6,6 +8,10 @@ import { CardsClient } from "./cards-client";
 export const metadata: Metadata = { title: "Cards" };
 
 export default async function CardsPage() {
+  if (!CARDS_ENABLED) {
+    redirect("/dashboard");
+  }
+
   const user = await getCurrentUser();
   if (!user) return null;
 
