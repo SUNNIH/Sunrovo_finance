@@ -12,6 +12,7 @@ import { BrandPeopleCarousel } from "@/components/brand/brand-people-carousel";
 import { FiseLogo } from "@/components/brand/fise-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { REGISTRATION_ENABLED } from "@/lib/feature-flags";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
@@ -60,11 +61,13 @@ export default function LandingPage() {
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
             <ThemeToggle />
             <Link href="/login"><Button variant="ghost" size="sm" className="px-2.5 sm:px-3">Sign In</Button></Link>
-            <Link href="/register">
-              <Button size="sm" className="px-3 shadow-sm sm:px-4">
-                <span className="hidden sm:inline">Create Account</span><span className="sm:hidden">Join</span>
-              </Button>
+            {REGISTRATION_ENABLED && (
+              <Link href="/register">
+                <Button size="sm" className="px-3 shadow-sm sm:px-4">
+                  <span className="hidden sm:inline">Create Account</span><span className="sm:hidden">Join</span>
+                </Button>
             </Link>
+            )}
           </div>
         </div>
       </header>
@@ -83,8 +86,10 @@ export default function LandingPage() {
               <h1 className="mt-4 text-4xl font-bold tracking-[-0.035em] text-text-primary sm:text-5xl lg:text-6xl lg:leading-[1.08]">Banking and digital assets, brought together.</h1>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-text-secondary sm:text-lg">FISE Holdings Trust Bank provides one workspace for your accounts, transfers, wallets, and crypto deposits.</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href="/register" className="w-full sm:w-auto"><Button size="lg" className="w-full shadow-md shadow-primary/20 transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25 sm:w-auto">Create your account<ChevronRight className="h-4 w-4" aria-hidden="true" /></Button></Link>
-                <Link href="/login" className="w-full sm:w-auto"><Button variant="outline" size="lg" className="w-full bg-surface-elevated/80 shadow-sm sm:w-auto">Sign in securely</Button></Link>
+                {REGISTRATION_ENABLED && (
+                  <Link href="/register" className="w-full sm:w-auto"><Button size="lg" className="w-full shadow-md shadow-primary/20 transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25 sm:w-auto">Create your account<ChevronRight className="h-4 w-4" aria-hidden="true" /></Button></Link>
+                )}
+                <Link href="/login" className="w-full sm:w-auto"><Button variant={REGISTRATION_ENABLED ? "outline" : "primary"} size="lg" className={`w-full shadow-sm sm:w-auto ${REGISTRATION_ENABLED ? "bg-surface-elevated/80" : "shadow-primary/20"}`}>Sign in securely{!REGISTRATION_ENABLED && <ChevronRight className="h-4 w-4" aria-hidden="true" />}</Button></Link>
               </div>
               <p className="mt-5 text-body-sm text-text-tertiary">Reliable environment for supported banking and digital asset features.</p>
             </div>
@@ -139,8 +144,12 @@ export default function LandingPage() {
         <section className="relative overflow-hidden bg-surface">
           <div className="pointer-events-none absolute inset-0 opacity-40 plt-grid-texture" aria-hidden="true" />
           <div className="relative mx-auto grid max-w-[1440px] gap-8 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1fr_auto] lg:items-end lg:px-8">
-            <div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">FISE Holdings Trust Bank</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Start with a workspace made for clarity.</h2><p className="mt-4 text-base leading-relaxed text-text-secondary">Create an account to access banking and digital asset wallet tools in FHT.</p></div>
-            <Link href="/register" className="w-full lg:w-auto"><Button size="lg" className="w-full shadow-md shadow-primary/20 lg:w-auto">Create your account<ChevronRight className="h-4 w-4" aria-hidden="true" /></Button></Link>
+            <div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">FISE Holdings Trust Bank</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Start with a workspace made for clarity.</h2><p className="mt-4 text-base leading-relaxed text-text-secondary">{REGISTRATION_ENABLED ? "Create an account to access banking and digital asset wallet tools in FHT." : "Sign in to access banking and digital asset wallet tools in FHT."}</p></div>
+            {REGISTRATION_ENABLED ? (
+              <Link href="/register" className="w-full lg:w-auto"><Button size="lg" className="w-full shadow-md shadow-primary/20 lg:w-auto">Create your account<ChevronRight className="h-4 w-4" aria-hidden="true" /></Button></Link>
+            ) : (
+              <Link href="/login" className="w-full lg:w-auto"><Button size="lg" className="w-full shadow-md shadow-primary/20 lg:w-auto">Sign in securely<ChevronRight className="h-4 w-4" aria-hidden="true" /></Button></Link>
+            )}
           </div>
         </section>
       </main>

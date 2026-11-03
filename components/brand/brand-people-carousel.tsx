@@ -132,8 +132,8 @@ export function BrandPeopleCarousel({
               <div className="absolute inset-0 z-20 bg-gradient-to-b from-surface/40 via-transparent via-15% to-surface" />
             </>
           ) : (
-            /* Auth Horizontal fade: People visible on left, fading into form background on right */
-            <div className="absolute inset-0 z-20 bg-gradient-to-r from-transparent via-background/50 via-55% to-background to-85%" />
+            /* Auth Horizontal fade: People visible on left, fading horizontally behind/toward form on right */
+            <div className="absolute inset-0 z-20 bg-gradient-to-r from-transparent via-background/60 via-40% to-background to-75%" />
           )}
         </div>
       )}
@@ -180,8 +180,9 @@ export function BrandPeopleCarousel({
         ) : (
           <div
             className={cn(
-              "relative w-full h-[240px] sm:h-[290px] md:h-[330px] overflow-hidden rounded-2xl border border-border/60 shadow-md lg:hidden mb-5 sm:mb-6",
-              className
+              "relative w-full h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden rounded-2xl border border-border/60 shadow-md",
+              className,
+              "lg:hidden"
             )}
           >
             {BRAND_PEOPLE_CAROUSEL_IMAGES.map((img, index) => {

@@ -12,6 +12,7 @@ import { SignupCard } from "@/components/auth/signup-card";
 import { TextField } from "@/components/forms/text-field";
 import { PasswordField } from "@/components/forms/password-field";
 import { Button } from "@/components/ui/button";
+import { REGISTRATION_ENABLED } from "@/lib/feature-flags";
 
 interface LoginResponse {
   status: "success" | "mfa_required";
@@ -122,12 +123,14 @@ export function LoginForm() {
           )}
         </Button>
 
-        <p className="text-center text-sm text-text-secondary">
-          Don&rsquo;t have an account?{" "}
-          <Link href="/register" className="font-medium text-primary hover:underline">
-            Sign up
-          </Link>
-        </p>
+        {REGISTRATION_ENABLED && (
+          <p className="text-center text-sm text-text-secondary">
+            Don&rsquo;t have an account?{" "}
+            <Link href="/register" className="font-medium text-primary hover:underline">
+              Sign up
+            </Link>
+          </p>
+        )}
       </form>
     </SignupCard>
   );
