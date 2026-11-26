@@ -62,6 +62,9 @@ const INTERVALS: { value: CandlestickInterval; label: string }[] = [
 
 ];
 
+// The preference is display-only and is shared across chart intervals/markets.
+const PREVIOUS_TRADES_VISIBILITY_KEY = "sunrovo:trade-chart:previous-trades-visible";
+
 const INTERVAL_SECONDS: Record<string, number> = {
 
   "1m": 60,
@@ -232,6 +235,9 @@ export function TradeChart({
 
   const [candleVersion, setCandleVersion] = useState(0);
 
+  // Historical fills are chart annotations, not active orders or ledger data.
+  const [showPreviousTrades, setShowPreviousTrades] = useState(true);
+
   const [livePrice, setLivePrice] = useState<string | null>(
 
     liveTicker?.lastPrice ?? null,
@@ -248,7 +254,26 @@ export function TradeChart({
 
     setMounted(true);
 
+    // Read the browser preference only after mounting to avoid SSR mismatch.
+    try {
+      if (window.localStorage.getItem(PREVIOUS_TRADES_VISIBILITY_KEY) === "false") {
+        setShowPreviousTrades(false);
+      }
+    } catch {
+      // A disabled storage API should not prevent the chart from rendering.
+    }
+
   }, []);
+
+  const togglePreviousTrades = () => {
+    const nextValue = !showPreviousTrades;
+    setShowPreviousTrades(nextValue);
+    try {
+      window.localStorage.setItem(PREVIOUS_TRADES_VISIBILITY_KEY, String(nextValue));
+    } catch {
+      // The toggle still works for this session when storage is unavailable.
+    }
+  };
 
   // Reset the price display when changing pairs; do not carry over the
 
@@ -842,6 +867,8 @@ export function TradeChart({
 
         (order) =>
 
+          showPreviousTrades &&
+
           order.type === "FILLED" &&
 
           order.time !== undefined &&
@@ -898,7 +925,7 @@ export function TradeChart({
 
     markerPlugin.setMarkers(markers);
 
-  }, [orders, candles, mounted, resolvedTheme, pricePrecision, symbol, currentInterval, candleVersion]);
+  }, [orders, candles, mounted, resolvedTheme, pricePrecision, symbol, currentInterval, candleVersion, showPreviousTrades]);
 
   // Maintain a single live/last-price line.
 
@@ -956,37 +983,68 @@ export function TradeChart({
 
     <div className="min-w-0 space-y-4">
 
-      <div className="flex max-w-full gap-2 overflow-x-auto pb-1">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
 
-        {INTERVALS.map((interval) => (
+        <div className="flex max-w-full flex-wrap items-center gap-2">
 
-          <button
+          {INTERVALS.map((interval) => (
 
-            key={interval.value}
+            <button
 
-            type="button"
+              key={interval.value}
 
-            onClick={() => handleIntervalChange(interval.value)}
+              type="button"
 
+              onClick={() => handleIntervalChange(interval.value)}
+
+              className={cn(
+
+                "shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+
+                currentInterval === interval.value
+
+                  ? "bg-primary text-primary-foreground"
+
+                  : "bg-muted text-text-secondary hover:bg-muted-hover",
+
+              )}
+
+            >
+
+              {interval.label}
+
+            </button>
+
+          ))}
+
+        </div>
+
+        <button
+          type="button"
+          role="switch"
+          aria-checked={showPreviousTrades}
+          aria-label="Show previous trades on chart"
+          onClick={togglePreviousTrades}
+          title="Show or hide past BUY and SELL markers. Active orders, TP and SL remain visible."
+          className="inline-flex shrink-0 items-center gap-2 rounded-md border px-3 py-1.5 text-sm text-text-secondary transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <span>Previous trades</span>
+          <span
+            aria-hidden="true"
             className={cn(
-
-              "shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-
-              currentInterval === interval.value
-
-                ? "bg-primary text-primary-foreground"
-
-                : "bg-muted text-text-secondary hover:bg-muted-hover",
-
+              "relative inline-flex h-5 w-9 rounded-full transition-colors",
+              showPreviousTrades ? "bg-primary" : "bg-muted-hover",
             )}
-
           >
-
-            {interval.label}
-
-          </button>
-
-        ))}
+            <span
+              className={cn(
+                "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
+                showPreviousTrades ? "translate-x-[18px]" : "translate-x-0.5",
+              )}
+            />
+          </span>
+          <span className="text-xs font-semibold">{showPreviousTrades ? "On" : "Off"}</span>
+        </button>
 
       </div>
 

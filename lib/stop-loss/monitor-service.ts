@@ -9,6 +9,7 @@
  */
 
 import { checkAndTriggerStopLossOrders } from "@/features/crypto/stop-loss-monitor";
+import { checkAndCloseDirectionalPositions } from "@/features/directional/position-monitor";
 
 let monitorInterval: NodeJS.Timeout | null = null;
 let isRunning = false;
@@ -49,24 +50,25 @@ async function checkOrders() {
   isRunning = true;
 
   try {
-    const result = await checkAndTriggerStopLossOrders();
-    
-    if (result.checked > 0) {
-      console.log(
-        `[Stop-Loss Monitor] Checked ${result.checked} orders: ` +
-        `${result.triggered} triggered, ${result.failed} failed`
-      );
+    // Keep the spot monitor independent: an outage in one must not starve the other.
+    try {
+      const result = await checkAndTriggerStopLossOrders();
+      if (result.checked > 0) {
+        console.log(`[Stop-Loss Monitor] Checked ${result.checked}: ${result.triggered} triggered, ${result.failed} failed`);
+      }
+      if (result.failed > 0) console.warn(`[Stop-Loss Monitor] ${result.failed} failed`);
+    } catch (error) {
+      console.error("[Stop-Loss Monitor] Spot scan failed:", error);
     }
 
-    if (result.triggered > 0) {
-      console.log(`✓ Successfully triggered ${result.triggered} stop-loss order(s)`);
+    try {
+      const result = await checkAndCloseDirectionalPositions();
+      if (result.triggered > 0 || result.failed > 0) {
+        console.log(`[Directional Monitor] checked=${result.checked} closed=${result.triggered} failed=${result.failed} stale=${result.skipped}`);
+      }
+    } catch (error) {
+      console.error("[Directional Monitor] Position scan failed:", error);
     }
-
-    if (result.failed > 0) {
-      console.warn(`⚠ Failed to trigger ${result.failed} stop-loss order(s)`);
-    }
-  } catch (error) {
-    console.error("[Stop-Loss Monitor] Error:", error);
   } finally {
     isRunning = false;
   }

@@ -19,6 +19,7 @@ import { TradingPanelWithStopLoss } from "./trading-panel-with-stop-loss";
 import { OrdersClient } from "./orders-client";
 
 import { ConversionTab } from "./conversion-tab";
+import { DirectionalTab } from "./directional-tab";
 
 import type { WalletView } from "@/features/crypto/wallets";
 
@@ -157,9 +158,9 @@ export function TradeClient({
 
   const searchParams = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState<"spot" | "convert">(
+  const [activeTab, setActiveTab] = useState<"spot" | "convert" | "directional">(
 
-    initialTab === "convert" ? "convert" : "spot"
+    initialTab === "convert" ? "convert" : initialTab === "directional" ? "directional" : "spot"
 
   );
 
@@ -225,7 +226,7 @@ export function TradeClient({
 
   const handleTabChange = useCallback(
 
-    (tab: "spot" | "convert") => {
+    (tab: "spot" | "convert" | "directional") => {
 
       setActiveTab(tab);
 
@@ -251,7 +252,7 @@ export function TradeClient({
 
   useEffect(() => {
 
-    setActiveTab(initialTab === "convert" ? "convert" : "spot");
+    setActiveTab(initialTab === "convert" ? "convert" : initialTab === "directional" ? "directional" : "spot");
 
   }, [initialTab]);
 
@@ -465,6 +466,15 @@ export function TradeClient({
 
           Spot Trading
 
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabChange("directional")}
+          className={cn("px-4 py-3 font-medium border-b-2 transition-colors",
+            activeTab === "directional" ? "border-primary text-primary" : "border-transparent text-text-tertiary hover:text-text-primary")}
+        >
+          Long / Short (1×)
         </button>
 
         <button
@@ -868,6 +878,19 @@ export function TradeClient({
         </>
 
       )}
+
+      {/* Independent synthetic 1x position engine (not spot orders). */}
+      {activeTab === "directional" && <DirectionalTab
+        key={`${symbol}:directional`}
+        symbol={symbol}
+        interval={initialInterval}
+        candles={initialCandles}
+        ticker={initialTicker}
+        pricePrecision={instrument.pricePrecision}
+        quantityPrecision={instrument.quantityPrecision}
+        instruments={allInstruments}
+        walletData={walletData}
+      />}
 
       {/* Convert Tab */}
 
