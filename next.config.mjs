@@ -2,7 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  
+  outputFileTracingRoot: import.meta.dirname,
+
   async headers() {
     return [
       {
