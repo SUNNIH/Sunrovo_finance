@@ -30,7 +30,7 @@ interface Quote {
 
 const SUPPORTED_ASSETS = ["BTC", "ETH", "SOL", "XRP", "USDT",];
 
-export function ConversionClient({ userId }: ConversionClientProps) {
+export const ConversionClient: React.FC<ConversionClientProps> = function ConversionClient() {
   const [fromAsset, setFromAsset] = useState("BTC");
   const [toAsset, setToAsset] = useState("USDT");
   const [fromAmount, setFromAmount] = useState("");
@@ -284,4 +284,4 @@ export function ConversionClient({ userId }: ConversionClientProps) {
       </CardContent>
     </Card>
   );
-}
+};

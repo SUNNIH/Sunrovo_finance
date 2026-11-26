@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowDown, Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 
 interface Quote {
   quoteId: string;
@@ -26,7 +26,7 @@ const VALID_PAIRS = new Set([
   "XRP-USDT", "USDT-XRP",
 ]);
 
-export function ConversionTab({ userId }: { userId: string }) {
+export const ConversionTab: React.FC<{ userId: string }> = function ConversionTab() {
   const [fromAsset, setFromAsset] = useState("BTC");
   const [toAsset, setToAsset] = useState("USDT");
   const [fromAmount, setFromAmount] = useState("");
@@ -359,4 +359,4 @@ export function ConversionTab({ userId }: { userId: string }) {
       </Card>
     </div>
   );
-}
+};

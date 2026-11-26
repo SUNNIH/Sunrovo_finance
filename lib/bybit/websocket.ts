@@ -62,7 +62,7 @@ export class BybitWebSocketManager {
     this.ws.on("open", () => this.handleOpen());
     this.ws.on("message", (data: Buffer) => this.handleMessage(data));
     this.ws.on("error", (error: Error) => this.handleError(error));
-    this.ws.on("close", (code: number, reason: Buffer) => this.handleClose(code, reason));
+    this.ws.on("close", () => this.handleClose());
   }
 
   /**
@@ -195,7 +195,7 @@ export class BybitWebSocketManager {
     console.error("[Bybit WS] Error:", error.message);
   }
 
-  private handleClose(_code: number, _reason: Buffer): void {
+  private handleClose(): void {
     this.connectionState = "disconnected";
 
     if (this.pingInterval) {

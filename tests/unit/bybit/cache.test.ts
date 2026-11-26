@@ -2,7 +2,7 @@
  * Bybit Cache Tests
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import * as cache from "@/lib/bybit/cache";
 
 describe("cache", () => {
@@ -64,18 +64,37 @@ describe("cache", () => {
       expect(cache.getCachedData("test:key")).toBeNull();
     });
 
-    it("should detect stale data", async () => {
-      cache.setCachedData("test:key", { value: 42 }, 3); // 3 second TTL
+    it("should detect stale data", () => {
+      vi.useFakeTimers();
 
-      // Fresh data should not be stale
-      expect(cache.isCachedDataStale("test:key", 5)).toBe(false);
+      try {
+        cache.setCachedData("test:key", { value: 42 }, 3);
 
-      // Wait until data becomes stale (within 1 second of expiration)
-      await new Promise((resolve) => setTimeout(resolve, 2100));
+        // Three seconds remaining: outside the one-second threshold.
+        expect(cache.isCachedDataStale("test:key", 1)).toBe(false);
 
-      // Data should now be stale (less than 1s until expiration)
-      expect(cache.isCachedDataStale("test:key", 1)).toBe(true);
-    }, 3000);
+        // Three seconds remaining: inside the five-second threshold.
+        expect(cache.isCachedDataStale("test:key", 5)).toBe(true);
+
+        // Advance to the one-second staleness boundary.
+        vi.advanceTimersByTime(2000);
+
+        expect(cache.isCachedDataStale("test:key", 1)).toBe(true);
+
+        // Near-expiration data is still available.
+        expect(cache.getCachedData("test:key")).toEqual({ value: 42 });
+
+        // Expired data must never be returned as fresh.
+        vi.advanceTimersByTime(1000);
+
+        expect(cache.getCachedData("test:key")).toBeNull();
+        expect(cache.getStaleCachedData("test:key")).toEqual({
+          value: 42,
+        });
+      } finally {
+        vi.useRealTimers();
+      }
+    });
 
     it("should return cache age", () => {
       cache.setCachedData("test:key", { value: 42 });

@@ -28,9 +28,7 @@ import { ensureAssetBalanceAndLedgerAccount } from "@/features/crypto/wallet-hel
 
 import { CRYPTO_TRADING_ENABLED } from "@/lib/feature-flags";
 
-import type { Prisma } from "@prisma/client";
 
-type TransactionClient = Prisma.TransactionClient;
 
 /**
  * Simulated Spot Stop Loss / Take Profit monitor.

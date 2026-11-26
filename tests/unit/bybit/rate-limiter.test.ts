@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { acquireRateLimitToken, hasRateLimitToken, getRateLimitState } from "@/lib/bybit/rate-limiter";
+import { acquireRateLimitToken, getRateLimitState } from "@/lib/bybit/rate-limiter";
 
 describe("rate-limiter", () => {
   it("should allow immediate token acquisition when bucket is full", async () => {

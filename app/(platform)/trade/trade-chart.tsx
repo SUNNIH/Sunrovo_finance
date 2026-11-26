@@ -589,7 +589,8 @@ export function TradeChart({
 
     priceLineRef.current = null;
 
-    orderLinesRef.current.clear();
+    const orderLines = orderLinesRef.current;
+    orderLines.clear();
 
     initialRangeSetRef.current = false;
 
@@ -613,7 +614,7 @@ export function TradeChart({
 
       resizeObserver.disconnect();
 
-      orderLinesRef.current.clear();
+      orderLines.clear();
 
       markersApiRef.current = null;
 

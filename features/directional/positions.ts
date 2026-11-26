@@ -12,7 +12,7 @@ import { ensureAssetBalanceAndLedgerAccount } from "@/features/crypto/wallet-hel
 import { getOrCreatePlatformLedgerAccount, feeRevenuePoolName } from "@/lib/ledger/platform-accounts";
 import { postLedgerEntries } from "@/lib/ledger/postLedgerEntries";
 import type { PostingLeg } from "@/lib/ledger/types";
-import type { Prisma, DirectionalCloseReason, DirectionalSide, DirectionalPosition } from "@prisma/client";
+import type { DirectionalCloseReason, DirectionalSide, DirectionalPosition } from "@prisma/client";
 import type Decimal from "decimal.js";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { CRYPTO_TRADING_ENABLED } from "@/lib/feature-flags";

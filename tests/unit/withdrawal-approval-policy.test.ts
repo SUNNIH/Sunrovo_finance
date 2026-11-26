@@ -2,7 +2,6 @@ import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
 import { prisma } from "@/lib/db/prisma";
 import { createWithdrawal } from "@/features/treasury/withdrawals";
 import { reviewWithdrawal } from "@/features/admin/withdrawals";
-import * as transactionPin from "@/lib/auth/transaction-pin";
 import Decimal from "decimal.js";
 
 /**
@@ -18,12 +17,42 @@ vi.mock("@/lib/auth/transaction-pin", () => ({
 }));
 
 describe("withdrawal approval policy - all withdrawals require admin review", () => {
-  let userId: string;
-  let adminId: string;
-  let accountId: string;
-  let ledgerAccountId: string;
+  let userId = "";
+  let adminId = "";
+  let accountId = "";
 
   beforeEach(async () => {
+    userId = "";
+    accountId = "";
+    adminId = "";
+    // Financial integration tests must never write to development or production data.
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl || process.env.SUNROVO_TEST_DB_CONFIRM !== "codex.phase6_test") {
+      throw new Error("SAFETY STOP: Isolated local test connection required.");
+    }
+    const url = new URL(databaseUrl);
+    if (
+      !["postgresql:", "postgres:"].includes(url.protocol) ||
+      !["localhost", "127.0.0.1"].includes(url.hostname) ||
+      url.pathname !== "/codex" ||
+      url.searchParams.getAll("schema").length !== 1 ||
+      url.searchParams.get("schema") !== "phase6_test"
+    ) {
+      throw new Error("SAFETY STOP: Refusing tests outside codex.phase6_test.");
+    }
+    const identity = await prisma.$queryRaw<
+      Array<{ databaseName: string; schemaName: string }>
+    >`
+      SELECT current_database() AS "databaseName", current_schema() AS "schemaName"
+    `;
+    if (
+      identity.length !== 1 ||
+      identity[0]?.databaseName !== "codex" ||
+      identity[0]?.schemaName !== "phase6_test"
+    ) {
+      throw new Error("SAFETY STOP: PostgreSQL identity mismatch.");
+    }
+
     // Create test user with security settings
     const user = await prisma.user.create({
       data: {
@@ -69,7 +98,7 @@ describe("withdrawal approval policy - all withdrawals require admin review", ()
     accountId = account.id;
 
     // Create ledger account for the bank account
-    const ledgerAccount = await prisma.ledgerAccount.create({
+    await prisma.ledgerAccount.create({
       data: {
         assetSymbol: "USD",
         type: "ASSET",
@@ -77,20 +106,42 @@ describe("withdrawal approval policy - all withdrawals require admin review", ()
         bankAccountId: accountId,
       },
     });
-    ledgerAccountId = ledgerAccount.id;
   });
 
   afterEach(async () => {
-    // Clean up test data
-    await prisma.withdrawal.deleteMany({ where: { userId } });
-    await prisma.transaction.deleteMany({ where: { userId } });
-    await prisma.notification.deleteMany({ where: { userId } });
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.ledgerAccount.deleteMany({ where: { bankAccountId: accountId } });
-    await prisma.bankAccount.deleteMany({ where: { userId } });
-    await prisma.securitySetting.deleteMany({ where: { userId } });
-    await prisma.profile.deleteMany({ where: { userId } });
-    await prisma.user.deleteMany({ where: { id: { in: [userId, adminId] } } });
+    // Empty IDs mean setup did not create any fixture. Never issue an unscoped delete.
+    if (!userId) return;
+
+    await prisma.$transaction(async (tx) => {
+      const entries = await tx.ledgerEntry.findMany({
+        where: {
+          OR: [
+            { ledgerAccount: { bankAccount: { userId } } },
+            { ledgerAccount: { cryptoWallet: { userId } } },
+          ],
+        },
+        select: { groupId: true },
+      });
+      const groupIds = [...new Set(entries.map((entry) => entry.groupId))];
+
+      await tx.withdrawal.deleteMany({ where: { userId } });
+      await tx.transaction.deleteMany({ where: { userId } });
+      await tx.notification.deleteMany({ where: { userId } });
+      // Delete the full posting groups of this fixture, including platform legs.
+      if (groupIds.length > 0) {
+        await tx.ledgerEntry.deleteMany({ where: { groupId: { in: groupIds } } });
+      }
+      await tx.ledgerAccount.deleteMany({ where: { bankAccount: { userId } } });
+      await tx.ledgerAccount.deleteMany({ where: { cryptoWallet: { userId } } });
+      await tx.assetBalance.deleteMany({ where: { wallet: { userId } } });
+      await tx.cryptoWallet.deleteMany({ where: { userId } });
+      await tx.bankAccount.deleteMany({ where: { userId } });
+      await tx.securitySetting.deleteMany({ where: { userId } });
+      const userIds = [userId, adminId].filter((id) => id.length > 0);
+      await tx.auditLog.deleteMany({ where: { actorUserId: { in: userIds } } });
+      await tx.profile.deleteMany({ where: { userId: { in: userIds } } });
+      await tx.user.deleteMany({ where: { id: { in: userIds } } });
+    });
   });
 
   it("creates small withdrawal ($100) as PENDING requiring admin review", async () => {

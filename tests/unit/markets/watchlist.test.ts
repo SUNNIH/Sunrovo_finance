@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import Decimal from "decimal.js";
 import { toggleWatchlist } from "@/app/(platform)/markets/actions";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
@@ -44,7 +45,7 @@ describe("Watchlist Safety", () => {
 
   describe("Symbol Validation", () => {
     beforeEach(() => {
-      vi.mocked(getCurrentUser).mockResolvedValue(mockUser as any);
+      vi.mocked(getCurrentUser, { partial: true }).mockResolvedValue(mockUser);
     });
 
     it("rejects invalid symbols", async () => {
@@ -68,7 +69,7 @@ describe("Watchlist Safety", () => {
     });
 
     it("accepts valid symbols", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue(mockUser as any);
+      vi.mocked(getCurrentUser, { partial: true }).mockResolvedValue(mockUser);
       vi.mocked(prisma.asset.findUnique).mockResolvedValue({
         id: "asset-1",
         symbol: "BTC",
@@ -85,10 +86,15 @@ describe("Watchlist Safety", () => {
           symbol: "BTCUSDT",
           baseAsset: "BTC",
           quoteAsset: "USDT",
-          status: "trading",
+          status: "active",
           pricePrecision: 2,
           quantityPrecision: 6,
-        } as any,
+          minOrderQuantity: new Decimal("0.0001"),
+          maxOrderQuantity: new Decimal("100"),
+          minOrderValue: new Decimal("10"),
+          maxOrderValue: new Decimal("1000000"),
+          tickSize: new Decimal("0.01"),
+        },
       ]);
 
       const result = await toggleWatchlist("BTC", true);
@@ -102,7 +108,7 @@ describe("Watchlist Safety", () => {
 
   describe("Asset Safety", () => {
     beforeEach(() => {
-      vi.mocked(getCurrentUser).mockResolvedValue(mockUser as any);
+      vi.mocked(getCurrentUser, { partial: true }).mockResolvedValue(mockUser);
     });
 
     it("rejects non-existent assets", async () => {
@@ -164,7 +170,7 @@ describe("Watchlist Safety", () => {
 
   describe("Market Verification", () => {
     beforeEach(() => {
-      vi.mocked(getCurrentUser).mockResolvedValue(mockUser as any);
+      vi.mocked(getCurrentUser, { partial: true }).mockResolvedValue(mockUser);
       vi.mocked(prisma.asset.findUnique).mockResolvedValue({
         id: "asset-1",
         symbol: "BTC",
@@ -184,10 +190,15 @@ describe("Watchlist Safety", () => {
           symbol: "ETHUSDT",
           baseAsset: "ETH",
           quoteAsset: "USDT",
-          status: "trading",
+          status: "active",
           pricePrecision: 2,
           quantityPrecision: 6,
-        } as any,
+          minOrderQuantity: new Decimal("0.0001"),
+          maxOrderQuantity: new Decimal("100"),
+          minOrderValue: new Decimal("10"),
+          maxOrderValue: new Decimal("1000000"),
+          tickSize: new Decimal("0.01"),
+        },
       ]);
 
       const result = await toggleWatchlist("BTC", true);
@@ -205,10 +216,15 @@ describe("Watchlist Safety", () => {
           symbol: "BTCUSDT",
           baseAsset: "BTC",
           quoteAsset: "USDT",
-          status: "trading",
+          status: "active",
           pricePrecision: 2,
           quantityPrecision: 6,
-        } as any,
+          minOrderQuantity: new Decimal("0.0001"),
+          maxOrderQuantity: new Decimal("100"),
+          minOrderValue: new Decimal("10"),
+          maxOrderValue: new Decimal("1000000"),
+          tickSize: new Decimal("0.01"),
+        },
       ]);
       vi.mocked(prisma.watchlist.upsert).mockResolvedValue({
         id: "watchlist-1",
@@ -238,7 +254,7 @@ describe("Watchlist Safety", () => {
 
   describe("Removal", () => {
     beforeEach(() => {
-      vi.mocked(getCurrentUser).mockResolvedValue(mockUser as any);
+      vi.mocked(getCurrentUser, { partial: true }).mockResolvedValue(mockUser);
     });
 
     it("allows removal even when Bybit is offline", async () => {

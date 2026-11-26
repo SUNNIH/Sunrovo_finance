@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import Decimal from "decimal.js";
+import type { Prisma } from "@prisma/client";
 
 // Mock dependencies before imports
 vi.mock("@/lib/market/service", () => ({
@@ -15,17 +16,34 @@ vi.mock("@/lib/feature-flags", () => ({
   CRYPTO_TRADING_ENABLED: true,
 }));
 
+// Fail closed: these unit tests must never fall through to a real database.
+vi.mock("@/lib/db/prisma", () => ({
+  prisma: {
+    cryptoOrder: { findUnique: vi.fn(), findFirst: vi.fn() },
+    cryptoWallet: { findFirst: vi.fn() },
+    $transaction: vi.fn(),
+  },
+}));
+
 import { prisma } from "@/lib/db/prisma";
 import { placeOrder, cancelOrder } from "@/features/crypto/trading";
 import { getMarketTicker, getTradingInstruments } from "@/lib/market/service";
 import { postLedgerEntries } from "@/lib/ledger/postLedgerEntries";
+
+type TransactionCallback = Parameters<typeof prisma.$transaction>[0];
 
 describe("Phase 4 Trading — Corrected Financial Implementation", () => {
   const testUserId = "user-123";
   const testWalletId = "wallet-123";
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
+    vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(null);
+    vi.mocked(prisma.cryptoOrder.findFirst).mockResolvedValue(null);
+    vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(null);
+    vi.mocked(prisma.$transaction).mockRejectedValue(
+      new Error("Unexpected database transaction in unit test")
+    );
 
     // Default mocks
     vi.mocked(getMarketTicker).mockResolvedValue({
@@ -89,10 +107,10 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
         createdAt: new Date(),
       };
 
-      vi.spyOn(prisma.cryptoOrder, "findUnique").mockResolvedValue(null);
-      vi.spyOn(prisma.cryptoWallet, "findFirst").mockResolvedValue(mockWallet);
+      vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(null);
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(mockWallet);
 
-      const mockTransaction = vi.fn(async (callback) => {
+      const mockTransaction = vi.fn(async (callback: TransactionCallback) => {
         return callback({
           cryptoWallet: {
             findFirst: vi.fn().mockResolvedValue(mockWallet),
@@ -130,10 +148,10 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
           auditLog: {
             create: vi.fn(),
           },
-        });
+        } as unknown as Prisma.TransactionClient);
       });
 
-      vi.spyOn(prisma, "$transaction").mockImplementation(mockTransaction as any);
+      vi.mocked(prisma.$transaction).mockImplementation(mockTransaction);
 
       const result = await placeOrder({
         userId: testUserId,
@@ -153,26 +171,26 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
       const legs = calls[0]![1];
       
       // Group by asset
-      const btcLegs = legs.filter((l: any) => l.assetSymbol === "BTC");
-      const usdtLegs = legs.filter((l: any) => l.assetSymbol === "USDT");
+      const btcLegs = legs.filter((l) => l.assetSymbol === "BTC");
+      const usdtLegs = legs.filter((l) => l.assetSymbol === "USDT");
 
       // BTC must be balanced
       const btcDebits = btcLegs
-        .filter((l: any) => l.direction === "DEBIT")
-        .reduce((sum: Decimal, l: any) => sum.plus(l.amount), new Decimal(0));
+        .filter((l) => l.direction === "DEBIT")
+        .reduce((sum: Decimal, l) => sum.plus(l.amount), new Decimal(0));
       const btcCredits = btcLegs
-        .filter((l: any) => l.direction === "CREDIT")
-        .reduce((sum: Decimal, l: any) => sum.plus(l.amount), new Decimal(0));
+        .filter((l) => l.direction === "CREDIT")
+        .reduce((sum: Decimal, l) => sum.plus(l.amount), new Decimal(0));
 
       expect(btcDebits.toString()).toBe(btcCredits.toString());
 
       // USDT must be balanced
       const usdtDebits = usdtLegs
-        .filter((l: any) => l.direction === "DEBIT")
-        .reduce((sum: Decimal, l: any) => sum.plus(l.amount), new Decimal(0));
+        .filter((l) => l.direction === "DEBIT")
+        .reduce((sum: Decimal, l) => sum.plus(l.amount), new Decimal(0));
       const usdtCredits = usdtLegs
-        .filter((l: any) => l.direction === "CREDIT")
-        .reduce((sum: Decimal, l: any) => sum.plus(l.amount), new Decimal(0));
+        .filter((l) => l.direction === "CREDIT")
+        .reduce((sum: Decimal, l) => sum.plus(l.amount), new Decimal(0));
 
       expect(usdtDebits.toString()).toBe(usdtCredits.toString());
     });
@@ -187,9 +205,9 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
         createdAt: new Date(),
       };
 
-      vi.spyOn(prisma.cryptoOrder, "findUnique").mockResolvedValue(null);
+      vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(null);
 
-      const mockTransaction = vi.fn(async (callback) => {
+      const mockTransaction = vi.fn(async (callback: TransactionCallback) => {
         return callback({
           cryptoWallet: {
             findFirst: vi.fn().mockResolvedValue(mockWallet),
@@ -209,7 +227,7 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
             }),
           },
           ledgerAccount: {
-            findFirst: vi.fn((params: any) => {
+            findFirst: vi.fn((params: { where?: { name?: string } }) => {
               // Return platform accounts for inventory and settlement
               if (params.where?.name?.includes("Crypto Inventory")) {
                 return Promise.resolve({ id: "inventory-pool", type: "ASSET" });
@@ -222,7 +240,7 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
               }
               return Promise.resolve({ id: "user-ledger", type: "ASSET" });
             }),
-            create: vi.fn((data: any) => {
+            create: vi.fn((data: Prisma.LedgerAccountCreateArgs) => {
               return Promise.resolve({ id: "created-account", ...data });
             }),
           },
@@ -236,10 +254,10 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
           auditLog: {
             create: vi.fn(),
           },
-        });
+        } as unknown as Prisma.TransactionClient);
       });
 
-      vi.spyOn(prisma, "$transaction").mockImplementation(mockTransaction as any);
+      vi.mocked(prisma.$transaction).mockImplementation(mockTransaction);
 
       await placeOrder({
         userId: testUserId,
@@ -254,7 +272,7 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
       const calls = vi.mocked(postLedgerEntries).mock.calls;
       expect(calls.length).toBeGreaterThan(0);
       const legs = calls[0]![1];
-      const accountIds = legs.map((l: any) => l.ledgerAccountId);
+      const accountIds = legs.map((l) => l.ledgerAccountId);
 
       // Should include platform inventory/settlement pools
       expect(accountIds).toContain("inventory-pool");
@@ -267,9 +285,9 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
     it("should reject concurrent orders exceeding available balance", async () => {
       const mockWallet = { id: testWalletId, userId: testUserId, label: "Spot", createdAt: new Date(), updatedAt: new Date() };
 
-      vi.spyOn(prisma.cryptoOrder, "findUnique").mockResolvedValue(null);
+      vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(null);
 
-      const mockTransaction = vi.fn(async (callback) => {
+      const mockTransaction = vi.fn(async (callback: TransactionCallback) => {
         return callback({
           cryptoWallet: {
             findFirst: vi.fn().mockResolvedValue(mockWallet),
@@ -295,10 +313,10 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
           auditLog: {
             create: vi.fn(),
           },
-        });
+        } as unknown as Prisma.TransactionClient);
       });
 
-      vi.spyOn(prisma, "$transaction").mockImplementation(mockTransaction as any);
+      vi.mocked(prisma.$transaction).mockImplementation(mockTransaction);
 
       const result = await placeOrder({
         userId: testUserId,
@@ -338,9 +356,9 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
         parentOrderId: null,
       };
 
-      vi.spyOn(prisma.cryptoOrder, "findUnique").mockResolvedValue(mockOrder);
+      vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(mockOrder);
 
-      const mockTransaction = vi.fn(async (callback) => {
+      const mockTransaction = vi.fn(async (callback: TransactionCallback) => {
         return callback({
           cryptoOrder: {
             findUnique: vi.fn().mockResolvedValue(mockOrder),
@@ -359,10 +377,10 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
           auditLog: {
             create: vi.fn(),
           },
-        });
+        } as unknown as Prisma.TransactionClient);
       });
 
-      vi.spyOn(prisma, "$transaction").mockImplementation(mockTransaction as any);
+      vi.mocked(prisma.$transaction).mockImplementation(mockTransaction);
 
       const result = await cancelOrder({
         userId: testUserId,
@@ -398,7 +416,7 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
         parentOrderId: null,
       };
 
-      vi.spyOn(prisma.cryptoOrder, "findUnique").mockResolvedValue(existingOrder);
+      vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(existingOrder);
 
       const result = await placeOrder({
         userId: testUserId, // Different user
@@ -436,7 +454,7 @@ describe("Phase 4 Trading — Corrected Financial Implementation", () => {
         parentOrderId: null,
       };
 
-      vi.spyOn(prisma.cryptoOrder, "findUnique").mockResolvedValue(existingOrder);
+      vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(existingOrder);
 
       const result = await placeOrder({
         userId: testUserId,

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import Decimal from "decimal.js";
+import type { ConversionQuote, Prisma } from "@prisma/client";
 
 import {
   createConversionQuote,
@@ -132,7 +133,7 @@ import {
  *
  * The transaction callback executes after module initialization.
  */
-const prismaMockTransaction = prisma as any;
+const prismaMockTransaction: Prisma.TransactionClient = prisma;
 
 /**
  * Create a sample Bybit order book.
@@ -184,14 +185,14 @@ function makeOrderBook(
  */
 function mockQuoteCreation(id: string): void {
   vi.mocked(prisma.conversionQuote.create).mockImplementation(
-    (async (args: any) => {
+    (async (args: Prisma.ConversionQuoteCreateArgs) => {
       return {
         id,
         ...args.data,
         createdAt: new Date(),
         consumedAt: null,
       };
-    }) as any
+    }) as unknown as typeof prisma.conversionQuote.create
   );
 }
 
@@ -200,7 +201,7 @@ function mockQuoteCreation(id: string): void {
  * transaction execution tests.
  */
 function makeStoredQuote(
-  overrides: Record<string, unknown> = {}
+  overrides: Partial<ConversionQuote> = {}
 ) {
   return {
     id: "quote_123",
@@ -231,7 +232,11 @@ function makeStoredQuote(
 
 describe("Phase 5: Cryptocurrency Conversion", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
+    vi.mocked(prisma.$transaction).mockImplementation(async (callback) =>
+      callback(prismaMockTransaction)
+    );
+    vi.mocked(postLedgerEntries).mockResolvedValue({ groupId: "test-ledger-group" });
   });
 
   /**
@@ -474,7 +479,9 @@ vi.mocked(getOrderBook).mockResolvedValue(
         id: "wallet_123",
         userId: "user_123",
         label: "Spot Wallet",
-      } as any);
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
       /**
        * Source BTC balance.
@@ -514,26 +521,38 @@ vi.mocked(getOrderBook).mockResolvedValue(
         ensureAssetBalanceAndLedgerAccount
       )
         .mockResolvedValueOnce({
-          balance: fromBalance as any,
+          balance: { ...fromBalance, updatedAt: new Date() },
           ledgerAccount: {
             id: "ledger_btc",
-          } as any,
+            type: "ASSET",
+            assetSymbol: "BTC",
+            name: "Spot Wallet - BTC",
+            bankAccountId: null,
+            cryptoWalletId: "wallet_123",
+            createdAt: new Date(),
+          },
         })
         .mockResolvedValueOnce({
-          balance: toBalance as any,
+          balance: { ...toBalance, updatedAt: new Date() },
           ledgerAccount: {
             id: "ledger_usdt",
-          } as any,
+            type: "ASSET",
+            assetSymbol: "USDT",
+            name: "Spot Wallet - USDT",
+            bankAccountId: null,
+            cryptoWalletId: "wallet_123",
+            createdAt: new Date(),
+          },
         });
 
       /**
        * Mock platform ledger accounts.
        */
       vi.mocked(
-        getOrCreatePlatformLedgerAccount
+        getOrCreatePlatformLedgerAccount, { partial: true }
       ).mockResolvedValue({
         id: "platform_account",
-      } as any);
+      });
 
       /**
        * Mock successful atomic balance deduction.
@@ -548,45 +567,45 @@ vi.mocked(getOrderBook).mockResolvedValue(
        * Mock destination balance credit.
        */
       vi.mocked(
-        prisma.assetBalance.update
-      ).mockResolvedValue({} as any);
+        prisma.assetBalance.update, { partial: true }
+      ).mockResolvedValue({});
 
       /**
        * Mock quote consumption.
        */
       vi.mocked(
-        prisma.conversionQuote.update
-      ).mockResolvedValue({} as any);
+        prisma.conversionQuote.update, { partial: true }
+      ).mockResolvedValue({});
 
       /**
        * Mock conversion record.
        */
       vi.mocked(
-        prisma.conversion.create
+        prisma.conversion.create, { partial: true }
       ).mockResolvedValue({
         id: "conv_123",
-      } as any);
+      });
 
       /**
        * Mock transaction history.
        */
       vi.mocked(
-        prisma.transaction.create
-      ).mockResolvedValue({} as any);
+        prisma.transaction.create, { partial: true }
+      ).mockResolvedValue({});
 
       /**
        * Mock audit logging.
        */
       vi.mocked(
-        prisma.auditLog.create
-      ).mockResolvedValue({} as any);
+        prisma.auditLog.create, { partial: true }
+      ).mockResolvedValue({});
 
       /**
        * Default:
        * No existing conversion.
        */
       vi.mocked(
-        prisma.conversion.findUnique
+        prisma.conversion.findUnique, { partial: true }
       ).mockResolvedValue(null);
 
       /**
@@ -594,9 +613,9 @@ vi.mocked(getOrderBook).mockResolvedValue(
        * Valid unconsumed quote.
        */
       vi.mocked(
-        prisma.conversionQuote.findUnique
+        prisma.conversionQuote.findUnique, { partial: true }
       ).mockResolvedValue(
-        makeStoredQuote() as any
+        makeStoredQuote()
       );
     });
     it(
@@ -820,7 +839,7 @@ it(
     // Confirm that execution preserved
     // the ORIGINAL quoted destination amount.
     const savedConversion =
-      vi.mocked(prisma.conversion.create)
+      vi.mocked(prisma.conversion.create, { partial: true })
         .mock.calls[0]?.[0].data;
 
     expect(
@@ -910,7 +929,7 @@ it(
     // 6,010 USDT -> 0.0999 BTC after fees,
     // at a 60,100 ask.
     vi.mocked(
-      prisma.conversionQuote.findUnique
+      prisma.conversionQuote.findUnique, { partial: true }
     ).mockResolvedValue({
       ...makeStoredQuote(),
 
@@ -920,7 +939,7 @@ it(
       fromAmount: new Decimal("6010"),
       toAmount: new Decimal("0.0999"),
       feeAmount: new Decimal("0.0001"),
-    } as any);
+    });
 
     const book = makeOrderBook();
 
@@ -958,7 +977,7 @@ it(
        * Conversion already exists for this key.
        */
       vi.mocked(
-        prisma.conversion.findUnique
+        prisma.conversion.findUnique, { partial: true }
       ).mockResolvedValue({
         id: "conv_123",
 
@@ -983,7 +1002,7 @@ it(
         status: "COMPLETED",
 
         createdAt: new Date(),
-      } as any);
+      });
 
       const result = await executeConversion({
         userId: "user_123",
@@ -1009,13 +1028,13 @@ it(
 
     it("should reject expired quote", async () => {
       vi.mocked(
-        prisma.conversionQuote.findUnique
+        prisma.conversionQuote.findUnique, { partial: true }
       ).mockResolvedValue(
         makeStoredQuote({
           expiresAt: new Date(
             Date.now() - 1000
           ),
-        }) as any
+        })
       );
 
       const result = await executeConversion({
@@ -1035,11 +1054,11 @@ it(
 
     it("should reject already consumed quote", async () => {
       vi.mocked(
-        prisma.conversionQuote.findUnique
+        prisma.conversionQuote.findUnique, { partial: true }
       ).mockResolvedValue(
         makeStoredQuote({
           consumedAt: new Date(),
-        }) as any
+        })
       );
 
       const result = await executeConversion({
@@ -1085,13 +1104,13 @@ it(
 
   // The quote requires 10 BTC.
   vi.mocked(
-    prisma.conversionQuote.findUnique
+    prisma.conversionQuote.findUnique, { partial: true }
   ).mockResolvedValue(
     makeStoredQuote({
       fromAmount: new Decimal("10"),
       toAmount: new Decimal("599400"),
       feeAmount: new Decimal("600"),
-    }) as any
+    })
   );
 
   const result = await executeConversion({
@@ -1125,11 +1144,11 @@ it(
        * Quote belongs to a different user.
        */
       vi.mocked(
-        prisma.conversionQuote.findUnique
+        prisma.conversionQuote.findUnique, { partial: true }
       ).mockResolvedValue(
         makeStoredQuote({
           userId: "user_456",
-        }) as any
+        })
       );
 
       const result = await executeConversion({

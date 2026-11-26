@@ -3,6 +3,33 @@ import { getWalletForUser } from "@/features/crypto/wallets";
 import { prisma } from "@/lib/db/prisma";
 import { getMultipleMarketTickers } from "@/lib/market/service";
 import Decimal from "decimal.js";
+import type { Prisma } from "@prisma/client";
+
+type WalletWithBalances = Prisma.CryptoWalletGetPayload<{
+  include: { balances: true };
+}>;
+
+type MarketTicker = Awaited<ReturnType<typeof getMultipleMarketTickers>> extends
+  ReadonlyMap<string, infer Ticker> ? Ticker : never;
+
+function walletFixture(wallet: WalletWithBalances): WalletWithBalances {
+  return wallet;
+}
+
+function tickerFixture(
+  ticker: Pick<MarketTicker, "symbol" | "lastPrice" | "status"> & Partial<MarketTicker>
+): MarketTicker {
+  return {
+    priceChange24h: new Decimal(0),
+    priceChangePercent24h: new Decimal(0),
+    high24h: ticker.lastPrice,
+    low24h: ticker.lastPrice,
+    volume24h: new Decimal(0),
+    quoteVolume24h: new Decimal(0),
+    timestamp: new Date(),
+    ...ticker,
+  };
+}
 
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
@@ -29,7 +56,7 @@ describe("Wallet Market Valuation", () => {
     });
 
     it("returns empty assets when all balances are zero", async () => {
-      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue({
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(walletFixture({
         id: "wallet-1",
         userId: "user-123",
         label: "Spot Wallet",
@@ -45,7 +72,7 @@ describe("Wallet Market Valuation", () => {
             updatedAt: new Date(),
           },
         ],
-      } as any);
+      }));
 
       const result = await getWalletForUser("user-123");
 
@@ -60,7 +87,7 @@ describe("Wallet Market Valuation", () => {
 
   describe("USDT Holdings", () => {
     it("values USDT at 1:1 without market lookup", async () => {
-      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue({
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(walletFixture({
         id: "wallet-1",
         userId: "user-123",
         label: "Spot Wallet",
@@ -76,7 +103,7 @@ describe("Wallet Market Valuation", () => {
             updatedAt: new Date(),
           },
         ],
-      } as any);
+      }));
 
       vi.mocked(getMultipleMarketTickers).mockResolvedValue(new Map());
 
@@ -98,7 +125,7 @@ describe("Wallet Market Valuation", () => {
 
   describe("Live Market Prices", () => {
     it("calculates values using live Bybit prices", async () => {
-      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue({
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(walletFixture({
         id: "wallet-1",
         userId: "user-123",
         label: "Spot Wallet",
@@ -122,13 +149,13 @@ describe("Wallet Market Valuation", () => {
             updatedAt: new Date(),
           },
         ],
-      } as any);
+      }));
 
       vi.mocked(getMultipleMarketTickers).mockResolvedValue(
         new Map([
           [
             "BTCUSDT",
-            {
+            tickerFixture({
               symbol: "BTCUSDT",
               lastPrice: new Decimal("60000"),
               priceChange24h: new Decimal("1000"),
@@ -138,11 +165,11 @@ describe("Wallet Market Valuation", () => {
               volume24h: new Decimal("1000"),
               quoteVolume24h: new Decimal("60000000"),
               status: "live",
-            } as any,
+            }),
           ],
           [
             "ETHUSDT",
-            {
+            tickerFixture({
               symbol: "ETHUSDT",
               lastPrice: new Decimal("3000"),
               priceChange24h: new Decimal("50"),
@@ -152,7 +179,7 @@ describe("Wallet Market Valuation", () => {
               volume24h: new Decimal("5000"),
               quoteVolume24h: new Decimal("15000000"),
               status: "live",
-            } as any,
+            }),
           ],
         ])
       );
@@ -188,7 +215,7 @@ describe("Wallet Market Valuation", () => {
 
   describe("Locked Balances", () => {
     it("includes locked balances in total value calculation", async () => {
-      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue({
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(walletFixture({
         id: "wallet-1",
         userId: "user-123",
         label: "Spot Wallet",
@@ -204,17 +231,17 @@ describe("Wallet Market Valuation", () => {
             updatedAt: new Date(),
           },
         ],
-      } as any);
+      }));
 
       vi.mocked(getMultipleMarketTickers).mockResolvedValue(
         new Map([
           [
             "BTCUSDT",
-            {
+            tickerFixture({
               symbol: "BTCUSDT",
               lastPrice: new Decimal("60000"),
               status: "live",
-            } as any,
+            }),
           ],
         ])
       );
@@ -235,7 +262,7 @@ describe("Wallet Market Valuation", () => {
 
   describe("Stale Prices", () => {
     it("marks assets with stale prices and excludes from portfolio total", async () => {
-      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue({
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(walletFixture({
         id: "wallet-1",
         userId: "user-123",
         label: "Spot Wallet",
@@ -259,25 +286,25 @@ describe("Wallet Market Valuation", () => {
             updatedAt: new Date(),
           },
         ],
-      } as any);
+      }));
 
       vi.mocked(getMultipleMarketTickers).mockResolvedValue(
         new Map([
           [
             "BTCUSDT",
-            {
+            tickerFixture({
               symbol: "BTCUSDT",
               lastPrice: new Decimal("60000"),
               status: "live",
-            } as any,
+            }),
           ],
           [
             "ETHUSDT",
-            {
+            tickerFixture({
               symbol: "ETHUSDT",
               lastPrice: new Decimal("3000"),
               status: "stale",
-            } as any,
+            }),
           ],
         ])
       );
@@ -304,7 +331,7 @@ describe("Wallet Market Valuation", () => {
 
   describe("Unavailable Prices", () => {
     it("marks assets without prices as unavailable", async () => {
-      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue({
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(walletFixture({
         id: "wallet-1",
         userId: "user-123",
         label: "Spot Wallet",
@@ -320,7 +347,7 @@ describe("Wallet Market Valuation", () => {
             updatedAt: new Date(),
           },
         ],
-      } as any);
+      }));
 
       // Market data unavailable
       vi.mocked(getMultipleMarketTickers).mockResolvedValue(new Map());
@@ -340,7 +367,7 @@ describe("Wallet Market Valuation", () => {
     });
 
     it("continues showing native balances when Bybit is offline", async () => {
-      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue({
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(walletFixture({
         id: "wallet-1",
         userId: "user-123",
         label: "Spot Wallet",
@@ -356,7 +383,7 @@ describe("Wallet Market Valuation", () => {
             updatedAt: new Date(),
           },
         ],
-      } as any);
+      }));
 
       // Complete Bybit failure
       vi.mocked(getMultipleMarketTickers).mockRejectedValue(
@@ -380,7 +407,7 @@ describe("Wallet Market Valuation", () => {
 
   describe("Mixed Portfolio", () => {
     it("handles USDT + crypto with live prices", async () => {
-      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue({
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(walletFixture({
         id: "wallet-1",
         userId: "user-123",
         label: "Spot Wallet",
@@ -404,17 +431,17 @@ describe("Wallet Market Valuation", () => {
             updatedAt: new Date(),
           },
         ],
-      } as any);
+      }));
 
       vi.mocked(getMultipleMarketTickers).mockResolvedValue(
         new Map([
           [
             "BTCUSDT",
-            {
+            tickerFixture({
               symbol: "BTCUSDT",
               lastPrice: new Decimal("60000"),
               status: "live",
-            } as any,
+            }),
           ],
         ])
       );
@@ -446,7 +473,7 @@ describe("Wallet Market Valuation", () => {
 
   describe("Decimal Precision", () => {
     it("maintains precision for small balances and prices", async () => {
-      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue({
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(walletFixture({
         id: "wallet-1",
         userId: "user-123",
         label: "Spot Wallet",
@@ -462,17 +489,17 @@ describe("Wallet Market Valuation", () => {
             updatedAt: new Date(),
           },
         ],
-      } as any);
+      }));
 
       vi.mocked(getMultipleMarketTickers).mockResolvedValue(
         new Map([
           [
             "BTCUSDT",
-            {
+            tickerFixture({
               symbol: "BTCUSDT",
               lastPrice: new Decimal("59962.30"),
               status: "live",
-            } as any,
+            }),
           ],
         ])
       );

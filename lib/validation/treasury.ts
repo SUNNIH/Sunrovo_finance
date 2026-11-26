@@ -93,7 +93,7 @@ export const adminDepositReviewSchema = z
   .object({
     depositId: z.string().min(1, "Deposit ID is required"),
     action: z.enum(["APPROVE", "REJECT"], {
-      errorMap: () => ({ message: "Action must be either APPROVE or REJECT." }),
+      error: "Action must be either APPROVE or REJECT.",
     }),
     rejectionReason: z.string().trim().max(500, "Reason cannot exceed 500 characters").optional(),
   })

@@ -4,7 +4,6 @@ import { prisma } from "@/lib/db/prisma";
 import { postLedgerEntries } from "@/lib/ledger/postLedgerEntries";
 import { externalSettlementPoolName, feeRevenuePoolName, getOrCreatePlatformLedgerAccount } from "@/lib/ledger/platform-accounts";
 import { AuthError } from "@/features/authentication/errors";
-import { writeAuditLog } from "@/lib/audit/log";
 
 export async function listPendingTransfers(limit = 100) {
   return prisma.transfer.findMany({

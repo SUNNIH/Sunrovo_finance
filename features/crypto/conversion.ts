@@ -7,19 +7,16 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import {
   calculateConversionPrice,
 } from "@/features/crypto/conversion-pricing";
-import type { Prisma } from "@prisma/client";
 import { postLedgerEntries } from "@/lib/ledger/postLedgerEntries";
 import type { PostingLeg } from "@/lib/ledger/types";
 import {
   getOrCreatePlatformLedgerAccount,
   cryptoInventoryPoolName,
-  tradingSettlementPoolName,
   feeRevenuePoolName,
 } from "@/lib/ledger/platform-accounts";
 import { ensureCryptoWallet, ensureAssetBalanceAndLedgerAccount } from "@/features/crypto/wallet-helpers";
 import { CRYPTO_CONVERSION_ENABLED } from "@/lib/feature-flags";
 
-type TransactionClient = Prisma.TransactionClient;
 
 /**
  * Phase 5: Cryptocurrency Conversion

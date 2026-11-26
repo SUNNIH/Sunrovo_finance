@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import Decimal from "decimal.js";
+import type { Prisma } from "@prisma/client";
 
 // Mock dependencies (must be hoisted before imports)
 vi.mock("@/lib/market/service", () => ({
@@ -15,17 +16,34 @@ vi.mock("@/lib/feature-flags", () => ({
   CRYPTO_TRADING_ENABLED: true,
 }));
 
+// Fail closed: these unit tests must never fall through to a real database.
+vi.mock("@/lib/db/prisma", () => ({
+  prisma: {
+    cryptoOrder: { findUnique: vi.fn(), findFirst: vi.fn() },
+    cryptoWallet: { findFirst: vi.fn() },
+    $transaction: vi.fn(),
+  },
+}));
+
 import { prisma } from "@/lib/db/prisma";
 import { placeOrder, cancelOrder } from "@/features/crypto/trading";
 import { getMarketTicker, getTradingInstruments } from "@/lib/market/service";
 import { postLedgerEntries } from "@/lib/ledger/postLedgerEntries";
+
+type TransactionCallback = Parameters<typeof prisma.$transaction>[0];
 
 describe("Simulated Cryptocurrency Trading", () => {
   const testUserId = "test-user-123";
   const testWalletId = "test-wallet-123";
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
+    vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(null);
+    vi.mocked(prisma.cryptoOrder.findFirst).mockResolvedValue(null);
+    vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(null);
+    vi.mocked(prisma.$transaction).mockRejectedValue(
+      new Error("Unexpected database transaction in unit test")
+    );
     
     // Set up default market ticker mock
     vi.mocked(getMarketTicker).mockResolvedValue({
@@ -68,6 +86,9 @@ describe("Simulated Cryptocurrency Trading", () => {
       const mockWallet = {
         id: testWalletId,
         userId: testUserId,
+        label: "Spot Wallet",
+        createdAt: new Date(),
+        updatedAt: new Date(),
         balances: [
           {
             id: "bal-1",
@@ -79,10 +100,10 @@ describe("Simulated Cryptocurrency Trading", () => {
         ],
       };
 
-      vi.spyOn(prisma.cryptoOrder, "findUnique").mockResolvedValue(null);
-      vi.spyOn(prisma.cryptoWallet, "findFirst").mockResolvedValue(mockWallet as any);
+      vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(null);
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(mockWallet);
       
-      const mockTransaction = vi.fn().mockImplementation(async (callback) => {
+      const mockTransaction = vi.fn(async (callback: TransactionCallback) => {
         return callback({
           cryptoWallet: {
             findFirst: vi.fn().mockResolvedValue(mockWallet),
@@ -123,9 +144,9 @@ describe("Simulated Cryptocurrency Trading", () => {
           auditLog: {
             create: vi.fn(),
           },
-        });
+        } as unknown as Prisma.TransactionClient);
       });
-      vi.spyOn(prisma, "$transaction").mockImplementation(mockTransaction as any);
+      vi.mocked(prisma.$transaction).mockImplementation(mockTransaction);
 
       const result = await placeOrder({
         userId: testUserId,
@@ -144,6 +165,9 @@ describe("Simulated Cryptocurrency Trading", () => {
       const mockWallet = {
         id: testWalletId,
         userId: testUserId,
+        label: "Spot Wallet",
+        createdAt: new Date(),
+        updatedAt: new Date(),
         balances: [
           {
             id: "bal-1",
@@ -155,10 +179,10 @@ describe("Simulated Cryptocurrency Trading", () => {
         ],
       };
 
-      vi.spyOn(prisma.cryptoOrder, "findUnique").mockResolvedValue(null);
-      vi.spyOn(prisma.cryptoWallet, "findFirst").mockResolvedValue(mockWallet as any);
+      vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(null);
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(mockWallet);
       
-      const mockTransaction = vi.fn().mockImplementation(async (callback) => {
+      const mockTransaction = vi.fn(async (callback: TransactionCallback) => {
         return callback({
           cryptoWallet: {
             findFirst: vi.fn().mockResolvedValue(mockWallet),
@@ -199,9 +223,9 @@ describe("Simulated Cryptocurrency Trading", () => {
           auditLog: {
             create: vi.fn(),
           },
-        });
+        } as unknown as Prisma.TransactionClient);
       });
-      vi.spyOn(prisma, "$transaction").mockImplementation(mockTransaction as any);
+      vi.mocked(prisma.$transaction).mockImplementation(mockTransaction);
 
       const result = await placeOrder({
         userId: testUserId,
@@ -220,6 +244,9 @@ describe("Simulated Cryptocurrency Trading", () => {
       const mockWallet = {
         id: testWalletId,
         userId: testUserId,
+        label: "Spot Wallet",
+        createdAt: new Date(),
+        updatedAt: new Date(),
         balances: [
           {
             id: "bal-1",
@@ -231,8 +258,53 @@ describe("Simulated Cryptocurrency Trading", () => {
         ],
       };
 
-      vi.spyOn(prisma.cryptoOrder, "findUnique").mockResolvedValue(null);
-      vi.spyOn(prisma.cryptoWallet, "findFirst").mockResolvedValue(mockWallet as any);
+      vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(null);
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(mockWallet);
+
+      const mockTransaction = vi.fn(async (callback: TransactionCallback) => {
+        return callback({
+          cryptoWallet: {
+            findFirst: vi.fn().mockResolvedValue(mockWallet),
+          },
+          ledgerAccount: {
+            findFirst: vi.fn().mockResolvedValue({ id: "ledger-123", type: "ASSET" }),
+            create: vi.fn().mockResolvedValue({ id: "ledger-123", type: "ASSET" }),
+          },
+          assetBalance: {
+            findFirst: vi.fn().mockResolvedValue({
+              id: "bal-1",
+              available: new Decimal(100),
+              locked: new Decimal(0),
+            }),
+            findUnique: vi.fn().mockResolvedValue({
+              id: "bal-1",
+              available: new Decimal(100),
+              locked: new Decimal(0),
+            }),
+            create: vi.fn().mockResolvedValue({
+              id: "bal-1",
+              available: new Decimal(0),
+              locked: new Decimal(0),
+            }),
+            updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+            update: vi.fn(),
+          },
+          ledgerEntry: {
+            create: vi.fn(),
+          },
+          cryptoOrder: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockResolvedValue({
+              id: "order-123",
+              status: "FILLED",
+            }),
+          },
+          auditLog: {
+            create: vi.fn(),
+          },
+        } as unknown as Prisma.TransactionClient);
+      });
+      vi.mocked(prisma.$transaction).mockImplementation(mockTransaction);
 
       const result = await placeOrder({
         userId: testUserId,
@@ -245,6 +317,8 @@ describe("Simulated Cryptocurrency Trading", () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain("Insufficient");
+      expect(result.error).toContain("Available: 100");
+      expect(postLedgerEntries).not.toHaveBeenCalled();
     });
   });
 
@@ -253,6 +327,9 @@ describe("Simulated Cryptocurrency Trading", () => {
       const mockWallet = {
         id: testWalletId,
         userId: testUserId,
+        label: "Spot Wallet",
+        createdAt: new Date(),
+        updatedAt: new Date(),
         balances: [
           {
             id: "bal-1",
@@ -264,10 +341,10 @@ describe("Simulated Cryptocurrency Trading", () => {
         ],
       };
 
-      vi.spyOn(prisma.cryptoOrder, "findUnique").mockResolvedValue(null);
-      vi.spyOn(prisma.cryptoWallet, "findFirst").mockResolvedValue(mockWallet as any);
+      vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(null);
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(mockWallet);
       
-      const mockTransaction = vi.fn().mockImplementation(async (callback) => {
+      const mockTransaction = vi.fn(async (callback: TransactionCallback) => {
         return callback({
           cryptoWallet: {
             findFirst: vi.fn().mockResolvedValue(mockWallet),
@@ -305,9 +382,9 @@ describe("Simulated Cryptocurrency Trading", () => {
           auditLog: {
             create: vi.fn(),
           },
-        });
+        } as unknown as Prisma.TransactionClient);
       });
-      vi.spyOn(prisma, "$transaction").mockImplementation(mockTransaction as any);
+      vi.mocked(prisma.$transaction).mockImplementation(mockTransaction);
 
       const result = await placeOrder({
         userId: testUserId,
@@ -362,7 +439,7 @@ describe("Simulated Cryptocurrency Trading", () => {
         parentOrderId: null,
       };
 
-      vi.spyOn(prisma.cryptoOrder, "findUnique").mockResolvedValue(existingOrder);
+      vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(existingOrder);
 
       const result = await placeOrder({
         userId: testUserId,
@@ -406,6 +483,9 @@ describe("Simulated Cryptocurrency Trading", () => {
       const mockWallet = {
         id: testWalletId,
         userId: testUserId,
+        label: "Spot Wallet",
+        createdAt: new Date(),
+        updatedAt: new Date(),
         balances: [
           {
             id: "bal-1",
@@ -416,10 +496,10 @@ describe("Simulated Cryptocurrency Trading", () => {
         ],
       };
 
-      vi.spyOn(prisma.cryptoOrder, "findUnique").mockResolvedValue(mockOrder);
-      vi.spyOn(prisma.cryptoWallet, "findFirst").mockResolvedValue(mockWallet as any);
+      vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(mockOrder);
+      vi.mocked(prisma.cryptoWallet.findFirst).mockResolvedValue(mockWallet);
       
-      const mockTransaction = vi.fn().mockImplementation(async (callback) => {
+      const mockTransaction = vi.fn(async (callback: TransactionCallback) => {
         return callback({
           cryptoOrder: {
             findUnique: vi.fn().mockResolvedValue(mockOrder),
@@ -438,9 +518,9 @@ describe("Simulated Cryptocurrency Trading", () => {
           auditLog: {
             create: vi.fn(),
           },
-        });
+        } as unknown as Prisma.TransactionClient);
       });
-      vi.spyOn(prisma, "$transaction").mockImplementation(mockTransaction as any);
+      vi.mocked(prisma.$transaction).mockImplementation(mockTransaction);
 
       const result = await cancelOrder({
         userId: testUserId,
@@ -473,15 +553,15 @@ describe("Simulated Cryptocurrency Trading", () => {
         parentOrderId: null,
       };
 
-      const mockTransaction = vi.fn().mockImplementation(async (callback) => {
+      const mockTransaction = vi.fn(async (callback: TransactionCallback) => {
         return callback({
           cryptoOrder: {
             findUnique: vi.fn().mockResolvedValue(mockFilledOrder),
           },
-        });
+        } as unknown as Prisma.TransactionClient);
       });
 
-      vi.spyOn(prisma, "$transaction").mockImplementation(mockTransaction as any);
+      vi.mocked(prisma.$transaction).mockImplementation(mockTransaction);
 
       const result = await cancelOrder({
         userId: testUserId,
@@ -515,15 +595,15 @@ describe("Simulated Cryptocurrency Trading", () => {
         parentOrderId: null,
       };
 
-      const mockTransaction = vi.fn().mockImplementation(async (callback) => {
+      const mockTransaction = vi.fn(async (callback: TransactionCallback) => {
         return callback({
           cryptoOrder: {
             findUnique: vi.fn().mockResolvedValue(mockOrder),
           },
-        });
+        } as unknown as Prisma.TransactionClient);
       });
 
-      vi.spyOn(prisma, "$transaction").mockImplementation(mockTransaction as any);
+      vi.mocked(prisma.$transaction).mockImplementation(mockTransaction);
 
       const result = await cancelOrder({
         userId: testUserId,
@@ -551,7 +631,7 @@ describe("Simulated Cryptocurrency Trading", () => {
     });
 
     it("should reject invalid trading pair", async () => {
-      vi.spyOn(prisma.cryptoOrder, "findUnique").mockResolvedValue(null);
+      vi.mocked(prisma.cryptoOrder.findUnique).mockResolvedValue(null);
 
       const result = await placeOrder({
         userId: testUserId,

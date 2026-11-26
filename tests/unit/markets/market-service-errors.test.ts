@@ -40,17 +40,18 @@ describe("Market Service Error Handling", () => {
     });
 
     it("filters by active status when requested", async () => {
-      vi.mocked(restClient.fetchInstruments).mockResolvedValue({
+      const response = {
         list: [
           {
             symbol: "BTCUSDT",
             baseCoin: "BTC",
             quoteCoin: "USDT",
-            status: "Trading",
+            status: "Trading" as const,
             basePrecision: "0.000001",
             quotePrecision: "0.01",
             lotSizeFilter: {
               basePrecision: "0.000001",
+              quotePrecision: "0.01",
               minOrderQty: "0.000001",
               maxOrderQty: "1000",
               minOrderAmt: "1",
@@ -59,16 +60,17 @@ describe("Market Service Error Handling", () => {
             priceFilter: {
               tickSize: "0.01",
             },
-          } as any,
+          },
           {
             symbol: "ETHUSDT",
             baseCoin: "ETH",
             quoteCoin: "USDT",
-            status: "Closed",
+            status: "Closed" as const,
             basePrecision: "0.0001",
             quotePrecision: "0.01",
             lotSizeFilter: {
               basePrecision: "0.0001",
+              quotePrecision: "0.01",
               minOrderQty: "0.0001",
               maxOrderQty: "1000",
               minOrderAmt: "1",
@@ -77,9 +79,10 @@ describe("Market Service Error Handling", () => {
             priceFilter: {
               tickSize: "0.01",
             },
-          } as any,
+          },
         ],
-      } as any);
+      };
+      vi.mocked(restClient.fetchInstruments, { partial: true, deep: true }).mockResolvedValue(response);
 
       const result = await getTradingInstruments({ activeOnly: true });
 
@@ -98,9 +101,9 @@ describe("Market Service Error Handling", () => {
     });
 
     it("throws when ticker is missing", async () => {
-      vi.mocked(restClient.fetchTicker).mockResolvedValue({
+      vi.mocked(restClient.fetchTicker, { partial: true, deep: true }).mockResolvedValue({
         list: [],
-      } as any);
+      });
 
       await expect(getMarketTicker("INVALIDPAIR")).rejects.toThrow(
         "Symbol INVALIDPAIR not found"
@@ -118,9 +121,9 @@ describe("Market Service Error Handling", () => {
     });
 
     it("passes through limit parameter", async () => {
-      vi.mocked(restClient.fetchKline).mockResolvedValue({
+      vi.mocked(restClient.fetchKline, { partial: true, deep: true }).mockResolvedValue({
         list: [],
-      } as any);
+      });
 
       await getCandlesticks("BTCUSDT", "1h", { limit: 50 });
 
@@ -156,9 +159,9 @@ describe("Market Service Error Handling", () => {
     });
 
     it("passes through limit parameter", async () => {
-      vi.mocked(restClient.fetchRecentTrades).mockResolvedValue({
+      vi.mocked(restClient.fetchRecentTrades, { partial: true, deep: true }).mockResolvedValue({
         list: [],
-      } as any);
+      });
 
       await getRecentTrades("BTCUSDT", 100);
 

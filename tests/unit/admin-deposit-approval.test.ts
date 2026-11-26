@@ -4,7 +4,30 @@ import { adminDepositReviewSchema } from "@/lib/validation/treasury";
 import { prisma } from "@/lib/db/prisma";
 import { postLedgerEntries } from "@/lib/ledger/postLedgerEntries";
 import { externalSettlementPoolName, getOrCreatePlatformLedgerAccount } from "@/lib/ledger/platform-accounts";
-import { AuthError } from "@/features/authentication/errors";
+import type { DepositStatus, Prisma } from "@prisma/client";
+
+// These fixtures intentionally model only the fields used by the service.
+type DepositFixture = {
+  id: string;
+  userId: string;
+  bankAccountId: string | null;
+  assetSymbol: string;
+  amount: string;
+  status: DepositStatus;
+  completedAt: Date | null;
+  ledgerGroupId: string | null;
+  sendingBank: string;
+  senderName: string;
+  transferReference: string;
+  rejectionReason?: string | null;
+  reviewedByAdminId?: string;
+  reviewedAt?: Date;
+};
+
+type DepositClaim = {
+  where: { id: string; status: DepositStatus };
+  data: Partial<DepositFixture>;
+};
 
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
@@ -56,7 +79,7 @@ describe("approveFiatDeposit - Admin Approval Backend", () => {
   const settlementPoolLedgerAccountId = "ledger_acct_settlement_001";
   const generatedLedgerGroupId = "uuid-ledger-group-approval-123";
 
-  const pendingDeposit = {
+  const pendingDeposit: DepositFixture = {
     id: depositId,
     userId,
     bankAccountId,
@@ -89,25 +112,19 @@ describe("approveFiatDeposit - Admin Approval Backend", () => {
     assetSymbol: "USD",
   };
 
-  let mockTx: any;
-  let currentDepositState: any;
+  let currentDepositState: DepositFixture;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-
-    currentDepositState = { ...pendingDeposit };
-
-    mockTx = {
+  const createMockTx = () => ({
       deposit: {
-        findUnique: vi.fn().mockImplementation(() => Promise.resolve({ ...currentDepositState })),
-        updateMany: vi.fn().mockImplementation(({ where, data }) => {
+        findUnique: vi.fn(() => Promise.resolve({ ...currentDepositState })),
+        updateMany: vi.fn(({ where, data }: DepositClaim) => {
           if (where.id === depositId && currentDepositState.status === where.status) {
             currentDepositState = { ...currentDepositState, ...data };
             return Promise.resolve({ count: 1 });
           }
           return Promise.resolve({ count: 0 });
         }),
-        update: vi.fn().mockImplementation(({ data }) => {
+        update: vi.fn(({ data }: { data: Partial<DepositFixture> }) => {
           currentDepositState = { ...currentDepositState, ...data };
           return Promise.resolve({ ...currentDepositState });
         }),
@@ -129,13 +146,21 @@ describe("approveFiatDeposit - Admin Approval Backend", () => {
       notification: {
         create: vi.fn().mockResolvedValue({ id: "notif_1" }),
       },
-    };
+  });
 
-    vi.mocked(prisma.$transaction).mockImplementation(async (callback: any) => {
-      return callback(mockTx);
+  let mockTx: ReturnType<typeof createMockTx>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    currentDepositState = { ...pendingDeposit };
+    mockTx = createMockTx();
+
+    vi.mocked(prisma.$transaction).mockImplementation(async (callback) => {
+      // The partial mock deliberately implements only the delegates under test.
+      return callback(mockTx as unknown as Prisma.TransactionClient);
     });
 
-    vi.mocked(getOrCreatePlatformLedgerAccount).mockResolvedValue(validSettlementPoolAccount as any);
+    vi.mocked(getOrCreatePlatformLedgerAccount, { partial: true }).mockResolvedValue(validSettlementPoolAccount);
     vi.mocked(postLedgerEntries).mockResolvedValue({ groupId: generatedLedgerGroupId });
   });
 
@@ -360,7 +385,7 @@ describe("rejectFiatDeposit - Admin Rejection Backend", () => {
   const bankAccountId = "acct_target_usd_456";
   const rejectionReason = "Originating account name does not match KYC profile";
 
-  const pendingDeposit = {
+  const pendingDeposit: DepositFixture = {
     id: depositId,
     userId,
     bankAccountId,
@@ -375,18 +400,12 @@ describe("rejectFiatDeposit - Admin Rejection Backend", () => {
     transferReference: "WIRE-REF-998877",
   };
 
-  let mockTx: any;
-  let currentDepositState: any;
+  let currentDepositState: DepositFixture;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-
-    currentDepositState = { ...pendingDeposit };
-
-    mockTx = {
+  const createMockTx = () => ({
       deposit: {
-        findUnique: vi.fn().mockImplementation(() => Promise.resolve({ ...currentDepositState })),
-        updateMany: vi.fn().mockImplementation(({ where, data }) => {
+        findUnique: vi.fn(() => Promise.resolve({ ...currentDepositState })),
+        updateMany: vi.fn(({ where, data }: DepositClaim) => {
           if (where.id === depositId && currentDepositState.status === where.status) {
             currentDepositState = { ...currentDepositState, ...data };
             return Promise.resolve({ count: 1 });
@@ -407,10 +426,18 @@ describe("rejectFiatDeposit - Admin Rejection Backend", () => {
       notification: {
         create: vi.fn().mockResolvedValue({ id: "notif_rej" }),
       },
-    };
+  });
 
-    vi.mocked(prisma.$transaction).mockImplementation(async (callback: any) => {
-      return callback(mockTx);
+  let mockTx: ReturnType<typeof createMockTx>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    currentDepositState = { ...pendingDeposit };
+    mockTx = createMockTx();
+
+    vi.mocked(prisma.$transaction).mockImplementation(async (callback) => {
+      // The partial mock deliberately implements only the delegates under test.
+      return callback(mockTx as unknown as Prisma.TransactionClient);
     });
   });
 

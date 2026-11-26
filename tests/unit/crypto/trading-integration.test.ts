@@ -337,7 +337,7 @@ it("should settle a LIMIT SELL against real PostgreSQL", async () => {
 });
   // SAFETY CHECK: Ensure we're running against an isolated test database
   beforeAll(async () => {
-  const expectedDatabase = "platinum_trust_bank";
+  const expectedDatabase = "codex";
   const expectedSchema = "phase6_test";
 
   const expectedConfirmation =

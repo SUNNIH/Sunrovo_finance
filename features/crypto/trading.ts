@@ -425,23 +425,8 @@ export async function placeOrder(params: PlaceOrderParams): Promise<PlaceOrderRe
 
       }
 
-      // For BUY: quantity = quoteAmount / price (before fees)
-
-      // We need to account for fees being taken from the received amount
-
-      // quoteAmount is the total USDT the user wants to spend
-
-      // requiredAmount (including fees) should not exceed quoteAmount
-
-      const feeRate = new Decimal(type === "LIMIT" ? 0.0005 : 0.001);
-
-      // Calculate quantity such that: quantity * price * (1 + feeRate) <= quoteAmount
-
-      // But fees are taken from received crypto, not added to quote cost
-
-      // So: quantity * price = quoteAmount, and fee is taken from quantity
-
-      // Let's use: quantity = quoteAmount / price (gross quantity before fees)
+      // BUY fees are deducted from the received asset, not added to quote cost.
+      // Calculate gross quantity within the quote budget before rounding down.
 
       quantity = quoteAmount!.div(priceForCalculation);
 

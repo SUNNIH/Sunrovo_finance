@@ -6,7 +6,6 @@ import { postLedgerEntries } from "@/lib/ledger/postLedgerEntries";
 import { getOrCreatePlatformLedgerAccount } from "@/lib/ledger/platform-accounts";
 import { ensureAssetBalanceAndLedgerAccount } from "@/features/crypto/wallet-helpers";
 import { withIdempotentFallback } from "@/lib/ledger/idempotency";
-import { writeAuditLog } from "@/lib/audit/log";
 import { AuthError } from "@/features/authentication/errors";
 
 export const ADMIN_FUNDING_POOL_NAME = (assetSymbol: string) =>
@@ -66,9 +65,6 @@ export async function fundUserAccount(
   if (amount.lte(0)) {
     throw new AuthError("VALIDATION_ERROR", "Amount must be greater than zero.", 422);
   }
-
-  const precision = getAssetPrecision(input.assetSymbol);
-  const amountStr = amount.toFixed(precision);
 
   // Exactly one target must be specified
   if (

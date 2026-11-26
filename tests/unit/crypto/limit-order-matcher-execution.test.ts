@@ -239,6 +239,7 @@ it("settles a SELL limit order with correct fees and balanced ledger", async () 
   it("fills an eligible BUY limit order and balances the ledger", async () => {
     const tx = {
       cryptoOrder: {
+        findMany: vi.fn().mockResolvedValue([]),
         findUnique: vi.fn().mockResolvedValue({
           id: "order-1",
           userId: "user-1",

@@ -1,6 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { PrismaClient } from "@prisma/client";
-import Decimal from "decimal.js";
 import { provisionDefaultAccountsForUser } from "@/features/authentication/provision-accounts";
 
 const prisma = new PrismaClient();
@@ -8,7 +7,38 @@ const prisma = new PrismaClient();
 describe("Zero-balance account provisioning", () => {
   const testUserId = `test-user-${Date.now()}`;
 
+  let fixtureCreated = false;
+
   beforeEach(async () => {
+    fixtureCreated = false;
+    // Financial integration tests must never write to development or production data.
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl || process.env.SUNROVO_TEST_DB_CONFIRM !== "codex.phase6_test") {
+      throw new Error("SAFETY STOP: Isolated local test connection required.");
+    }
+    const url = new URL(databaseUrl);
+    if (
+      !["postgresql:", "postgres:"].includes(url.protocol) ||
+      !["localhost", "127.0.0.1"].includes(url.hostname) ||
+      url.pathname !== "/codex" ||
+      url.searchParams.getAll("schema").length !== 1 ||
+      url.searchParams.get("schema") !== "phase6_test"
+    ) {
+      throw new Error("SAFETY STOP: Refusing tests outside codex.phase6_test.");
+    }
+    const identity = await prisma.$queryRaw<
+      Array<{ databaseName: string; schemaName: string }>
+    >`
+      SELECT current_database() AS "databaseName", current_schema() AS "schemaName"
+    `;
+    if (
+      identity.length !== 1 ||
+      identity[0]?.databaseName !== "codex" ||
+      identity[0]?.schemaName !== "phase6_test"
+    ) {
+      throw new Error("SAFETY STOP: PostgreSQL identity mismatch.");
+    }
+
     // Create test user
     await prisma.user.create({
       data: {
@@ -18,9 +48,11 @@ describe("Zero-balance account provisioning", () => {
         emailVerifiedAt: new Date(),
       },
     });
+    fixtureCreated = true;
   });
 
   afterEach(async () => {
+    if (!fixtureCreated) return;
     // Clean up test data
     await prisma.$transaction([
       prisma.ledgerEntry.deleteMany({ where: { ledgerAccount: { bankAccount: { userId: testUserId } } } }),

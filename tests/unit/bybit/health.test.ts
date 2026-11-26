@@ -92,7 +92,7 @@ describe("health monitoring", () => {
       recordProviderSuccess(50);
 
       // Initially live
-      let health = getProviderHealth();
+      const health = getProviderHealth();
       expect(health.status).toBe("live");
 
       // Wait for data to become stale (threshold is 60 seconds in config)
