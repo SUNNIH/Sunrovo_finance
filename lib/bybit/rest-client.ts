@@ -105,12 +105,23 @@ async function get<T>(
         });
 
         if (!response.ok) {
-          throw new BybitNetworkError(
-            `HTTP ${response.status}: ${response.statusText}`,
-            undefined,
-            response.status
-          );
-        }
+  const responseBody = await response.text();
+
+  console.error("[Bybit REST] HTTP request rejected", {
+    status: response.status,
+    statusText: response.statusText,
+    host: url.hostname,
+    endpoint: url.pathname,
+    region: process.env.VERCEL_REGION ?? "local-or-unknown",
+    response: responseBody.slice(0, 500),
+  });
+
+  throw new BybitNetworkError(
+    `HTTP ${response.status}: ${response.statusText}`,
+    undefined,
+    response.status
+  );
+}
 
         // Keep timeout active until JSON parsing completes.
         let data: BybitResponse<T>;
