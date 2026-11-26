@@ -22,6 +22,7 @@ interface AppShellProps {
 export function AppShell({ children, userName, userInitials }: AppShellProps) {
   const [collapsed, setCollapsed] = React.useState(false);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const closeDrawer = React.useCallback(() => setDrawerOpen(false), []);
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -33,7 +34,7 @@ export function AppShell({ children, userName, userInitials }: AppShellProps) {
       </a>
 
       <Sidebar collapsed={collapsed} onToggleCollapsed={() => setCollapsed((v) => !v)} />
-      <MobileNavDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <MobileNavDrawer open={drawerOpen} onClose={closeDrawer} />
 
       <div
         className={cn(

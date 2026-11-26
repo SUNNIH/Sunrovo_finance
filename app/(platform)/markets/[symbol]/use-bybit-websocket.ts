@@ -174,8 +174,10 @@ export function useBybitWebSocket({
 
     try {
       const ws = new WebSocket(BYBIT_WS_URL);
+      wsRef.current = ws;
 
       ws.onopen = () => {
+        if (wsRef.current !== ws) return;
         setStatus("connected");
         reconnectAttemptRef.current = 0;
 
@@ -191,15 +193,29 @@ export function useBybitWebSocket({
         startPing();
       };
 
-      ws.onmessage = handleMessage;
-
-      ws.onerror = (error) => {
-        console.error("[Bybit WS] Error:", error);
+      ws.onmessage = (event) => {
+        if (wsRef.current === ws) handleMessage(event);
       };
 
-      ws.onclose = () => {
+      ws.onerror = () => {
+        if (wsRef.current !== ws) return;
+        // Browser WebSocket errors do not expose the HTTP handshake details.
+        // The close event below reports the failure and schedules recovery.
+        setStatus("disconnected");
+      };
+
+      ws.onclose = (event) => {
+        if (wsRef.current !== ws) return;
+        wsRef.current = null;
         setStatus("disconnected");
         clearTimers();
+
+        if (!event.wasClean || event.code !== 1000) {
+          console.warn("[Bybit WS] Connection closed; retrying when enabled", {
+            code: event.code,
+            wasClean: event.wasClean,
+          });
+        }
 
         // Auto-reconnect with exponential backoff
         if (enabled) {
@@ -210,13 +226,13 @@ export function useBybitWebSocket({
             ] || 30000;
 
           reconnectTimerRef.current = setTimeout(() => {
+            reconnectTimerRef.current = null;
             reconnectAttemptRef.current++;
             connect();
           }, delay);
         }
       };
 
-      wsRef.current = ws;
     } catch (error) {
       console.error("[Bybit WS] Connection failed:", error);
       setStatus("disconnected");
@@ -225,9 +241,18 @@ export function useBybitWebSocket({
 
   const disconnect = useCallback(() => {
     clearTimers();
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
+    const ws = wsRef.current;
+    wsRef.current = null;
+    reconnectAttemptRef.current = 0;
+    if (ws) {
+      // Invalidate callbacks before closing: cleanup must not schedule a retry.
+      ws.onopen = null;
+      ws.onmessage = null;
+      ws.onerror = null;
+      ws.onclose = null;
+      if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+        ws.close();
+      }
     }
     setStatus("disconnected");
   }, [clearTimers]);
