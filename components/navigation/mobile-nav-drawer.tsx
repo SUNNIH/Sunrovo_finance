@@ -88,10 +88,10 @@ export function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps) {
         <div
           className={cn(
             "flex h-16 items-center justify-between border-b border-border px-4",
-            "plt-grid-texture"
+            "glass-swirl-effect"
           )}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 relative z-10">
             <FiseLogo variant="mark" className="h-8 w-8" />
             <FiseLogo className="h-9 w-auto max-w-[154px]" />
           </div>
@@ -100,7 +100,7 @@ export function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps) {
             onClick={onClose}
             aria-label="Close menu"
             className={cn(
-              "touch-target inline-flex items-center justify-center rounded-lg",
+              "touch-target inline-flex items-center justify-center rounded-lg relative z-10",
               "text-text-secondary transition-colors duration-200 ease-out hover:bg-surface-hover"
             )}
           >

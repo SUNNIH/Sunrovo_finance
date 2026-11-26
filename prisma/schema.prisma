@@ -115,9 +115,12 @@ enum OrderSide {
 enum OrderType {
   MARKET
   LIMIT
+  STOP_LOSS
+  TAKE_PROFIT // internal TP-only bracket (SL+TP uses STOP_LOSS)
 }
 
 enum OrderStatus {
+  PENDING
   OPEN
   FILLED
   PARTIALLY_FILLED
@@ -507,9 +510,13 @@ model CryptoOrder {
   type           OrderType
   quantity       Decimal     @db.Decimal(36, 18)
   limitPrice     Decimal?    @db.Decimal(36, 18)
+  stopPrice      Decimal?    @db.Decimal(36, 18) // Protective SL trigger
+  takeProfitPrice Decimal?   @db.Decimal(36, 18) // Protective TP trigger, shares reserved funds
+  exitTrigger    String?     // STOP_LOSS or TAKE_PROFIT after protective exit executes
   filledPrice    Decimal?    @db.Decimal(36, 18)
   feeAmount      Decimal     @default(0) @db.Decimal(36, 18)
   status         OrderStatus @default(OPEN)
+  parentOrderId  String?     // Links stop-loss protection to parent order
   idempotencyKey String      @unique
   ledgerGroupId  String?
   createdAt      DateTime    @default(now())
@@ -518,6 +525,8 @@ model CryptoOrder {
 
   @@index([userId, createdAt])
   @@index([symbol, status])
+  @@index([status, type, symbol]) // For stop-loss monitoring
+  @@index([parentOrderId]) // For linking protection to parent
   @@map("crypto_orders")
 }
 

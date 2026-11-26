@@ -38,7 +38,7 @@ export function Sidebar({ collapsed, onToggleCollapsed, className }: SidebarProp
         "hidden lg:flex lg:flex-col",
         "border-r border-border bg-surface-elevated",
         "fixed left-0 top-0 bottom-0 shrink-0 transition-[width] duration-300 ease-out",
-        /* Subtle blue cast on the right edge — matches auth page primary glow */
+        /* Subtle cast on the right edge — matches auth page primary glow */
         "shadow-[1px_0_0_hsl(var(--primary)/0.06)]",
         collapsed ? "lg:w-[76px]" : "lg:w-[248px]",
         className
@@ -49,11 +49,11 @@ export function Sidebar({ collapsed, onToggleCollapsed, className }: SidebarProp
       <div
         className={cn(
           "flex h-16 shrink-0 items-center gap-3 border-b border-border px-4",
-          "plt-grid-texture" /* subtle financial texture in header strip */
+          "glass-swirl-effect" /* premium swirling 3D glass effect */
         )}
       >
-        <FiseLogo variant="mark" className="h-8 w-8" />
-        {!collapsed && <FiseLogo className="h-9 w-auto max-w-[154px]" />}
+        <FiseLogo variant="mark" className="h-8 w-8 relative z-10" />
+        {!collapsed && <FiseLogo className="h-9 w-auto max-w-[154px] relative z-10" />}
       </div>
 
       {/* ── Primary navigation (scrollable) ── */}

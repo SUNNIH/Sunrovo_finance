@@ -48,7 +48,7 @@ export function ThemePreferenceCard() {
           <div>
             <CardTitle className="text-base font-semibold text-text-primary">Appearance &amp; Theme</CardTitle>
             <CardDescription className="text-xs text-text-secondary mt-0.5">
-              Select your preferred visual style for the FISE Holdings Trust Bank interface.
+              Select your preferred visual style for the Sunrovo Finance interface.
             </CardDescription>
           </div>
         </div>

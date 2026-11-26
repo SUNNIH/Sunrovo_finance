@@ -18,7 +18,7 @@ export function MobileBottomNavigation() {
       className={cn(
         "fixed inset-x-0 bottom-0 z-40 lg:hidden",
         "border-t border-border/80 bg-surface-elevated/[0.97] backdrop-blur-md",
-        /* Subtle blue upward shadow — mirrors the header's downward cast */
+        /* Subtle upward shadow — mirrors the header's downward cast */
         "shadow-[0_-1px_0_hsl(var(--primary)/0.05)]"
       )}
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}

@@ -8,10 +8,12 @@ import {
   Home,
   LayoutGrid,
   LifeBuoy,
+  LineChart,
   Settings,
   Shield,
   Users,
   Wallet,
+  ListOrdered,
 } from "lucide-react";
 
 import { CARDS_ENABLED } from "@/lib/feature-flags";
@@ -46,7 +48,9 @@ export const SIDEBAR_NAV: NavGroup[] = [
   {
     label: "Crypto",
     items: [
+      { label: "Markets", href: "/markets", icon: LineChart },
       { label: "Wallets", href: "/wallets", icon: Wallet },
+      { label: "Trade", href: "/trade", icon: ListOrdered },
       { label: "Deposit", href: "/deposit", icon: Download },
     ],
   },
@@ -66,10 +70,10 @@ export const SUPPORT_NAV_ITEM: NavItem = {
   icon: LifeBuoy,
 };
 
-/** Mobile bottom navigation (design memory: Home, Wallets, Transfer, Accounts, More). */
+/** Mobile bottom navigation (design memory: Home, Markets, Transfer, Accounts, More). */
 export const MOBILE_NAV: NavItem[] = [
   { label: "Home", href: "/dashboard", icon: Home },
-  { label: "Wallets", href: "/wallets", icon: Wallet },
+  { label: "Markets", href: "/markets", icon: LineChart },
   { label: "Transfer", href: "/transfers", icon: ArrowLeftRight },
   { label: "Accounts", href: "/accounts", icon: Banknote },
   { label: "More", href: "/profile", icon: Settings },

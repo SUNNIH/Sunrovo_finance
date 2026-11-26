@@ -45,7 +45,7 @@ export default function LandingPage() {
     <div className="min-h-screen overflow-x-hidden bg-background text-text-primary">
       <header className="sticky top-0 z-30 border-b border-border/70 bg-surface-elevated/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-2 px-4 sm:gap-5 sm:px-6 lg:px-8">
-          <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="FISE Holdings Trust Bank home">
+          <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="Sunrovo Finance home">
             <FiseLogo variant="mark" className="h-8 w-8" alt="" />
             <FiseLogo className="hidden h-9 w-auto max-w-[154px] sm:block" />
           </Link>
@@ -75,16 +75,16 @@ export default function LandingPage() {
       <main>
         <section className="relative isolate overflow-hidden border-b border-border bg-surface">
           <BrandPeopleCarousel variant="hero" />
-          <div className="pointer-events-none absolute inset-0 -z-10 opacity-70 plt-grid-texture" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-0 -z-10 opacity-60 glass-swirl-effect" aria-hidden="true" />
           <div className="pointer-events-none absolute -left-24 top-12 -z-10 h-72 w-72 rounded-full bg-primary/15 blur-3xl" aria-hidden="true" />
           <div className="pointer-events-none absolute -right-20 top-20 -z-10 h-80 w-80 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
 
           <div className="relative z-10 mx-auto grid max-w-[1440px] items-center gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(440px,1.1fr)] lg:gap-16 lg:px-8 lg:py-28">
             <div className="max-w-2xl animate-fade-in-up">
               <FiseLogo className="h-12 w-auto max-w-[220px]" />
-              <p className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Finance · Investment · Security · Equity</p>
+              <p className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Banking · Transfers · Wallets · Security</p>
               <h1 className="mt-4 text-4xl font-bold tracking-[-0.035em] text-text-primary sm:text-5xl lg:text-6xl lg:leading-[1.08]">Banking and digital assets, brought together.</h1>
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-text-secondary sm:text-lg">FISE Holdings Trust Bank provides one workspace for your accounts, transfers, wallets, and crypto deposits.</p>
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-text-secondary sm:text-lg">Sunrovo Finance provides one workspace for your accounts, transfers, wallets, and crypto deposits.</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 {REGISTRATION_ENABLED && (
                   <Link href="/register" className="w-full sm:w-auto"><Button size="lg" className="w-full shadow-md shadow-primary/20 transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25 sm:w-auto">Create your account<ChevronRight className="h-4 w-4" aria-hidden="true" /></Button></Link>
@@ -98,7 +98,7 @@ export default function LandingPage() {
               <div className="absolute -inset-4 rounded-[2rem] bg-primary/10 blur-2xl" aria-hidden="true" />
               <div className="relative overflow-hidden rounded-2xl border border-border bg-surface-elevated/90 p-4 shadow-xl shadow-primary/10 backdrop-blur-sm sm:p-5">
                 <div className="flex items-center justify-between border-b border-border pb-4">
-                  <div className="flex items-center gap-3"><FiseLogo variant="mark" className="h-9 w-9" alt="" /><div><p className="text-sm font-semibold text-text-primary">Your FISE workspace</p><p className="text-body-sm text-text-secondary">A clear view of what matters</p></div></div>
+                  <div className="flex items-center gap-3"><FiseLogo variant="mark" className="h-9 w-9" alt="" /><div><p className="text-sm font-semibold text-text-primary">Your Sunrovo workspace</p><p className="text-body-sm text-text-secondary">A clear view of what matters</p></div></div>
                   <span className="rounded-full border border-primary/20 bg-primary-soft px-2.5 py-1 text-label font-semibold text-primary">FHT</span>
                 </div>
 
@@ -142,9 +142,9 @@ export default function LandingPage() {
         </section>
 
         <section className="relative overflow-hidden bg-surface">
-          <div className="pointer-events-none absolute inset-0 opacity-40 plt-grid-texture" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-0 opacity-35 glass-swirl-effect" aria-hidden="true" />
           <div className="relative mx-auto grid max-w-[1440px] gap-8 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1fr_auto] lg:items-end lg:px-8">
-            <div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">FISE Holdings Trust Bank</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Start with a workspace made for clarity.</h2><p className="mt-4 text-base leading-relaxed text-text-secondary">{REGISTRATION_ENABLED ? "Create an account to access banking and digital asset wallet tools in FHT." : "Sign in to access banking and digital asset wallet tools in FHT."}</p></div>
+            <div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Sunrovo Finance</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Start with a workspace made for clarity.</h2><p className="mt-4 text-base leading-relaxed text-text-secondary">{REGISTRATION_ENABLED ? "Create an account to access banking and digital asset wallet tools in FHT." : "Sign in to access banking and digital asset wallet tools in FHT."}</p></div>
             {REGISTRATION_ENABLED ? (
               <Link href="/register" className="w-full lg:w-auto"><Button size="lg" className="w-full shadow-md shadow-primary/20 lg:w-auto">Create your account<ChevronRight className="h-4 w-4" aria-hidden="true" /></Button></Link>
             ) : (
@@ -165,7 +165,9 @@ export default function LandingPage() {
               Privacy Policy
             </Link>
           </div>
-          <div className="max-w-3xl lg:text-right"><p>FISE Holdings Trust Bank (FHT).</p><p className="mt-1 text-text-tertiary">&copy; {new Date().getFullYear()} FISE Holdings Trust Bank. All rights reserved.</p></div>
+          <div className="max-w-3xl lg:text-right">
+            <p className="text-text-tertiary">&copy; {new Date().getFullYear()} Sunrovo Finance. All rights reserved.</p>
+          </div>
         </div>
       </footer>
     </div>
