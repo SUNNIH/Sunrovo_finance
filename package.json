@@ -1,8 +1,8 @@
 {
-  "name": "platinum-trust-bank",
+  "name": "sunrovo-finance",
   "version": "0.6.0-phase6",
   "private": true,
-  "description": "FISE Holdings Trust Bank (FHT) - digital banking and cryptocurrency application",
+  "description": "Sunrovo Finance - Digital banking, cryptocurrency exchange, and Long and Short trading platform",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
