@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 export function ForgotPasswordForm() {
-  const [submitted, setSubmitted] = React.useState(false);
+  const [submittedEmail, setSubmittedEmail] = React.useState<string | null>(null);
   const [serverError, setServerError] = React.useState<string | null>(null);
 
   const {
@@ -22,25 +22,35 @@ export function ForgotPasswordForm() {
   } = useForm<ForgotPasswordInput>({ resolver: zodResolver(forgotPasswordSchema) });
 
   async function onSubmit(values: ForgotPasswordInput) {
-    setServerError(null);
-    try {
-      await postJson("/api/auth/forgot-password", values);
-      setSubmitted(true);
-    } catch (error) {
-      setServerError(error instanceof ApiRequestError ? error.message : "Something went wrong.");
-    }
-  }
+  setServerError(null);
 
-  if (submitted) {
+  try {
+    await postJson("/api/auth/forgot-password", values);
+    setSubmittedEmail(values.email);
+  } catch (error) {
+    setServerError(
+      error instanceof ApiRequestError
+        ? error.message
+        : "Something went wrong."
+    );
+  }
+}
+
+  if (submittedEmail) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
           <MailCheck className="h-10 w-10 text-primary" aria-hidden="true" />
           <h1 className="text-section-title text-text-primary">Check your email</h1>
           <p className="text-sm text-text-secondary">
-            If an account exists for that address, we&rsquo;ve sent a link to reset your password.
-            It expires in 30 minutes.
-          </p>
+  If an account is associated with{" "}
+  <span className="font-semibold text-text-primary break-all">
+    {submittedEmail}
+  </span>
+  , a password reset link has been sent to that address.
+  Please check your inbox and spam folder.
+  The link expires in 30 minutes.
+</p>
           <Link href="/login" className="mt-2">
             <Button variant="outline">Back to sign in</Button>
           </Link>

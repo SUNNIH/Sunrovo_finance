@@ -123,6 +123,12 @@ export function LoginForm() {
           )}
         </Button>
 
+        <p className="text-center text-sm text-text-secondary">
+          <Link href="/verify-email" className="font-medium text-primary hover:underline">
+            Resend verification email
+          </Link>
+        </p>
+
         {REGISTRATION_ENABLED && (
           <p className="text-center text-sm text-text-secondary">
             Don&rsquo;t have an account?{" "}

@@ -23,6 +23,10 @@ function getTransporter(): Transporter | null {
   if (cachedTransporter !== undefined) return cachedTransporter;
 
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD } = process.env;
+  if (process.env.NODE_ENV === "production" && (!SMTP_HOST || !SMTP_USER || !SMTP_PASSWORD)) {
+    // Never simulate delivery or write verification/reset links into production logs.
+    throw new Error("Production SMTP configuration is incomplete.");
+  }
   if (!SMTP_HOST) {
     cachedTransporter = null;
     return cachedTransporter;
@@ -42,8 +46,8 @@ export async function sendEmail({ to, subject, html, text }: SendEmailInput): Pr
   const from = process.env.EMAIL_FROM ?? "Sunrovo finance <no-reply@Sunrovo.example>";
 
   if (!transporter) {
-    // Simulated delivery: never throw here, and never log the raw
-    // credential/token payload beyond what a real inbox would show.
+    // Local development only: logs contain sensitive one-time links.
+    // Never share these logs or use simulated delivery in production.
     console.log(
       `[FHT demo email] SMTP not configured — simulating send.\n  To: ${to}\n  Subject: ${subject}\n  Body:\n${text}\n`
     );

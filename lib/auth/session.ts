@@ -2,6 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
+import { AuthError } from "@/features/authentication/errors";
 import { generateRawToken, hashToken } from "./tokens";
 
 /**
@@ -27,6 +28,18 @@ export interface RequestMeta {
 }
 
 export async function createSession(userId: string, meta: RequestMeta = {}) {
+  // Recheck at the session issuance boundary, including alternative callers.
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { status: true, emailVerifiedAt: true },
+  });
+  if (!user || user.status !== "ACTIVE") {
+    throw new AuthError("ACCOUNT_INACTIVE", "This account is not active. Contact support.", 403);
+  }
+  if (!user.emailVerifiedAt) {
+    throw new AuthError("EMAIL_NOT_VERIFIED", "Verify your email address before signing in. You can request a new verification link.", 403);
+  }
+
   const rawToken = generateRawToken();
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
 
@@ -98,7 +111,7 @@ export async function getCurrentUser() {
     await prisma.session.delete({ where: { id: session.id } }).catch(() => undefined);
     return null;
   }
-  if (session.user.status !== "ACTIVE") return null;
+  if (session.user.status !== "ACTIVE" || !session.user.emailVerifiedAt) return null;
 
   return session.user;
 }

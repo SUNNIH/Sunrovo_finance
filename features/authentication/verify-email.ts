@@ -18,16 +18,32 @@ export async function verifyEmailToken(rawToken: string): Promise<void> {
     throw new AuthError("TOKEN_EXPIRED", "This verification link has expired. Request a new one.", 400);
   }
 
-  await prisma.$transaction([
-    prisma.verificationToken.update({
-      where: { id: record.id },
-      data: { consumedAt: new Date() },
-    }),
-    prisma.user.update({
-      where: { id: record.userId },
-      data: { emailVerifiedAt: new Date() },
-    }),
-  ]);
+  await prisma.$transaction(async (tx) => {
+    const now = new Date();
+    // Claim an unconsumed, unexpired token exactly once, even under concurrency.
+    const claim = await tx.verificationToken.updateMany({
+      where: {
+        id: record.id,
+        type: "EMAIL_VERIFICATION",
+        consumedAt: null,
+        expiresAt: { gt: now },
+      },
+      data: { consumedAt: now },
+    });
+    if (claim.count !== 1) {
+      throw new AuthError("INVALID_TOKEN", "This verification link is no longer valid. Request a new one.", 400);
+    }
+
+    const verified = await tx.user.updateMany({
+      where: { id: record.userId, emailVerifiedAt: null },
+      data: { emailVerifiedAt: now },
+    });
+    if (verified.count === 1) {
+      // Old sessions issued before enforcement must not become valid again.
+      await tx.session.deleteMany({ where: { userId: record.userId } });
+      await tx.trustedDevice.updateMany({ where: { userId: record.userId }, data: { trusted: false } });
+    }
+  });
 
   await writeAuditLog({
     actorUserId: record.userId,

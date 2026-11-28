@@ -4,20 +4,29 @@ import { LegalPage } from "@/components/legal/legal-page";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Privacy Policy for Sunrovo Finance.",
+  description: "Privacy Policy for the Sunrovo Finance software demonstration.",
 };
 
 export default function PrivacyPage() {
   return (
     <LegalPage
       title="PRIVACY POLICY"
-      effectiveDate="16 September 2016"
+      effectiveDate="28 November 2026"
     >
+
       <p>
-        Sunrovo Finance respects the privacy and security of customer
-        information. This Privacy Policy explains how Sunrovo Finance collects, uses,
-        stores and protects personal information when customers use its
-        Services.
+        Sunrovo Finance respects the privacy of its users. This Privacy Policy
+        explains how personal information may be collected, used, stored,
+        shared and protected when you register for or use the Sunrovo Finance
+        website and its features.
+      </p>
+
+      <p className="mt-3 font-semibold">
+        Sunrovo Finance is a live software portfolio demonstration under
+        active development, not a licensed financial institution. Financial
+        activity and balances are simulated, but personal information
+        submitted to the live website is real data. Do not deposit, transfer
+        or invest real funds through the platform.
       </p>
 
       <section>
@@ -26,23 +35,50 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          Depending on the Services used, Sunrovo Finance may collect:
+          Depending on the features you use, Sunrovo Finance may collect the
+          following information:
         </p>
 
         <ul className="mt-3 list-disc space-y-2 pl-6">
-          <li>Name and contact information;</li>
-          <li>Date of birth and identification information;</li>
-          <li>KYC and verification information;</li>
-          <li>Account and transaction information;</li>
-          <li>Payment and banking information;</li>
-          <li>Device and technical information;</li>
-          <li>Login and security information;</li>
-          <li>Communications with Sunrovo Finance; and</li>
           <li>
-            Information required to prevent fraud and comply with applicable
-            law.
+            Your full name, email address and account registration details;
+          </li>
+          <li>
+            Profile and onboarding details, including country, phone number,
+            date of birth, preferred currency and account type, where
+            provided;
+          </li>
+          <li>
+            Password hashes, email verification status, security settings and
+            information associated with multi-factor authentication (MFA) and
+            transaction PINs;
+          </li>
+          <li>
+            Session records, IP addresses, browser information, device
+            identifiers, trusted device records and login activity;
+          </li>
+          <li>
+            Simulated account balances, wallet records, transaction history,
+            deposit and withdrawal requests, transfer details, trading orders
+            and watchlists;
+          </li>
+          <li>
+            Information you submit in transaction notes, support
+            communications or other platform forms; and
+          </li>
+          <li>
+            Technical records and audit logs used to operate, troubleshoot and
+            protect the platform.
           </li>
         </ul>
+
+        <p className="mt-2">
+          Onboarding identity checks are simulated and do not constitute
+          regulated Know Your Customer (KYC) verification. Do not submit
+          government identification documents, real payment credentials,
+          private keys, recovery phrases or other sensitive information that
+          is unnecessary for using the demonstration.
+        </p>
       </section>
 
       <section>
@@ -51,40 +87,76 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          Sunrovo Finance may use customer information to:
+          We use personal information for purposes associated with operating
+          and developing Sunrovo Finance, including:
         </p>
 
         <ul className="mt-3 list-disc space-y-2 pl-6">
-          <li>Open and manage accounts;</li>
-          <li>Process transactions and payments;</li>
-          <li>Provide banking Services;</li>
-          <li>Verify customer identity;</li>
-          <li>Prevent fraud and financial crime;</li>
-          <li>Meet KYC, AML and sanctions obligations;</li>
-          <li>Maintain security;</li>
-          <li>Provide customer support;</li>
-          <li>Improve Services;</li>
-          <li>Meet legal and regulatory obligations; and</li>
           <li>
-            Protect the rights and property of Sunrovo Finance and its customers.
+            Creating and managing user accounts and profiles;
+          </li>
+          <li>
+            Verifying email addresses and supporting secure login, MFA and
+            password recovery;
+          </li>
+          <li>
+            Providing simulated banking, cryptocurrency conversion and trading
+            features;
+          </li>
+          <li>
+            Processing and reviewing simulated transaction requests and
+            maintaining ledger records;
+          </li>
+          <li>
+            Protecting accounts, preventing unauthorized access and
+            investigating misuse;
+          </li>
+          <li>
+            Sending account-related communications and notifications;
+          </li>
+          <li>
+            Diagnosing software errors, testing reliability and improving the
+            platform; and
+          </li>
+          <li>
+            Responding to privacy requests and meeting applicable legal
+            obligations.
           </li>
         </ul>
+
+        <p className="mt-2">
+          Where applicable law requires a lawful basis for processing, the
+          basis may include providing requested platform functionality,
+          legitimate interests in operating and securing the demonstration,
+          compliance with legal obligations, or consent where required.
+        </p>
       </section>
 
       <section>
         <h2 className="text-lg font-semibold text-text-primary">
-          3. Financial and Transaction Information
+          3. Simulated Financial and Transaction Information
         </h2>
 
         <p className="mt-2">
-          Sunrovo Finance maintains records of customer accounts, deposits, withdrawals,
-          transfers, payments and other transactions as required for banking
-          operations, security, accounting and regulatory purposes.
+          Sunrovo Finance maintains records of virtual current and savings
+          accounts, cryptocurrency wallets, deposits, withdrawals, transfers,
+          conversions, trading orders and positions. These records support
+          simulated financial workflows, accounting, reconciliation,
+          administrative review and software testing.
         </p>
 
         <p className="mt-2">
-          Transaction records may be retained for periods required by
-          applicable law and regulatory requirements.
+          Displayed account numbers, wallet addresses, balances and
+          transaction records are for demonstration purposes. They do not
+          represent real funds or assets held by Sunrovo Finance. Do not use
+          real bank details or send real funds or cryptocurrency to the
+          platform.
+        </p>
+
+        <p className="mt-2">
+          Although transactions are simulated, the account information and
+          activity associated with an identifiable user may still be personal
+          information and are treated accordingly.
         </p>
       </section>
 
@@ -94,14 +166,18 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          Sunrovo Finance may use cookies and similar technologies to maintain secure
-          sessions, remember preferences, analyze service performance and
-          improve the customer experience.
+          Sunrovo Finance uses session cookies and related security mechanisms
+          to maintain authentication and protect requests. Device and browser
+          information may also be used to recognize trusted devices and detect
+          unusual login activity.
         </p>
 
         <p className="mt-2">
-          Customers may be able to control certain cookies through their
-          browser or device settings.
+          You can manage cookies through your browser settings. Blocking or
+          deleting essential cookies may prevent login or other authenticated
+          features from working correctly. Signing out ends your current
+          authenticated access; clearing browser cookies alone does not
+          necessarily revoke a server-side session.
         </p>
       </section>
 
@@ -111,48 +187,62 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          Sunrovo Finance may share information where necessary with:
+          Information may be accessed or processed where necessary by the
+          platform operator, authorized administrators and service providers
+          supporting the demonstration, including:
         </p>
 
         <ul className="mt-3 list-disc space-y-2 pl-6">
-          <li>Payment networks and financial institutions;</li>
-          <li>Service providers;</li>
-          <li>Technology and security providers;</li>
-          <li>Regulators and government authorities;</li>
-          <li>Law-enforcement agencies where legally required;</li>
-          <li>Professional advisers; and</li>
           <li>
-            Other parties where authorized by the customer or permitted by law.
+            Vercel, for application hosting, request processing and
+            operational logs;
+          </li>
+          <li>
+            The PostgreSQL database hosting provider, for storage and
+            retrieval of application records;
+          </li>
+          <li>
+            Google Gmail SMTP, when configured for email verification and
+            password recovery, which processes recipient addresses and message
+            contents;
+          </li>
+          <li>
+            Bybit, for public cryptocurrency market data and related market
+            requests; and
+          </li>
+          <li>
+            Other parties where authorized by you or where disclosure is
+            required by applicable law.
           </li>
         </ul>
 
         <p className="mt-2">
-          Sunrovo Finance does not sell customer financial information for unrelated
-          commercial purposes.
+          Bybit market-data integration is not intended to execute real trades
+          or provide custody of user funds. Technical information associated
+          with requests may be processed by the relevant provider. We do not
+          intend to sell personal information or use it for unrelated
+          advertising purposes.
         </p>
       </section>
 
       <section>
         <h2 className="text-lg font-semibold text-text-primary">
-          6. Regulatory and Legal Disclosure
+          6. Legal Disclosure
         </h2>
 
         <p className="mt-2">
-          Sunrovo Finance may disclose customer information where required or permitted by
-          law, including for:
+          Sunrovo Finance may disclose information where necessary and
+          permitted or required by applicable law, such as to respond to valid
+          court orders or lawful requests, investigate security incidents or
+          unlawful activity, protect the rights and safety of users, or
+          establish or defend legal claims.
         </p>
 
-        <ul className="mt-3 list-disc space-y-2 pl-6">
-          <li>Fraud investigations;</li>
-          <li>AML and counter-terrorist-financing requirements;</li>
-          <li>Sanctions compliance;</li>
-          <li>Court orders;</li>
-          <li>Regulatory investigations;</li>
-          <li>Law-enforcement requests; and</li>
-          <li>
-            Protection of customers, the Bank or the financial system.
-          </li>
-        </ul>
+        <p className="mt-2">
+          The demonstration is not a regulated bank or financial institution
+          and does not claim to operate a regulated financial crime monitoring
+          or sanctions-screening program.
+        </p>
       </section>
 
       <section>
@@ -161,9 +251,17 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          Where customer information must be transferred or processed outside
-          the customer&apos;s country, Sunrovo Finance will take appropriate measures required
-          by applicable data-protection laws.
+          Cloud hosting, database services, email delivery and market-data
+          infrastructure may process information in countries other than your
+          country of residence.
+        </p>
+
+        <p className="mt-2">
+          Where applicable, international processing and transfers are subject
+          to relevant data-protection requirements. The locations and
+          safeguards used by service providers depend on their configurations
+          and terms. No particular country of storage is guaranteed by this
+          policy.
         </p>
       </section>
 
@@ -173,15 +271,19 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          Sunrovo Finance uses reasonable administrative, technical and organizational
-          measures designed to protect customer information against unauthorized
-          access, alteration, disclosure, loss and misuse.
+          Sunrovo Finance uses technical controls designed to protect
+          information, including password hashing, session management, email
+          verification mechanisms, optional multi-factor authentication,
+          access controls, request protection, rate limiting and audit
+          logging.
         </p>
 
         <p className="mt-2">
-          No electronic system can be guaranteed to be completely secure.
-          Customers must also protect their passwords, devices and
-          authentication credentials.
+          The platform is under active development, and no software system can
+          be guaranteed to be completely secure. You should use a unique
+          password, protect your devices and authentication credentials, and
+          avoid sharing verification links, password reset links or security
+          codes.
         </p>
       </section>
 
@@ -191,59 +293,79 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          Sunrovo Finance retains personal and financial information for as long as
-          reasonably necessary to provide Services and to meet legal,
-          regulatory, accounting, fraud-prevention and dispute-resolution
-          requirements.
+          Personal information and simulated transaction records may be
+          retained for as long as reasonably necessary to operate accounts,
+          maintain security, investigate errors, preserve accounting
+          consistency and meet applicable legal obligations.
         </p>
 
         <p className="mt-2">
-          Certain financial records may be retained after an account is closed
-          where required by law.
+          Session records, verification tokens, technical logs and backups may
+          have different lifetimes. Expiration of a token or session does not
+          necessarily mean all related records are immediately deleted. The
+          platform does not promise a fixed retention period for every
+          category of information.
         </p>
       </section>
 
       <section>
         <h2 className="text-lg font-semibold text-text-primary">
-          10. Customer Privacy Rights
+          10. User Privacy Rights
         </h2>
 
         <p className="mt-2">
-          Subject to applicable law, customers may have rights concerning their
-          personal information, including rights to:
+          Depending on the applicable data-protection law, you may have the
+          right to:
         </p>
 
         <ul className="mt-3 list-disc space-y-2 pl-6">
-          <li>Request access to personal information;</li>
-          <li>Request correction of inaccurate information;</li>
-          <li>Request deletion where legally available;</li>
-          <li>Object to or restrict certain processing;</li>
-          <li>Withdraw consent where processing is based on consent; and</li>
           <li>
-            Submit a privacy complaint to the appropriate authority.
+            Request access to personal information relating to you;
+          </li>
+          <li>
+            Request correction of inaccurate or incomplete information;
+          </li>
+          <li>
+            Request deletion of personal information where applicable;
+          </li>
+          <li>
+            Object to or request restriction of certain processing;
+          </li>
+          <li>
+            Request a copy of your information in a portable format where
+            applicable;
+          </li>
+          <li>
+            Withdraw consent where processing relies on consent; and
+          </li>
+          <li>
+            Lodge a complaint with the relevant data-protection authority.
           </li>
         </ul>
 
         <p className="mt-2">
-          These rights may be limited where retention or processing is required
-          by law.
+          These rights may be subject to lawful exceptions and reasonable
+          identity verification before a request is fulfilled.
         </p>
       </section>
 
       <section>
         <h2 className="text-lg font-semibold text-text-primary">
-          11. Account Deletion
+          11. Account Closure and Deletion
         </h2>
 
         <p className="mt-2">
-          Customers may request account closure through Sunrovo Finance&apos;s approved
-          channels.
+          You may request closure of your demonstration account or deletion of
+          your personal information by contacting the platform operator.
+          Account closure does not necessarily mean immediate deletion of
+          every related record.
         </p>
 
         <p className="mt-2">
-          Closing an account does not necessarily result in immediate deletion
-          of all information. Financial and regulatory records may need to be
-          retained for the period required by law.
+          Some information may need to be retained temporarily for security,
+          backup management, simulated ledger consistency, dispute resolution
+          or applicable legal obligations. Deletion requests will be assessed
+          in accordance with applicable law.
         </p>
       </section>
 
@@ -253,13 +375,16 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          Sunrovo Finance&apos;s Services are intended for persons who are legally eligible
-          to open and operate the relevant financial account.
+          Sunrovo Finance is intended for adult users exploring simulated
+          financial software. It is not designed for children. Children should
+          not create accounts or submit personal information through the
+          demonstration.
         </p>
 
         <p className="mt-2">
-          Sunrovo Finance does not knowingly provide financial accounts to persons who are
-          legally prohibited from holding them.
+          If information relating to a child has been submitted, the platform
+          operator should be contacted so the information can be reviewed and
+          handled appropriately.
         </p>
       </section>
 
@@ -269,40 +394,57 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          Sunrovo Finance may send customers service-related communications concerning:
+          Sunrovo Finance may send service-related messages, including:
         </p>
 
         <ul className="mt-3 list-disc space-y-2 pl-6">
-          <li>Account activity;</li>
-          <li>Transactions;</li>
-          <li>Security alerts;</li>
-          <li>Service changes;</li>
-          <li>Regulatory requirements; and</li>
           <li>
-            Other information necessary to operate the customers account.
+            Email verification and resend verification messages;
+          </li>
+          <li>
+            Password reset instructions;
+          </li>
+          <li>
+            Account activity and security notifications;
+          </li>
+          <li>
+            Simulated transaction updates and administrative review
+            notifications; and
+          </li>
+          <li>
+            Important platform or policy changes.
           </li>
         </ul>
 
         <p className="mt-2">
-          Marketing communications, where applicable, will be handled in
-          accordance with applicable law and customer preferences.
+          These messages support the operation and security of your account.
+          If marketing communications are introduced, they will be subject to
+          applicable consent and opt-out requirements.
         </p>
       </section>
 
       <section>
         <h2 className="text-lg font-semibold text-text-primary">
-          14. Automated Security and Fraud Detection
+          14. Automated Security and Administrative Review
         </h2>
 
         <p className="mt-2">
-          Sunrovo Finance may use automated systems to detect suspicious transactions,
-          fraud, account compromise, sanctions concerns and other security
-          risks.
+          Automated controls may be used to limit repeated requests, check
+          authentication, validate transaction instructions and detect invalid
+          or unauthorized activity.
         </p>
 
         <p className="mt-2">
-          Where required by applicable law, customers may have rights concerning
-          certain automated decisions and may request appropriate review.
+          Authorized administrators may review simulated deposit, withdrawal
+          and external transfer requests and relevant audit records. Automated
+          checks and administrative decisions in this demonstration are not
+          real credit assessments or regulated financial eligibility
+          decisions.
+        </p>
+
+        <p className="mt-2">
+          Where applicable law provides rights relating to automated
+          decisions, you may request an explanation or appropriate review.
         </p>
       </section>
 
@@ -312,14 +454,16 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          Sunrovo Finance may provide links or integrations to third-party websites and
-          services.
+          Sunrovo Finance may display third-party market information, use
+          external infrastructure or provide links to other websites. External
+          services may have their own privacy policies and terms.
         </p>
 
         <p className="mt-2">
-          Third-party services operate under their own privacy policies and
-          terms. Sunrovo Finance is not responsible for the privacy practices of
-          independent third parties.
+          If you follow an external link, review the destination&rsquo;s
+          privacy policy before submitting information. The use of third-party
+          infrastructure does not remove any privacy responsibilities that
+          apply to Sunrovo Finance.
         </p>
       </section>
 
@@ -329,13 +473,15 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          Sunrovo Finance may update this Privacy Policy when its Services, technology,
-          legal obligations or data-processing practices change.
+          This Privacy Policy may be updated as Sunrovo Finance evolves,
+          including changes to features, service providers, security controls
+          or data-processing practices.
         </p>
 
         <p className="mt-2">
-          Material changes will be communicated through appropriate channels
-          where required.
+          The effective date will be updated when changes take effect, and
+          material changes will be communicated where required by applicable
+          law.
         </p>
       </section>
 
@@ -344,12 +490,27 @@ export default function PrivacyPage() {
           17. Contact Us
         </h2>
 
+        <p className="mt-2">
+          For questions, privacy requests or concerns about the handling of
+          personal information, contact the Sunrovo Finance project operator
+          through a verified project contact channel. Never include passwords,
+          verification codes or reset links in a privacy request.
+        </p>
+
         <div className="mt-2 space-y-1">
-          <p>Sunrovo Finance</p>
-          <p>Website: www.fiseholdings.com</p>
-          <p>Privacy Contact: fiseholdings@supportplt.com</p>
+          <p className="font-semibold">Sunrovo Finance</p>
+          <p>
+            Website:{" "}
+            <a
+              href="https://sunrovo-finace.vercel.app/"
+              className="underline break-all"
+            >
+              https://sunrovo-finace.vercel.app/
+            </a>
+          </p>
         </div>
       </section>
+
     </LegalPage>
   );
 }

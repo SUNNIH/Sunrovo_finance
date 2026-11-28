@@ -114,6 +114,10 @@ export async function loginUser(input: LoginInput, meta: RequestMeta): Promise<L
     throw new AuthError("ACCOUNT_INACTIVE", "This account is not active. Contact support.", 403);
   }
 
+  if (!user.emailVerifiedAt) {
+    throw new AuthError("EMAIL_NOT_VERIFIED", "Verify your email address before signing in. You can request a new verification link.", 403);
+  }
+
   const { deviceId } = await getOrCreateDeviceId();
   const deviceFingerprint = fingerprintDevice(deviceId, meta.userAgent);
   const trustedDevice = await prisma.trustedDevice.findUnique({
@@ -150,6 +154,14 @@ export async function verifyMfaAndLogin(input: MfaVerifyInput, meta: RequestMeta
 
   if (!user || !security?.mfaSecretEncrypted) {
     throw new AuthError("MFA_NOT_CONFIGURED", "MFA is not set up correctly for this account.", 400);
+  }
+
+  if (user.status !== "ACTIVE" || !user.emailVerifiedAt) {
+    await clearPendingMfaCookie();
+    if (user.status !== "ACTIVE") {
+      throw new AuthError("ACCOUNT_INACTIVE", "This account is not active. Contact support.", 403);
+    }
+    throw new AuthError("EMAIL_NOT_VERIFIED", "Verify your email address before signing in. You can request a new verification link.", 403);
   }
 
   const secret = decryptSecret(security.mfaSecretEncrypted);

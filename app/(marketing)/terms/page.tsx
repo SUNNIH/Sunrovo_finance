@@ -4,73 +4,85 @@ import { LegalPage } from "@/components/legal/legal-page";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "Terms of Service for Sunrovo Finance.",
+  description: "Terms of Service for the Sunrovo Finance software demonstration.",
 };
 
 export default function TermsPage() {
   return (
     <LegalPage
       title="TERMS OF SERVICE"
-      effectiveDate="16 September 2016"
+      effectiveDate="28 November 2026"
     >
       <p>
-        Last Updated: 16 September 2024
+        Last Updated: 28 November 2026
       </p>
 
       <p>
-        These Terms of Service (“Terms”) govern your access to and use of the
-        banking, financial and digital services provided by FISE HOLDING TRUST
-        BANK (“FISE,” “the Bank,” “we,” “us” or “our”) through our website,
-        mobile applications, electronic banking platforms, branches and other
-        approved channels (collectively, the “Services”).
+        These Terms of Service (&ldquo;Terms&rdquo;) govern access to and use
+        of Sunrovo Finance (&ldquo;Sunrovo Finance,&rdquo; &ldquo;the
+        platform,&rdquo; &ldquo;we,&rdquo; &ldquo;us&rdquo; or
+        &ldquo;our&rdquo;), a web-based portfolio project demonstrating
+        digital banking and simulated cryptocurrency services.
       </p>
 
       <p>
-        By opening an account, accessing the Services or conducting a transaction
-        through FISE, you agree to these Terms and any applicable
-        product-specific terms, notices and policies.
+        By registering an account or using the platform, you agree to these
+        Terms, subject to applicable law.
+      </p>
+
+      <p className="mt-3 font-semibold">
+        Important: Sunrovo Finance is a live software demonstration under
+        active development. It is not a licensed financial institution. All
+        financial transactions and balances are simulated. Do not deposit,
+        transfer or invest real funds through this platform.
       </p>
 
       <section>
         <h2 className="text-lg font-semibold text-text-primary">
-          1. Banking Services
+          1. Platform Services
         </h2>
 
         <p className="mt-2">
-          Depending on your eligibility and the products available in your
-          jurisdiction, FISE may provide services including:
+          Sunrovo Finance is a web-based software portfolio demonstration for
+          exploring digital banking and simulated financial workflows. It is
+          not a licensed bank, broker, cryptocurrency exchange, payment
+          institution or financial custodian. The live website is a deployed
+          demonstration, not a live financial service.
+        </p>
+
+        <p className="mt-3">
+          Depending on the features currently enabled, the platform may allow
+          you to explore:
         </p>
 
         <ul className="mt-3 list-disc space-y-2 pl-6">
-          <li>Current and savings accounts;</li>
-          <li>Deposits and withdrawals;</li>
-          <li>Domestic and international transfers;</li>
-          <li>Electronic and mobile banking;</li>
-          <li>Payment services;</li>
-          <li>Debit or payment cards;</li>
-          <li>Foreign-currency services;</li>
           <li>
-            Digital-asset or cryptocurrency services where legally permitted;
+            Simulated current and savings accounts and transaction records;
           </li>
-          <li>Statements and transaction records; and</li>
-          <li>Other financial products made available by the Bank.</li>
+          <li>
+            Simulated deposits, internal transfers, external transfer requests
+            and fiat withdrawal requests;
+          </li>
+          <li>
+            Virtual cryptocurrency wallets, market data, watchlists and
+            currency or asset conversions;
+          </li>
+          <li>
+            Simulated market and limit orders, long and short positions, and
+            linked stop-loss and take-profit orders where supported;
+          </li>
+          <li>
+            Administrative review and approval of selected simulated
+            transactions.
+          </li>
         </ul>
 
         <p className="mt-3">
-          Specific products may be subject to additional terms, eligibility
-          requirements, fees, limits and regulatory requirements.
-        </p>
-
-        <p className="mt-3">
-          FISE will provide its banking services in accordance with applicable
-          laws, regulations and regulatory requirements.
-        </p>
-
-        <p className="mt-3 font-semibold">
-          Regulatory information, including the Banks applicable licence,
-          regulatory authority, licence number, registered office and
-          deposit-insurance status, should be displayed on the Banks official
-          website and customer documentation.
+          All balances, credits, debits, fees, orders and transaction records
+          within the demonstration represent simulated activity. They do not
+          create a claim to money, cryptocurrency or other assets. Do not send
+          real funds or digital assets to any account details or wallet
+          addresses displayed on the platform.
         </p>
       </section>
 
@@ -80,25 +92,25 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          You must provide accurate and complete information when opening an
-          account or using our Services.
+          Provide accurate information necessary to create and maintain your
+          demonstration account, including an email address you control. Do
+          not impersonate another person or provide information you are not
+          authorized to use.
         </p>
 
         <p className="mt-3">
-          FISE may require identification and verification documents, including
-          information required for customer identification, Know Your Customer
-          (“KYC”), anti-money laundering (“AML”), counter-terrorist financing and
-          sanctions-screening requirements.
+          Email verification is required under these Terms before accessing
+          authenticated services. You may request a new verification link if
+          the original link expires or is not received. Email verification
+          confirms access to an email address; it is not financial identity
+          verification or regulatory KYC.
         </p>
 
         <p className="mt-3">
-          You must promptly update information that becomes inaccurate or
-          changes.
-        </p>
-
-        <p className="mt-3">
-          FISE may refuse or delay account opening where permitted or required
-          by law.
+          Do not submit government identification, real bank credentials,
+          payment card details or private wallet keys for the purpose of
+          testing this platform. Access may be restricted to protect the
+          platform or its users.
         </p>
       </section>
 
@@ -108,28 +120,22 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          You are responsible for maintaining the confidentiality of your
-          passwords, PINs, authentication credentials, cards, devices and other
-          security information.
+          Keep your password, transaction PIN, multi-factor authentication
+          credentials, devices and recovery information confidential. Use the
+          security controls provided by the platform and do not share
+          credentials or verification and password reset links.
         </p>
 
         <p className="mt-3">
-          You must notify FISE immediately if you believe that:
+          Report suspected unauthorized access, compromised credentials or
+          unusual account activity promptly through the project contact
+          channel when available.
         </p>
 
-        <ul className="mt-3 list-disc space-y-2 pl-6">
-          <li>Your account has been accessed without authorization;</li>
-          <li>
-            Your password, PIN or authentication credentials have been
-            compromised;
-          </li>
-          <li>Your card or device has been lost or stolen; or</li>
-          <li>A transaction appears unauthorized or fraudulent.</li>
-        </ul>
-
         <p className="mt-3">
-          FISE may suspend access to an account or transaction where reasonably
-          necessary to protect the customer, the Bank or the financial system.
+          Access may be restricted and sessions may be revoked when security
+          risks are identified. Do not attempt to bypass email verification,
+          authentication, authorization or administrative controls.
         </p>
       </section>
 
@@ -139,25 +145,24 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          Deposits and credits to your account will be recorded in accordance
-          with FISEs banking systems and applicable banking procedures.
+          Account balances are virtual balances recorded in the platform
+          database and ledger. They are not deposits held by a financial
+          institution and are not covered by deposit insurance. They have no
+          cash or redemption value.
         </p>
 
         <p className="mt-3">
-          A transaction may remain pending until it has been fully processed
-          and cleared.
+          Simulated incoming fiat deposit requests may remain pending until an
+          administrator reviews and approves or rejects them. Approval updates
+          the relevant virtual records only; it does not confirm receipt of
+          actual funds.
         </p>
 
         <p className="mt-3">
-          FISE may correct an account entry where an error, duplicate credit,
-          fraudulent transaction or unauthorized entry is identified, subject
-          to applicable law and customer-notification requirements.
-        </p>
-
-        <p className="mt-3">
-          Account statements and transaction records made available through
-          FISEs systems may be used as evidence of account activity, subject
-          to applicable law.
+          The platform may correct duplicate, erroneous or unauthorized
+          simulated entries. Transaction histories and statements are
+          demonstration records, not proof of real-world payment, ownership or
+          funds.
         </p>
       </section>
 
@@ -167,34 +172,38 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          Customers may initiate transfers and payments through approved FISE
-          channels.
+          The platform may support simulated transfers between accounts and
+          requests representing transfers to external institutions. Internal
+          transfers may be processed within the demonstration ledger, while
+          external transfer requests may require administrative approval.
         </p>
 
         <p className="mt-3">
-          Transactions may be subject to:
+          Transfers may be subject to:
         </p>
 
         <ul className="mt-3 list-disc space-y-2 pl-6">
-          <li>Authentication requirements;</li>
-          <li>Daily or transaction limits;</li>
-          <li>Recipient verification;</li>
-          <li>Fraud and security screening;</li>
-          <li>Regulatory checks;</li>
-          <li>Processing times; and</li>
-          <li>Applicable fees.</li>
+          <li>
+            Authentication and authorization requirements;
+          </li>
+          <li>
+            Available virtual balance and transaction limits;
+          </li>
+          <li>
+            Recipient information checks;
+          </li>
+          <li>
+            Administrative review, simulated fees and processing rules.
+          </li>
         </ul>
 
         <p className="mt-3">
-          Customers are responsible for verifying recipient information before
-          authorizing a transaction.
-        </p>
-
-        <p className="mt-3">
-          Where a payment has already been completed, cancellation or reversal
-          may not be possible. FISE may nevertheless investigate and process
-          recovery or reversal requests where permitted by the applicable
-          payment system, recipient institution and law.
+          Review recipient details and transaction amounts before submitting a
+          request. An approved or completed transfer is a change in
+          demonstration records only and does not instruct a bank, payment
+          network or other financial institution to move actual funds.
+          Completed simulated transfers may not be cancellable through the
+          interface.
         </p>
       </section>
 
@@ -204,15 +213,23 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          Withdrawals may be subject to available balance requirements,
-          transaction limits, identity verification, security checks and
-          applicable fees.
+          Withdrawals are simulated fiat withdrawal requests. They are subject
+          to available virtual balances, supported currencies, applicable
+          limits and administrative review.
         </p>
 
         <p className="mt-3">
-          FISE may delay or restrict a withdrawal where required for fraud
-          prevention, legal compliance, sanctions screening, investigation or
-          other legitimate banking purposes.
+          The current demonstrated withdrawal policy requires a minimum of USD
+          100 or its equivalent in a supported fiat currency. All withdrawal
+          requests require administrator approval. Direct cryptocurrency
+          withdrawals are not supported.
+        </p>
+
+        <p className="mt-3">
+          A pending request may reserve or deduct a virtual balance in
+          accordance with the workflow. Approval or rejection is reflected in
+          the ledger, including any applicable simulated refund. No withdrawal
+          results in a real payment or redemption of funds.
         </p>
       </section>
 
@@ -222,32 +239,37 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          Where FISE makes cryptocurrency or digital-asset services available,
-          such services will be subject to applicable law, regulatory
-          requirements and FISEs specific digital-asset terms.
+          The platform uses third-party market information, including Bybit
+          market data, to demonstrate cryptocurrency pricing, virtual wallet
+          valuation, conversions and simulated trading. Orders are not
+          submitted to Bybit or another exchange on your behalf.
         </p>
 
         <p className="mt-3">
-          Digital assets may involve significant price volatility and
-          transaction risks.
+          Available trading features may include market and limit orders, long
+          and short positions, stop-loss and take-profit orders, and
+          one-cancels-the-other (OCO) relationships where implemented and
+          enabled.
         </p>
 
         <p className="mt-3">
-          Customers are responsible for confirming wallet addresses and
-          transaction details before authorizing a digital-asset transfer.
-          Blockchain transactions may be irreversible once confirmed.
+          Market data may be delayed, inaccurate or unavailable. Simulated
+          order execution and conversions may differ from actual market
+          outcomes because of price movement, liquidity assumptions, quote
+          expiration, processing delays and software limitations.
         </p>
 
         <p className="mt-3">
-          Cryptocurrency balances should not automatically be treated as
-          equivalent to insured bank deposits unless FISE expressly states
-          otherwise and applicable law provides such treatment.
+          Stop-loss and take-profit functionality is not a guarantee of
+          execution at a particular price or of continuous monitoring.
+          Simulated performance does not predict real trading results. Do not
+          use the platform as the sole basis for financial decisions.
         </p>
 
         <p className="mt-3">
-          FISE may suspend or restrict digital-asset transactions where required
-          for security, fraud prevention, AML/KYC compliance, sanctions
-          screening or regulatory purposes.
+          Virtual wallet balances and addresses do not establish custody or
+          ownership of real digital assets. Do not transfer cryptocurrency to
+          any address displayed by the demonstration.
         </p>
       </section>
 
@@ -257,19 +279,16 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          Applicable fees, charges, exchange rates and transaction limits will
-          be communicated through FISEs website, account documentation,
-          transaction interface or other approved communication channels.
+          The platform may calculate simulated fees, exchange rates, spreads
+          and other transaction amounts as part of its financial workflows.
+          Review the values displayed in the relevant interface before
+          confirming a request.
         </p>
 
         <p className="mt-3">
-          Fees may vary according to the type of account, transaction, payment
-          method, currency, service or customer category.
-        </p>
-
-        <p className="mt-3">
-          Where required by law, customers will receive appropriate notice of
-          material changes to applicable fees.
+          Simulated fees and transaction limits may change as the application
+          develops. Virtual fees are ledger entries and do not represent a
+          charge to your real bank account, card or cryptocurrency wallet.
         </p>
       </section>
 
@@ -279,32 +298,17 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          Banking transactions are different from ordinary retail purchases and
-          are not automatically refundable.
+          Failed, rejected, duplicated or incorrectly processed simulated
+          transactions may be investigated and corrected through the
+          applicable administrative or ledger workflow.
         </p>
 
         <p className="mt-3">
-          Where a transaction fails, is duplicated, is incorrectly processed or
-          is otherwise eligible for reversal, FISE will investigate the
-          transaction and process any applicable correction, refund or reversal
-          in accordance with applicable law and payment-system rules.
-        </p>
-
-        <p className="mt-3">
-          A customer must report a suspected unauthorized or erroneous
-          transaction promptly.
-        </p>
-
-        <p className="mt-3">
-          Refunds or reversals may be subject to verification and may take time
-          to process because another financial institution, payment processor or
-          payment network may be involved.
-        </p>
-
-        <p className="mt-3">
-          Fees already charged may be refundable where required by law or where
-          FISE determines that the fee resulted from an error attributable to
-          the Bank.
+          A simulated reversal or refund changes virtual balances and records
+          only. It does not entitle you to reimbursement in real money or
+          digital assets. Report inconsistent records promptly and do not
+          exploit errors or submit repeated requests to obtain unintended
+          virtual credits.
         </p>
       </section>
 
@@ -314,26 +318,40 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          Customers must not use FISE Services for unlawful or fraudulent
-          purposes, including:
+          Do not use Sunrovo Finance for unlawful, fraudulent or abusive
+          purposes. Prohibited conduct includes:
         </p>
 
         <ul className="mt-3 list-disc space-y-2 pl-6">
-          <li>Money laundering;</li>
-          <li>Terrorist financing;</li>
-          <li>Fraud or attempted fraud;</li>
-          <li>Sanctions evasion;</li>
-          <li>Identity theft;</li>
-          <li>Unauthorized access to another persons account;</li>
-          <li>Use of stolen payment credentials;</li>
-          <li>Financing unlawful activities;</li>
-          <li>Manipulation or abuse of payment systems; or</li>
-          <li>Any activity prohibited by applicable law.</li>
+          <li>
+            Misrepresenting the demonstration as a licensed financial
+            institution or using its records as proof of real funds;
+          </li>
+          <li>
+            Soliciting or accepting real payments, deposits or investments
+            through the demonstration;
+          </li>
+          <li>
+            Identity theft, impersonation or unauthorized access to other
+            accounts;
+          </li>
+          <li>
+            Attempting to bypass security controls, manipulate balances or
+            exploit transaction errors;
+          </li>
+          <li>
+            Introducing malicious code, disrupting availability or accessing
+            data without authorization;
+          </li>
+          <li>
+            Using the platform for fraud, unlawful financial activity or other
+            conduct prohibited by applicable law.
+          </li>
         </ul>
 
         <p className="mt-3">
-          FISE may report suspicious activity to competent authorities where
-          required or permitted by law.
+          Security incidents and suspected abuse may result in restricted
+          access or other appropriate action, subject to applicable law.
         </p>
       </section>
 
@@ -343,26 +361,23 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          FISE may restrict, suspend or close an account where permitted or
-          required by law, including where:
-        </p>
-
-        <ul className="mt-3 list-disc space-y-2 pl-6">
-          <li>Fraud or suspicious activity is detected;</li>
-          <li>KYC information cannot be satisfactorily verified;</li>
-          <li>The account is used for prohibited activity;</li>
-          <li>A legal or regulatory requirement applies;</li>
-          <li>Security risks are identified; or</li>
-          <li>The customer materially breaches these Terms.</li>
-        </ul>
-
-        <p className="mt-3">
-          Where legally permitted, FISE will provide appropriate notice.
+          Access to a demonstration account may be restricted, suspended or
+          terminated for security risks, misuse, a breach of these Terms,
+          maintenance or discontinuation of the project.
         </p>
 
         <p className="mt-3">
-          Any remaining eligible balance will be handled in accordance with
-          applicable law and the circumstances surrounding the account closure.
+          As a project under active development, test accounts and simulated
+          records may be reset, corrected or removed as necessary for
+          maintenance and testing, subject to applicable privacy and
+          data-protection obligations. Where practicable, notice will be
+          provided before planned changes affecting access.
+        </p>
+
+        <p className="mt-3">
+          Account closure or removal of virtual balances does not create a
+          right to a real payment. Any applicable rights concerning personal
+          information remain unaffected.
         </p>
       </section>
 
@@ -372,19 +387,17 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          FISE aims to maintain reliable banking services but does not guarantee
-          uninterrupted availability.
+          Sunrovo Finance is under active development. Features may be
+          incomplete, changed, disabled or discontinued. Availability, data
+          persistence, scheduled background processing and uninterrupted
+          access are not guaranteed.
         </p>
 
         <p className="mt-3">
-          Services may occasionally be unavailable because of maintenance,
-          telecommunications failures, payment-network interruptions,
-          cybersecurity incidents, technical failures, regulatory requirements
-          or circumstances beyond the Banks reasonable control.
-        </p>
-
-        <p className="mt-3">
-          FISE will take reasonable measures to restore affected Services.
+          Maintenance, software defects, network failures, market-data
+          interruptions and hosting limitations may affect the demonstration.
+          Simulated orders and automated risk controls may be delayed or may
+          not execute.
         </p>
       </section>
 
@@ -394,35 +407,54 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          Certain Services may depend on payment networks, correspondent banks,
-          card networks, telecommunications providers, technology providers or
-          other third parties.
+          The platform relies on external technology services, including
+          Vercel hosting, email delivery infrastructure and Bybit market data.
+          These services may experience outages, rate limits or other
+          restrictions.
         </p>
 
         <p className="mt-3">
-          Third-party services may be governed by additional terms and may be
-          subject to processing delays or availability limitations outside
-          FISEs direct control.
+          Use of third-party data does not establish a partnership,
+          endorsement, brokerage or custody relationship. If you access an
+          external website or service, its own terms and privacy practices may
+          apply.
         </p>
       </section>
 
       <section>
         <h2 className="text-lg font-semibold text-text-primary">
-          14. Customer Responsibilities
+          14. User Responsibilities
         </h2>
 
         <p className="mt-2">
-          Customers are responsible for:
+          When using the demonstration, you are responsible for:
         </p>
 
         <ul className="mt-3 list-disc space-y-2 pl-6">
-          <li>Providing accurate information;</li>
-          <li>Protecting account credentials;</li>
-          <li>Reviewing account statements and transaction notifications;</li>
-          <li>Reporting unauthorized transactions promptly;</li>
-          <li>Complying with applicable laws; and</li>
-          <li>Using FISE Services only for lawful purposes.</li>
+          <li>
+            Using only information you are authorized to provide;
+          </li>
+          <li>
+            Keeping authentication credentials private and reviewing simulated
+            account activity;
+          </li>
+          <li>
+            Reporting unexpected behaviour or suspected security incidents;
+          </li>
+          <li>
+            Using virtual balances and transaction records only for
+            demonstration purposes;
+          </li>
+          <li>
+            Respecting the rights and privacy of other users and complying
+            with applicable law.
+          </li>
         </ul>
+
+        <p className="mt-3">
+          Personal information submitted during registration and use of the
+          platform is addressed in the applicable Privacy Policy.
+        </p>
       </section>
 
       <section>
@@ -431,14 +463,16 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          The FISE name, trademarks, logos, software, website content, designs
-          and related intellectual property belong to FISE or its licensors.
+          The Sunrovo Finance project name, interface, software and original
+          content are subject to the rights of their respective owners.
+          Third-party libraries, market data, names and other materials remain
+          subject to their applicable licences or terms.
         </p>
 
         <p className="mt-3">
-          Customers may not reproduce, modify, distribute or commercially
-          exploit FISE intellectual property without prior written
-          authorization.
+          Use of the platform does not transfer ownership of intellectual
+          property. Any rights granted under an applicable open-source or
+          other licence remain unaffected.
         </p>
       </section>
 
@@ -448,20 +482,22 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          FISE will provide its Services using reasonable professional and
-          operational standards.
+          Sunrovo Finance is provided for software demonstration, education
+          and testing. It does not provide investment advice, banking
+          services, financial recommendations, real-money trading or asset
+          custody.
         </p>
 
         <p className="mt-3">
-          Nothing in these Terms excludes or limits liability that cannot
-          legally be excluded or limited under applicable law.
+          The platform is provided as available and may contain errors. No
+          guarantee is made about simulated outcomes, market-data accuracy,
+          uninterrupted availability or the suitability of the application for
+          real financial use.
         </p>
 
         <p className="mt-3">
-          FISE does not guarantee that every Service will be available at all
-          times or that every transaction will be completed within a particular
-          period where processing depends on external institutions or payment
-          networks.
+          Nothing in these Terms excludes rights or protections that cannot
+          lawfully be excluded.
         </p>
       </section>
 
@@ -471,37 +507,30 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          To the maximum extent permitted by applicable law, FISE will not be
-          liable for indirect, incidental, consequential or special losses
-          arising from the use of the Services where such losses were not
-          reasonably foreseeable.
+          To the extent permitted by applicable law, the project operator is
+          not responsible for indirect or consequential losses resulting from
+          use of the demonstration, reliance on simulated results or
+          interruptions outside its reasonable control.
         </p>
 
         <p className="mt-3">
-          FISE will not be responsible for losses caused by circumstances
-          outside its reasonable control, including telecommunications failures,
-          payment-network failures, acts of government, natural disasters, cyber
-          incidents affecting third-party infrastructure or other force-majeure
-          events.
-        </p>
-
-        <p className="mt-3">
-          Nothing in this section limits liability where such limitation is
-          prohibited by applicable law, including liability arising from fraud,
-          willful misconduct or other non-excludable liability.
+          Do not use the platform to carry out or substantiate real financial
+          transactions. This limitation does not exclude liability for fraud,
+          wilful misconduct or any other liability that cannot lawfully be
+          limited or excluded.
         </p>
       </section>
 
       <section>
         <h2 className="text-lg font-semibold text-text-primary">
-          18. Indemnification
+          18. Responsibility for Misuse
         </h2>
 
         <p className="mt-2">
-          To the extent permitted by law, you agree to indemnify FISE against
-          losses, claims, costs and expenses arising from your unlawful use of
-          the Services, fraud, intentional misconduct or material breach of
-          these Terms.
+          You remain responsible for unlawful use of the platform, fraud,
+          intentional misconduct and material violations of these Terms, to
+          the extent provided by applicable law. Nothing in this section
+          removes any rights or remedies that cannot lawfully be waived.
         </p>
       </section>
 
@@ -511,20 +540,15 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          FISE may update these Terms from time to time to reflect changes in
-          its Services, technology, business practices or applicable legal and
-          regulatory requirements.
+          These Terms may be updated as the project, its features and
+          applicable requirements change. The revised date will be displayed
+          on this page. Where required, material changes will be communicated
+          or further consent requested.
         </p>
 
         <p className="mt-3">
-          Material changes will be communicated through appropriate channels
-          where required by law.
-        </p>
-
-        <p className="mt-3">
-          Continued use of the Services after the effective date of updated
-          Terms constitutes acceptance of the revised Terms, subject to
-          applicable legal requirements.
+          Your continued use of the platform is subject to the updated Terms
+          to the extent permitted by applicable law.
         </p>
       </section>
 
@@ -534,23 +558,15 @@ export default function TermsPage() {
         </h2>
 
         <p className="mt-2">
-          These Terms are governed by the laws applicable to FISEs operations
-          and the relevant customer relationship.
+          These Terms are subject to applicable law. Concerns relating to the
+          demonstration should first be raised with the project operator
+          through the published project contact channel, when available.
         </p>
 
         <p className="mt-3">
-          Customers should first contact FISE to attempt to resolve complaints
-          or disputes.
-        </p>
-
-        <p className="mt-3">
-          Nothing in these Terms prevents a customer from exercising any
-          statutory right to complain to a competent regulator, ombudsman, court
-          or other authorized dispute-resolution body.
-        </p>
-
-        <p className="mt-3 font-semibold">
-          Applicable Law
+          Nothing in these Terms prevents you from exercising applicable
+          statutory rights or seeking a remedy through a competent court or
+          other authorized body.
         </p>
       </section>
 
@@ -559,11 +575,26 @@ export default function TermsPage() {
           21. Contact
         </h2>
 
-        <div className="mt-2 space-y-1">
-          <p className="font-semibold">FISE HOLDING TRUST BANK</p>
-          <p>Website: www.fiseholdings.com</p>
-          <p>Email: fiseholdings@supportplt.com</p>
-        </div>
+        <p className="mt-2">
+          Sunrovo Finance — software portfolio demonstration.
+        </p>
+
+        <p className="mt-3">
+          For project information and any published contact channels, visit
+          the official demonstration website. Never send passwords, app
+          passwords, authentication codes or private keys in a support
+          request.
+        </p>
+
+        <p className="mt-3 break-all">
+          Website:{" "}
+          <a
+            href="https://sunrovo-finace.vercel.app/"
+            className="text-primary underline"
+          >
+            https://sunrovo-finace.vercel.app/
+          </a>
+        </p>
       </section>
     </LegalPage>
   );
