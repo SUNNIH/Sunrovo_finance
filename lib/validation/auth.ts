@@ -10,7 +10,7 @@ export const registerSchema = z
     password: z.string().min(10, "Use at least 10 characters"),
     confirmPassword: z.string(),
     acceptedTerms: z.literal(true, {
-      errorMap: () => ({ message: "You must accept the Terms and Privacy Policy" }),
+      error: "You must accept the Terms and Privacy Policy",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {

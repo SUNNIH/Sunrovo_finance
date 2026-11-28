@@ -48,7 +48,7 @@ export function TopNavigation({ onOpenMobileMenu, userName, userInitials = "U" }
         "border-b border-border/80 px-4 sm:px-6",
         /* Crisper glass effect — matches auth page elevated surface */
         "bg-surface-elevated/[0.97] backdrop-blur-md",
-        /* Extremely subtle blue cast on the bottom edge */
+        /* Extremely subtle cast on the bottom edge */
         "shadow-[0_1px_0_hsl(var(--primary)/0.05)]"
       )}
     >

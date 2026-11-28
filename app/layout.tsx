@@ -11,8 +11,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "FISE Holdings Trust Bank",
-    template: "%s | FISE Holdings Trust Bank",
+    default: "Sunrovo Finance",
+    template: "%s | Sunrovo Finance",
   },
   description: "Bank. Trade. Invest. Grow. — a digital banking and cryptocurrency platform.",
 };

@@ -3,9 +3,7 @@ import Decimal from "decimal.js";
 import { prisma } from "@/lib/db/prisma";
 import { postLedgerEntries } from "@/lib/ledger/postLedgerEntries";
 import { externalSettlementPoolName, feeRevenuePoolName, getOrCreatePlatformLedgerAccount } from "@/lib/ledger/platform-accounts";
-import { isFiatAsset } from "@/lib/money/asset-kind";
 import { AuthError } from "@/features/authentication/errors";
-import { writeAuditLog } from "@/lib/audit/log";
 
 export async function listPendingWithdrawals(limit = 100) {
   return prisma.withdrawal.findMany({

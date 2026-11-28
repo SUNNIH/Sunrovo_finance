@@ -23,19 +23,39 @@ export function assertBalancedPosting(legs: PostingLeg[]): void {
   const totals = new Map<string, { debit: Decimal; credit: Decimal }>();
 
   for (const leg of legs) {
-    const current = totals.get(leg.assetSymbol) ?? {
-      debit: new Decimal(0),
-      credit: new Decimal(0),
-    };
-    const amount = new Decimal(leg.amount);
+  const current = totals.get(leg.assetSymbol) ?? {
+    debit: new Decimal(0),
+    credit: new Decimal(0),
+  };
 
-    if (leg.direction === "DEBIT") {
-      current.debit = current.debit.add(amount);
-    } else {
-      current.credit = current.credit.add(amount);
-    }
-    totals.set(leg.assetSymbol, current);
+  const amount = new Decimal(leg.amount);
+
+  // Every financial posting must have
+  // a strictly positive, finite amount.
+  if (!amount.isFinite() || amount.lte(0)) {
+    throw new Error(
+      `Invalid ledger posting amount for ${leg.assetSymbol}`
+    );
   }
+
+  // Reject invalid posting directions.
+  if (
+    leg.direction !== "DEBIT" &&
+    leg.direction !== "CREDIT"
+  ) {
+    throw new Error(
+      `Invalid ledger posting direction for ${leg.assetSymbol}`
+    );
+  }
+
+  if (leg.direction === "DEBIT") {
+    current.debit = current.debit.add(amount);
+  } else {
+    current.credit = current.credit.add(amount);
+  }
+
+  totals.set(leg.assetSymbol, current);
+}
 
   for (const [assetSymbol, { debit, credit }] of totals.entries()) {
     if (!debit.eq(credit)) {

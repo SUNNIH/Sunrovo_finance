@@ -3,34 +3,33 @@
 @tailwind utilities;
 
 /**
- * FHT design tokens (brand memory: blue primary, white/blue light mode,
- * black-navy/blue dark mode). These are the single source of truth for
- * colour in the product. Components consume them via Tailwind classes
- * (bg-surface, text-secondary, border-default, etc.) defined in
- * tailwind.config.ts -- never hardcode hex values in components.
+ * Sunrovo Finance design tokens (premium terracotta, burnt-orange, cream, espresso).
+ * These are the single source of truth for colour in the product. Components consume
+ * them via Tailwind classes (bg-surface, text-secondary, border-default, etc.) defined
+ * in tailwind.config.ts -- never hardcode hex values in components.
  */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --surface: 216 45% 98%;
-    --surface-elevated: 0 0% 100%;
-    --surface-hover: 216 42% 95%;
+    --background: 33 100% 97%;
+    --surface: 33 100% 97%;
+    --surface-elevated: 40 100% 99%;
+    --surface-hover: 25 65% 93%;
 
-    --primary: 220 87% 51%;
-    --primary-hover: 220 100% 45%;
-    --primary-soft: 220 100% 96%;
+    --primary: 11 68% 45%;
+    --primary-hover: 11 76% 38%;
+    --primary-soft: 20 86% 93%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 216 42% 95%;
-    --secondary-foreground: 220 43% 11%;
+    --secondary: 25 65% 93%;
+    --secondary-foreground: 20 23% 13%;
 
-    --text-primary: 220 43% 11%;
-    --text-secondary: 221 13% 46%;
-    --text-tertiary: 218 15% 65%;
+    --text-primary: 20 23% 13%;
+    --text-secondary: 21 14% 41%;
+    --text-tertiary: 21 12% 55%;
 
-    --border: 218 17% 91%;
-    --border-strong: 220 16% 82%;
-    --ring: 220 87% 51%;
+    --border: 26 36% 86%;
+    --border-strong: 24 34% 77%;
+    --ring: 11 68% 45%;
 
     --success: 153 91% 30%;
     --success-soft: 148 52% 94%;
@@ -38,8 +37,8 @@
     --danger-soft: 3 82% 96%;
     --warning: 28 97% 44%;
     --warning-soft: 32 92% 95%;
-    --info: 220 87% 51%;
-    --info-soft: 220 100% 96%;
+    --info: 11 68% 45%;
+    --info-soft: 20 86% 93%;
 
     --radius-sm: 6px;
     --radius-md: 10px;
@@ -48,26 +47,26 @@
   }
 
   .dark {
-    --background: 222 48% 5%;
-    --surface: 220 45% 9%;
-    --surface-elevated: 219 46% 12%;
-    --surface-hover: 220 45% 16%;
+    --background: 20 38% 7%;
+    --surface: 20 33% 9%;
+    --surface-elevated: 20 29% 11%;
+    --surface-hover: 18 30% 16%;
 
-    --primary: 222 100% 59%;
-    --primary-hover: 222 100% 65%;
-    --primary-soft: 222 65% 22%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 22 89% 59%;
+    --primary-hover: 25 100% 68%;
+    --primary-soft: 19 41% 20%;
+    --primary-foreground: 20 38% 7%;
 
-    --secondary: 220 45% 16%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 18 25% 17%;
+    --secondary-foreground: 33 100% 95%;
 
-    --text-primary: 210 40% 98%;
-    --text-secondary: 218 15% 65%;
-    --text-tertiary: 216 12% 54%;
+    --text-primary: 33 100% 95%;
+    --text-secondary: 26 25% 70%;
+    --text-tertiary: 26 20% 60%;
 
-    --border: 218 34% 21%;
-    --border-strong: 218 32% 29%;
-    --ring: 222 100% 65%;
+    --border: 21 28% 22%;
+    --border-strong: 21 25% 30%;
+    --ring: 22 89% 59%;
 
     --success: 150 66% 52%;
     --success-soft: 156 52% 12%;
@@ -75,8 +74,8 @@
     --danger-soft: 5 47% 15%;
     --warning: 39 98% 56%;
     --warning-soft: 39 63% 14%;
-    --info: 222 100% 65%;
-    --info-soft: 222 65% 22%;
+    --info: 22 89% 59%;
+    --info-soft: 19 41% 20%;
   }
 
   * {
@@ -115,6 +114,12 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+    
+    /* Disable hover transforms for reduced motion */
+    .hover\:-translate-y-\[2\.5px\]:hover,
+    .hover\:-translate-y-\[5px\]:hover {
+      transform: none !important;
     }
   }
 
@@ -190,14 +195,281 @@
   }
 
   /**
-   * FHT shell: 48 px financial grid watermark.
-   * Applied to the sidebar and mobile-drawer logo/header areas only.
-   * Uses --border CSS var so it adapts to light and dark mode automatically.
+   * Premium swirling 3D glass effect — more pronounced overlapping ribbons.
+   * Features flowing glass ribbons, curved translucent layers, visible gradients,
+   * reflections, highlights, and realistic depth. Warm terracotta, copper, amber tones.
    */
-  .plt-grid-texture {
-    background-image:
-      linear-gradient(hsl(var(--border) / 0.5) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.5) 1px, transparent 1px);
-    background-size: 48px 48px;
+  .glass-swirl-effect {
+    position: relative;
+    background: linear-gradient(135deg, 
+      hsl(var(--surface-elevated)) 0%,
+      hsl(var(--surface)) 50%,
+      hsl(var(--surface-elevated)) 100%
+    );
+  }
+  
+  /* Flowing glass ribbons with stronger visibility */
+  .glass-swirl-effect::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: 
+      radial-gradient(ellipse 90% 70% at 15% 25%, 
+        hsl(var(--primary) / 0.22) 0%, 
+        hsl(var(--primary) / 0.12) 30%,
+        transparent 60%),
+      radial-gradient(ellipse 85% 60% at 85% 75%, 
+        hsl(var(--primary-hover) / 0.18) 0%, 
+        hsl(var(--primary-hover) / 0.08) 35%,
+        transparent 65%),
+      radial-gradient(circle at 50% 50%, 
+        hsl(var(--primary-soft) / 0.15) 0%, 
+        transparent 50%),
+      linear-gradient(115deg, 
+        transparent 0%, 
+        hsl(var(--border-strong) / 0.25) 20%, 
+        hsl(var(--primary) / 0.15) 40%, 
+        transparent 50%, 
+        hsl(var(--primary-soft) / 0.3) 70%, 
+        hsl(var(--border-strong) / 0.2) 85%,
+        transparent 100%);
+    opacity: 0.75;
+    pointer-events: none;
+  }
+  
+  /* Swirling refraction with visible rotation and highlights */
+  .glass-swirl-effect::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: 
+      conic-gradient(from 35deg at 35% 35%, 
+        hsl(var(--primary) / 0.15) 0deg,
+        transparent 45deg,
+        hsl(var(--primary-hover) / 0.12) 90deg,
+        transparent 135deg,
+        hsl(var(--border-strong) / 0.18) 200deg,
+        transparent 260deg,
+        hsl(var(--primary) / 0.1) 310deg,
+        transparent 360deg
+      ),
+      linear-gradient(145deg,
+        hsl(var(--surface-elevated)) 0%,
+        transparent 30%,
+        hsl(var(--primary) / 0.08) 50%,
+        transparent 70%,
+        hsl(var(--surface)) 100%
+      );
+    opacity: 0.65;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+  
+  /* Enhanced depth and visibility in dark mode */
+  .dark .glass-swirl-effect::before {
+    background: 
+      radial-gradient(ellipse 90% 70% at 15% 25%, 
+        hsl(var(--primary) / 0.35) 0%, 
+        hsl(var(--primary) / 0.20) 30%,
+        transparent 60%),
+      radial-gradient(ellipse 85% 60% at 85% 75%, 
+        hsl(var(--primary-hover) / 0.28) 0%, 
+        hsl(var(--primary-hover) / 0.15) 35%,
+        transparent 65%),
+      radial-gradient(circle at 50% 50%, 
+        hsl(var(--primary-soft) / 0.25) 0%, 
+        transparent 50%),
+      linear-gradient(115deg, 
+        transparent 0%, 
+        hsl(var(--border-strong) / 0.38) 20%, 
+        hsl(var(--primary) / 0.25) 40%, 
+        transparent 50%, 
+        hsl(var(--primary-soft) / 0.45) 70%, 
+        hsl(var(--border-strong) / 0.32) 85%,
+        transparent 100%);
+    opacity: 0.9;
+  }
+  
+  .dark .glass-swirl-effect::after {
+    background: 
+      conic-gradient(from 35deg at 35% 35%, 
+        hsl(var(--primary) / 0.25) 0deg,
+        transparent 45deg,
+        hsl(var(--primary-hover) / 0.20) 90deg,
+        transparent 135deg,
+        hsl(var(--border-strong) / 0.28) 200deg,
+        transparent 260deg,
+        hsl(var(--primary) / 0.18) 310deg,
+        transparent 360deg
+      ),
+      linear-gradient(145deg,
+        hsl(var(--surface-elevated)) 0%,
+        transparent 30%,
+        hsl(var(--primary) / 0.15) 50%,
+        transparent 70%,
+        hsl(var(--surface)) 100%
+      );
+    opacity: 0.85;
+  }
+  
+  /* Prominent variant for balance/hero sections - dramatic visible depth */
+  .glass-swirl-effect-prominent {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    background: linear-gradient(125deg, 
+      hsl(var(--surface-elevated)) 0%,
+      hsl(var(--surface)) 25%,
+      hsl(var(--surface-elevated)) 50%,
+      hsl(var(--surface)) 75%,
+      hsl(var(--surface-elevated)) 100%
+    );
+  }
+  
+  /* Primary curved glass ribbons with dramatic visibility */
+  .glass-swirl-effect-prominent::before {
+    content: "";
+    position: absolute;
+    inset: -10%;
+    border-radius: inherit;
+    background: 
+      /* Large sweeping curves */
+      radial-gradient(ellipse 100% 85% at 5% 15%, 
+        hsl(var(--primary) / 0.32) 0%, 
+        hsl(var(--primary) / 0.20) 20%,
+        hsl(var(--primary) / 0.08) 45%,
+        transparent 70%),
+      radial-gradient(ellipse 95% 75% at 95% 85%, 
+        hsl(var(--primary-hover) / 0.28) 0%, 
+        hsl(var(--primary-hover) / 0.16) 25%,
+        hsl(var(--primary-hover) / 0.06) 50%,
+        transparent 75%),
+      /* Central highlight orb */
+      radial-gradient(circle 60% at 45% 35%, 
+        hsl(var(--primary-soft) / 0.25) 0%, 
+        hsl(var(--primary) / 0.12) 35%,
+        transparent 65%),
+      /* Diagonal flowing ribbons */
+      linear-gradient(95deg, 
+        hsl(var(--primary) / 0.18) 0%, 
+        transparent 12%,
+        hsl(var(--border-strong) / 0.35) 22%, 
+        hsl(var(--primary) / 0.22) 38%, 
+        transparent 48%, 
+        hsl(var(--primary-soft) / 0.40) 68%, 
+        hsl(var(--border-strong) / 0.30) 85%,
+        transparent 100%),
+      /* Counter-flow ribbon for depth */
+      linear-gradient(145deg,
+        transparent 0%,
+        hsl(var(--primary-hover) / 0.15) 18%,
+        transparent 35%,
+        hsl(var(--primary) / 0.20) 58%,
+        transparent 78%,
+        hsl(var(--border-strong) / 0.12) 92%
+      );
+    opacity: 0.90;
+    pointer-events: none;
+    animation: glass-float 20s ease-in-out infinite;
+  }
+  
+  /* Swirling refraction layer with strong rotation */
+  .glass-swirl-effect-prominent::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: 
+      /* Rotating conic gradient for glass refraction */
+      conic-gradient(from 20deg at 28% 28%, 
+        hsl(var(--primary) / 0.25) 0deg,
+        hsl(var(--primary-hover) / 0.12) 45deg,
+        transparent 80deg,
+        hsl(var(--primary-hover) / 0.22) 130deg,
+        transparent 170deg,
+        hsl(var(--border-strong) / 0.28) 220deg,
+        transparent 270deg,
+        hsl(var(--primary) / 0.18) 320deg,
+        transparent 360deg
+      ),
+      /* Curved highlights */
+      radial-gradient(ellipse 70% 50% at 75% 25%,
+        hsl(var(--surface-elevated)) 0%,
+        hsl(var(--primary) / 0.08) 40%,
+        transparent 70%
+      ),
+      /* Diagonal shine */
+      linear-gradient(125deg,
+        transparent 0%,
+        hsl(var(--primary) / 0.15) 22%,
+        transparent 40%,
+        hsl(var(--primary-soft) / 0.18) 62%,
+        transparent 80%
+      );
+    opacity: 0.80;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+  
+  /* Dramatic depth enhancement in dark mode */
+  .dark .glass-swirl-effect-prominent::before {
+    background: 
+      radial-gradient(ellipse 100% 85% at 5% 15%, 
+        hsl(var(--primary) / 0.50) 0%, 
+        hsl(var(--primary) / 0.32) 20%,
+        hsl(var(--primary) / 0.14) 45%,
+        transparent 70%),
+      radial-gradient(ellipse 95% 75% at 95% 85%, 
+        hsl(var(--primary-hover) / 0.42) 0%, 
+        hsl(var(--primary-hover) / 0.25) 25%,
+        hsl(var(--primary-hover) / 0.10) 50%,
+        transparent 75%),
+      radial-gradient(circle 60% at 45% 35%, 
+        hsl(var(--primary-soft) / 0.38) 0%, 
+        hsl(var(--primary) / 0.20) 35%,
+        transparent 65%),
+      linear-gradient(95deg, 
+        hsl(var(--primary) / 0.30) 0%, 
+        transparent 12%,
+        hsl(var(--border-strong) / 0.52) 22%, 
+        hsl(var(--primary) / 0.35) 38%, 
+        transparent 48%, 
+        hsl(var(--primary-soft) / 0.60) 68%, 
+        hsl(var(--border-strong) / 0.48) 85%,
+        transparent 100%),
+      linear-gradient(145deg,
+        transparent 0%,
+        hsl(var(--primary-hover) / 0.25) 18%,
+        transparent 35%,
+        hsl(var(--primary) / 0.32) 58%,
+        transparent 78%,
+        hsl(var(--border-strong) / 0.20) 92%
+      );
+    opacity: 0.95;
+  }
+  
+  .dark .glass-swirl-effect-prominent::after {
+    opacity: 0.92;
+  }
+  
+  /* Subtle floating animation for glass ribbons */
+  @keyframes glass-float {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-2%) scale(1.02);
+    }
+  }
+  
+  /* Disable animation for reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .glass-swirl-effect-prominent::before {
+      animation: none;
+    }
   }
 }
+

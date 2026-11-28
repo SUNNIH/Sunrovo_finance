@@ -149,11 +149,91 @@ describe("Phase 5: Order Cleanup", () => {
     expect(results.length).toBe(0); // No OPEN orders to cancel
   });
 
-  it("verifies no locked balances remain after cleanup", async () => {
+  it("verifies no locked balances remain for the test user after cleanup", async () => {
+    const baseline = await verifyNoLockedBalances();
+
+    expect(
+      baseline.lockedBalances.filter(
+        (balance) => balance.userId === testUserId
+      )
+    ).toEqual([]);
+
+    const order = await prisma.cryptoOrder.create({
+      data: {
+        userId: testUserId,
+        symbol: "BTCUSDT",
+        side: "BUY",
+        type: "LIMIT",
+        quantity: new Decimal("0.1"),
+        limitPrice: new Decimal("50000"),
+        status: "OPEN",
+        idempotencyKey: "test-verification-" + Date.now(),
+      },
+    });
+
+    await prisma.assetBalance.update({
+      where: {
+        walletId_assetSymbol: {
+          walletId,
+          assetSymbol: "USDT",
+        },
+      },
+      data: {
+        available: { decrement: "5000" },
+        locked: { increment: "5000" },
+      },
+    });
+
+    const before = await verifyNoLockedBalances();
+
+    expect(before.clean).toBe(false);
+
+    expect(before.lockedBalances).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          userId: testUserId,
+          assetSymbol: "USDT",
+          available: "5000",
+          locked: "5000",
+        }),
+      ])
+    );
+
+    const results = await cancelAllUserOpenOrders(testUserId);
+
+    expect(results).toHaveLength(1);
+    expect(results[0]?.orderId).toBe(order.id);
+    expect(results[0]?.status).toBe("cancelled");
+
     const verification = await verifyNoLockedBalances();
 
-    expect(verification.clean).toBe(true);
-    expect(verification.lockedBalances).toEqual([]);
+    expect(
+      verification.lockedBalances.filter(
+        (balance) => balance.userId === testUserId
+      )
+    ).toEqual([]);
+
+    expect(verification.clean).toBe(baseline.clean);
+
+    expect(verification.lockedBalances).toHaveLength(
+      baseline.lockedBalances.length
+    );
+
+    expect(verification.lockedBalances).toEqual(
+      expect.arrayContaining(baseline.lockedBalances)
+    );
+
+    const balance = await prisma.assetBalance.findUniqueOrThrow({
+      where: {
+        walletId_assetSymbol: {
+          walletId,
+          assetSymbol: "USDT",
+        },
+      },
+    });
+
+    expect(balance.available.toString()).toBe("10000");
+    expect(balance.locked.toString()).toBe("0");
   });
 
   it("is idempotent - repeated cleanup doesn't double-release", async () => {

@@ -147,7 +147,7 @@ export async function createWithdrawal(userId: string, input: WithdrawalInput, i
           { ledgerAccountId: feePool.id, direction: "CREDIT", assetSymbol: input.assetSymbol, amount: fee, referenceType: "Withdrawal", referenceId: withdrawal.id },
         ]);
 
-        await tx.withdrawal.update({ where: { id: withdrawal.id }, data: { ledgerGroupId: groupId } });
+        const updatedWithdrawal = await tx.withdrawal.update({ where: { id: withdrawal.id }, data: { ledgerGroupId: groupId } });
 
         await tx.transaction.create({
           data: {
@@ -188,7 +188,7 @@ export async function createWithdrawal(userId: string, input: WithdrawalInput, i
           },
         });
 
-        return withdrawal;
+        return updatedWithdrawal;
       }),
     () => prisma.withdrawal.findUnique({ where: { idempotencyKey: namespacedKey } })
   );

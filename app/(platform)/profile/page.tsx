@@ -160,7 +160,7 @@ export default async function ProfilePage() {
               <div>
                 <CardTitle className="text-base font-semibold text-text-primary">Personal Details</CardTitle>
                 <CardDescription className="text-xs text-text-secondary mt-0.5">
-                  Verified legal identity information registered with FISE Holdings Trust Bank.
+                  Verified legal identity information registered with Sunrovo Finance.
                 </CardDescription>
               </div>
             </div>
@@ -219,7 +219,7 @@ export default async function ProfilePage() {
           <div className="flex items-start gap-2.5 rounded-xl border border-border bg-surface/60 p-3 text-xs text-text-secondary">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-text-tertiary" aria-hidden="true" />
             <span className="leading-relaxed">
-              Legal identity details were confirmed during account onboarding. To request corrections or submit updated KYC documentation, please contact FISE Holdings Trust Bank compliance.
+              Legal identity details were confirmed during account onboarding. To request corrections or submit updated KYC documentation, please contact Sunrovo Finance compliance.
             </span>
           </div>
         </CardContent>

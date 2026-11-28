@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Decimal from "decimal.js";
 import {
   ArrowUpRight,
   Download,
   Wallet as WalletIcon,
+  TrendingUp,
+  AlertCircle,
+  Clock,
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getWalletForUser } from "@/features/crypto/wallets";
@@ -15,15 +19,54 @@ import {
   CryptoAssetIcon,
   getCryptoAssetMeta,
 } from "@/components/financial/crypto-asset-icon";
+import { cn } from "@/lib/utilities/cn";
+import type { MarketDataStatus } from "@/lib/market/types";
 
 export const metadata: Metadata = { title: "Wallets" };
 
 /**
- * Phase 3: Deposit-and-hold wallet
+ * Phase 3: Cryptocurrency wallet with live market valuation
  * 
- * Displays native crypto balances only (BTC, USDT, etc.)
- * No USD valuation, no portfolio allocation, no trading dependencies.
+ * Displays native crypto balances with USDT market prices and valuations.
+ * Shows Live, Stale, and Unavailable price states.
+ * Preserves native balances during provider outages.
  */
+function formatUsdtPrice(price: Decimal): string {
+  if (price.isZero()) return "0";
+
+  if (price.abs().greaterThanOrEqualTo(1)) {
+    return price.toFixed(2);
+  }
+
+  return price.toSignificantDigits(6).toFixed();
+}
+
+function PriceStatusBadge({ status }: { status: MarketDataStatus }) {
+  if (status === "live") {
+    return (
+      <Badge variant="success" className="text-[10px] py-0.5 px-1.5 gap-1">
+        <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+        Live
+      </Badge>
+    );
+  }
+
+  if (status === "stale") {
+    return (
+      <Badge variant="warning" className="text-[10px] py-0.5 px-1.5 gap-1">
+        <Clock className="h-2.5 w-2.5" />
+        Stale
+      </Badge>
+    );
+  }
+
+  return (
+    <Badge variant="neutral" className="text-[10px] py-0.5 px-1.5 gap-1">
+      <AlertCircle className="h-2.5 w-2.5" />
+      Unavailable
+    </Badge>
+  );
+}
 
 export default async function WalletsPage() {
   const user = await getCurrentUser();
@@ -34,12 +77,19 @@ export default async function WalletsPage() {
   const assetsWithMeta = hasAssets
     ? wallet!.assets.map((asset) => {
         const meta = getCryptoAssetMeta(asset.assetSymbol);
+        const totalBalance = new Decimal(asset.available).plus(asset.locked);
         return {
           ...asset,
           meta,
+          totalBalance: totalBalance.toString(),
         };
       })
     : [];
+
+  // Format portfolio total
+  const portfolioTotal = wallet?.totalUsdtValue
+    ? new Decimal(wallet.totalUsdtValue).toFixed(2)
+    : null;
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in-up">
@@ -58,7 +108,7 @@ export default async function WalletsPage() {
             Wallets
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
-            Your crypto balances, deposit addresses, and transaction history.
+            Your crypto balances with live market valuations in USDT.
           </p>
         </div>
       </div>
@@ -66,24 +116,50 @@ export default async function WalletsPage() {
       {/* ── Portfolio Overview Hero Card ──────────────────────────────────── */}
       <Card className="rounded-xl border-border bg-surface-elevated p-5 shadow-sm sm:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          {/* Wallet info */}
-          <div>
+          {/* Wallet info & Portfolio Value */}
+          <div className="flex-1">
             <div className="flex items-center gap-2">
               <span className="text-body-sm font-medium text-text-secondary">
-                Crypto Assets
+                Portfolio Value
               </span>
+              {wallet?.hasIncompleteValuation && (
+                <Badge variant="warning" className="text-[10px] py-0.5 px-1.5 gap-1">
+                  <AlertCircle className="h-2.5 w-2.5" />
+                  Incomplete
+                </Badge>
+              )}
             </div>
 
-            <div className="mt-2 flex items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 text-2xl font-bold text-text-primary">
-                <WalletIcon className="h-6 w-6" aria-hidden="true" />
+            <div className="mt-2 flex items-baseline gap-2">
+              {portfolioTotal ? (
+                <>
+                  <span className="text-3xl font-bold text-text-primary tabular-nums sm:text-4xl">
+                    {portfolioTotal.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                  </span>
+                  <span className="text-lg font-medium text-text-secondary">
+                    USDT
+                  </span>
+                </>
+              ) : (
+                <span className="text-2xl font-bold text-text-tertiary">
+                  {wallet?.hasIncompleteValuation
+                    ? "Valuation incomplete"
+                    : "—"}
+                </span>
+              )}
+            </div>
+
+            <div className="mt-2 flex items-center gap-2.5 text-body-sm text-text-secondary">
+              <span className="inline-flex items-center gap-1.5">
+                <WalletIcon className="h-4 w-4" aria-hidden="true" />
                 {wallet?.assets.length ?? 0}{" "}
                 {wallet?.assets.length === 1 ? "Asset" : "Assets"}
               </span>
-            </div>
-
-            <div className="mt-2.5 text-body-sm text-text-secondary">
-              Deposit-and-hold wallet for supported crypto assets
+              {wallet?.hasIncompleteValuation && (
+                <span className="text-warning">
+                  • Some prices unavailable
+                </span>
+              )}
             </div>
           </div>
 
@@ -99,6 +175,12 @@ export default async function WalletsPage() {
               <Button variant="outline" size="sm" className="gap-1.5 touch-target sm:min-h-0">
                 <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                 Withdraw
+              </Button>
+            </Link>
+            <Link href="/markets">
+              <Button variant="ghost" size="sm" className="gap-1.5 touch-target sm:min-h-0">
+                <TrendingUp className="h-4 w-4" aria-hidden="true" />
+                Markets
               </Button>
             </Link>
           </div>
@@ -150,11 +232,16 @@ export default async function WalletsPage() {
                   <tr>
                     <th scope="col" className="px-5 py-3 font-medium">Asset</th>
                     <th scope="col" className="px-4 py-3 text-right font-medium">Balance</th>
+                    <th scope="col" className="px-4 py-3 text-right font-medium">Price (USDT)</th>
+                    <th scope="col" className="px-4 py-3 text-right font-medium">Value (USDT)</th>
                     <th scope="col" className="px-5 py-3 text-right font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {assetsWithMeta.map((asset) => {
+                    const priceDecimal = asset.usdtPrice ? new Decimal(asset.usdtPrice) : null;
+                    const valueDecimal = asset.usdtValue ? new Decimal(asset.usdtValue) : null;
+
                     return (
                       <tr
                         key={asset.assetSymbol}
@@ -185,10 +272,47 @@ export default async function WalletsPage() {
                         {/* Balance */}
                         <td className="px-4 py-3.5 text-right">
                           <CurrencyValue
-                            amount={asset.available}
+                            amount={asset.totalBalance}
                             assetSymbol={asset.assetSymbol}
                             className="font-medium text-text-primary"
                           />
+                          {new Decimal(asset.locked).greaterThan(0) && (
+                            <div className="mt-0.5 text-xs text-text-tertiary">
+                              {new Decimal(asset.locked).toFixed()} locked
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Price */}
+                        <td className="px-4 py-3.5 text-right">
+                          <div className="flex flex-col items-end gap-1">
+                            {priceDecimal ? (
+                              <span className="font-mono text-text-primary tabular-nums">
+                                {formatUsdtPrice(priceDecimal)}
+                              </span>
+                            ) : (
+                              <span className="text-text-tertiary">—</span>
+                            )}
+                            <PriceStatusBadge status={asset.priceStatus} />
+                          </div>
+                        </td>
+
+                        {/* Value */}
+                        <td className="px-4 py-3.5 text-right">
+                          {valueDecimal ? (
+                            <span
+                              className={cn(
+                                "font-medium tabular-nums",
+                                asset.priceStatus === "live"
+                                  ? "text-text-primary"
+                                  : "text-text-secondary"
+                              )}
+                            >
+                              {valueDecimal.toFixed(2)}
+                            </span>
+                          ) : (
+                            <span className="text-text-tertiary">—</span>
+                          )}
                         </td>
 
                         {/* Inline Actions */}
@@ -215,13 +339,16 @@ export default async function WalletsPage() {
             {/* Mobile Card List View (< 640px) */}
             <div className="grid grid-cols-1 gap-3 sm:hidden">
               {assetsWithMeta.map((asset) => {
+                const priceDecimal = asset.usdtPrice ? new Decimal(asset.usdtPrice) : null;
+                const valueDecimal = asset.usdtValue ? new Decimal(asset.usdtValue) : null;
+
                 return (
                   <Card
                     key={asset.assetSymbol}
                     className="rounded-xl border-border bg-surface-elevated p-4 shadow-xs"
                   >
                     {/* Top: Icon + Symbol + Balance */}
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <CryptoAssetIcon symbol={asset.assetSymbol} size="md" showBadge />
                         <div>
@@ -241,17 +368,51 @@ export default async function WalletsPage() {
                         </div>
                       </div>
 
-                      <div className="text-right">
+                      <PriceStatusBadge status={asset.priceStatus} />
+                    </div>
+
+                    {/* Balance & Value */}
+                    <div className="space-y-2 mb-3">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-text-tertiary">Balance:</span>
                         <CurrencyValue
-                          amount={asset.available}
+                          amount={asset.totalBalance}
                           assetSymbol={asset.assetSymbol}
-                          className="font-bold text-text-primary text-base"
+                          className="font-bold text-text-primary"
                         />
                       </div>
+                      {priceDecimal && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-text-tertiary">Price:</span>
+                          <span className="font-mono text-text-primary tabular-nums">
+                            {formatUsdtPrice(priceDecimal)} USDT
+                          </span>
+                        </div>
+                      )}
+                      {valueDecimal && (
+                        <div className="flex justify-between">
+                          <span className="text-text-tertiary text-sm">Est. Value:</span>
+                          <span
+                            className={cn(
+                              "font-semibold tabular-nums",
+                              asset.priceStatus === "live"
+                                ? "text-text-primary"
+                                : "text-text-secondary"
+                            )}
+                          >
+                            {valueDecimal.toFixed(2)} USDT
+                          </span>
+                        </div>
+                      )}
+                      {new Decimal(asset.locked).greaterThan(0) && (
+                        <div className="text-xs text-text-tertiary">
+                          {new Decimal(asset.locked).toFixed()} locked
+                        </div>
+                      )}
                     </div>
 
                     {/* Bottom: Touch-friendly Quick Actions */}
-                    <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <Link href="/deposit" className="w-full">
                         <Button
                           variant="outline"

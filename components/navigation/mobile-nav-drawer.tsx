@@ -23,11 +23,27 @@ export function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps) {
   const panelRef = React.useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
+  // Keep the drawer mounted for its exit transition, but make the closed
+  // drawer inaccessible to keyboard, pointer and assistive technology.
+  const setDrawerRef = React.useCallback((element: HTMLDivElement | null) => {
+    element?.toggleAttribute("inert", !open);
+  }, [open]);
+
   React.useEffect(() => {
     if (!open) return;
 
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    if (desktop.matches) {
+      onClose();
+      return;
+    }
+
     const previouslyFocused = document.activeElement as HTMLElement | null;
-    panelRef.current?.querySelector<HTMLElement>("a, button")?.focus();
+    panelRef.current?.querySelector<HTMLElement>("a, button")?.focus({ preventScroll: true });
+
+    function handleViewportChange(event: MediaQueryListEvent) {
+      if (event.matches) onClose();
+    }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -54,21 +70,34 @@ export function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps) {
     }
 
     document.addEventListener("keydown", handleKeyDown);
+    desktop.addEventListener("change", handleViewportChange);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      previouslyFocused?.focus();
+      desktop.removeEventListener("change", handleViewportChange);
+      previouslyFocused?.focus({ preventScroll: true });
     };
   }, [open, onClose]);
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50 lg:hidden">
+    <div
+      ref={setDrawerRef}
+      className={cn(
+        "fixed inset-0 z-50 overflow-hidden lg:hidden",
+        // Hide only after the slide-out finishes; show immediately on open.
+        "transition-[visibility] duration-0 motion-reduce:delay-0",
+        open ? "visible delay-0" : "invisible pointer-events-none delay-300"
+      )}
+    >
       {/* Backdrop scrim */}
       <button
         type="button"
         aria-label="Close menu"
-        className="absolute inset-0 bg-black/50 animate-fade-in"
+        tabIndex={-1}
+        aria-hidden="true"
+        className={cn(
+          "absolute inset-0 bg-black/50 transition-opacity duration-300 ease-out motion-reduce:transition-none",
+          open ? "opacity-100" : "opacity-0"
+        )}
         onClick={onClose}
       />
 
@@ -76,22 +105,26 @@ export function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps) {
       <div
         ref={panelRef}
         role="dialog"
-        aria-modal="true"
+        aria-modal={open ? true : undefined}
         aria-label="Navigation menu"
         className={cn(
           "absolute inset-y-0 left-0 flex w-[86%] max-w-xs flex-col",
-          "bg-surface-elevated shadow-xl animate-slide-up",
-          "safe-area-top safe-area-bottom"
+          "bg-surface-elevated shadow-xl",
+          "safe-area-top safe-area-bottom",
+          "transform transition-transform duration-300 motion-reduce:transition-none",
+          open
+            ? "translate-x-0 ease-out"
+            : "-translate-x-full ease-in"
         )}
       >
         {/* ── Logo / wordmark — matches sidebar exactly ── */}
         <div
           className={cn(
             "flex h-16 items-center justify-between border-b border-border px-4",
-            "plt-grid-texture"
+            "glass-swirl-effect"
           )}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 relative z-10">
             <FiseLogo variant="mark" className="h-8 w-8" />
             <FiseLogo className="h-9 w-auto max-w-[154px]" />
           </div>
@@ -100,7 +133,7 @@ export function MobileNavDrawer({ open, onClose }: MobileNavDrawerProps) {
             onClick={onClose}
             aria-label="Close menu"
             className={cn(
-              "touch-target inline-flex items-center justify-center rounded-lg",
+              "touch-target inline-flex items-center justify-center rounded-lg relative z-10",
               "text-text-secondary transition-colors duration-200 ease-out hover:bg-surface-hover"
             )}
           >

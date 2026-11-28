@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { Prisma } from "@prisma/client";
 import { fiatDepositSchema } from "@/lib/validation/treasury";
 import { createFiatDeposit } from "@/features/treasury/deposits";
 import { prisma } from "@/lib/db/prisma";
@@ -58,8 +59,12 @@ describe("fiatDepositSchema validation", () => {
 
   it("accepts inputs without optional customerNote", () => {
     const { customerNote, ...rest } = validPayload;
+    expect(customerNote).toBe("Deposit for payroll");
     const result = fiatDepositSchema.safeParse(rest);
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.customerNote).toBeUndefined();
+    }
   });
 
   it("trims whitespace from string fields", () => {
@@ -123,9 +128,9 @@ describe("createFiatDeposit service flow", () => {
     id: "acct_target_usd",
     userId,
     currencySymbol: "USD",
-    balanceCache: "5000.00",
+    balanceCache: new Prisma.Decimal("5000.00"),
     accountNumber: "1122334455",
-    type: "CURRENT",
+    type: "CURRENT" as const,
   };
 
   const validDepositInput = {
@@ -154,10 +159,10 @@ describe("createFiatDeposit service flow", () => {
 
   it("rejects if the target account currency is not a supported fiat currency", async () => {
     vi.mocked(prisma.deposit.findUnique).mockResolvedValueOnce(null);
-    vi.mocked(accountsModule.getOwnedAccountOrThrow).mockResolvedValueOnce({
+    vi.mocked(accountsModule.getOwnedAccountOrThrow, { partial: true }).mockResolvedValueOnce({
       ...validAccount,
       currencySymbol: "BTC",
-    } as any);
+    });
 
     await expect(createFiatDeposit(userId, validDepositInput, idempotencyKey)).rejects.toThrow(
       "Account currency is not a supported fiat currency."
@@ -170,14 +175,14 @@ describe("createFiatDeposit service flow", () => {
       userId,
       bankAccountId: "acct_target_usd",
       assetSymbol: "USD",
-      amount: "1500.00",
-      status: "PENDING",
+      amount: new Prisma.Decimal("1500.00"),
+      status: "PENDING" as const,
       idempotencyKey: namespacedKey,
       completedAt: null,
       ledgerGroupId: null,
     };
 
-    vi.mocked(prisma.deposit.findUnique).mockResolvedValueOnce(existingDeposit as any);
+    vi.mocked(prisma.deposit.findUnique, { partial: true }).mockResolvedValueOnce(existingDeposit);
 
     const result = await createFiatDeposit(userId, validDepositInput, idempotencyKey);
 
@@ -188,7 +193,7 @@ describe("createFiatDeposit service flow", () => {
 
   it("creates PENDING deposit and PENDING transaction with zero ledger posting and unchanged balanceCache", async () => {
     vi.mocked(prisma.deposit.findUnique).mockResolvedValueOnce(null);
-    vi.mocked(accountsModule.getOwnedAccountOrThrow).mockResolvedValueOnce(validAccount as any);
+    vi.mocked(accountsModule.getOwnedAccountOrThrow, { partial: true }).mockResolvedValueOnce(validAccount);
 
     const createdDeposit = {
       id: "dep_new_pending_789",
@@ -225,8 +230,9 @@ describe("createFiatDeposit service flow", () => {
       },
     };
 
-    vi.mocked(prisma.$transaction).mockImplementationOnce(async (callback: any) => {
-      return callback(mockTx);
+    vi.mocked(prisma.$transaction).mockImplementationOnce(async (callback) => {
+      // Only the delegates exercised by this service are mocked.
+      return callback(mockTx as unknown as Prisma.TransactionClient);
     });
 
     const result = await createFiatDeposit(userId, validDepositInput, idempotencyKey);

@@ -4,7 +4,7 @@ import { LegalPage } from "@/components/legal/legal-page";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Privacy Policy for FISE Holdings Trust Bank.",
+  description: "Privacy Policy for Sunrovo Finance.",
 };
 
 export default function PrivacyPage() {
@@ -14,8 +14,8 @@ export default function PrivacyPage() {
       effectiveDate="16 September 2016"
     >
       <p>
-        FISE HOLDING TRUST BANK respects the privacy and security of customer
-        information. This Privacy Policy explains how FISE collects, uses,
+        Sunrovo Finance respects the privacy and security of customer
+        information. This Privacy Policy explains how Sunrovo Finance collects, uses,
         stores and protects personal information when customers use its
         Services.
       </p>
@@ -26,7 +26,7 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          Depending on the Services used, FISE may collect:
+          Depending on the Services used, Sunrovo Finance may collect:
         </p>
 
         <ul className="mt-3 list-disc space-y-2 pl-6">
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
           <li>Payment and banking information;</li>
           <li>Device and technical information;</li>
           <li>Login and security information;</li>
-          <li>Communications with FISE; and</li>
+          <li>Communications with Sunrovo Finance; and</li>
           <li>
             Information required to prevent fraud and comply with applicable
             law.
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          FISE may use customer information to:
+          Sunrovo Finance may use customer information to:
         </p>
 
         <ul className="mt-3 list-disc space-y-2 pl-6">
@@ -66,7 +66,7 @@ export default function PrivacyPage() {
           <li>Improve Services;</li>
           <li>Meet legal and regulatory obligations; and</li>
           <li>
-            Protect the rights and property of FISE and its customers.
+            Protect the rights and property of Sunrovo Finance and its customers.
           </li>
         </ul>
       </section>
@@ -77,7 +77,7 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          FISE maintains records of customer accounts, deposits, withdrawals,
+          Sunrovo Finance maintains records of customer accounts, deposits, withdrawals,
           transfers, payments and other transactions as required for banking
           operations, security, accounting and regulatory purposes.
         </p>
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          FISE may use cookies and similar technologies to maintain secure
+          Sunrovo Finance may use cookies and similar technologies to maintain secure
           sessions, remember preferences, analyze service performance and
           improve the customer experience.
         </p>
@@ -111,7 +111,7 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          FISE may share information where necessary with:
+          Sunrovo Finance may share information where necessary with:
         </p>
 
         <ul className="mt-3 list-disc space-y-2 pl-6">
@@ -127,7 +127,7 @@ export default function PrivacyPage() {
         </ul>
 
         <p className="mt-2">
-          FISE does not sell customer financial information for unrelated
+          Sunrovo Finance does not sell customer financial information for unrelated
           commercial purposes.
         </p>
       </section>
@@ -138,7 +138,7 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          FISE may disclose customer information where required or permitted by
+          Sunrovo Finance may disclose customer information where required or permitted by
           law, including for:
         </p>
 
@@ -162,7 +162,7 @@ export default function PrivacyPage() {
 
         <p className="mt-2">
           Where customer information must be transferred or processed outside
-          the customer&apos;s country, FISE will take appropriate measures required
+          the customer&apos;s country, Sunrovo Finance will take appropriate measures required
           by applicable data-protection laws.
         </p>
       </section>
@@ -173,7 +173,7 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          FISE uses reasonable administrative, technical and organizational
+          Sunrovo Finance uses reasonable administrative, technical and organizational
           measures designed to protect customer information against unauthorized
           access, alteration, disclosure, loss and misuse.
         </p>
@@ -191,7 +191,7 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          FISE retains personal and financial information for as long as
+          Sunrovo Finance retains personal and financial information for as long as
           reasonably necessary to provide Services and to meet legal,
           regulatory, accounting, fraud-prevention and dispute-resolution
           requirements.
@@ -236,7 +236,7 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          Customers may request account closure through FISEs approved
+          Customers may request account closure through Sunrovo Finance&apos;s approved
           channels.
         </p>
 
@@ -253,12 +253,12 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          FISEs Services are intended for persons who are legally eligible
+          Sunrovo Finance&apos;s Services are intended for persons who are legally eligible
           to open and operate the relevant financial account.
         </p>
 
         <p className="mt-2">
-          FISE does not knowingly provide financial accounts to persons who are
+          Sunrovo Finance does not knowingly provide financial accounts to persons who are
           legally prohibited from holding them.
         </p>
       </section>
@@ -269,7 +269,7 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          FISE may send customers service-related communications concerning:
+          Sunrovo Finance may send customers service-related communications concerning:
         </p>
 
         <ul className="mt-3 list-disc space-y-2 pl-6">
@@ -295,7 +295,7 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          FISE may use automated systems to detect suspicious transactions,
+          Sunrovo Finance may use automated systems to detect suspicious transactions,
           fraud, account compromise, sanctions concerns and other security
           risks.
         </p>
@@ -312,13 +312,13 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          FISE may provide links or integrations to third-party websites and
+          Sunrovo Finance may provide links or integrations to third-party websites and
           services.
         </p>
 
         <p className="mt-2">
           Third-party services operate under their own privacy policies and
-          terms. FISE is not responsible for the privacy practices of
+          terms. Sunrovo Finance is not responsible for the privacy practices of
           independent third parties.
         </p>
       </section>
@@ -329,7 +329,7 @@ export default function PrivacyPage() {
         </h2>
 
         <p className="mt-2">
-          FISE may update this Privacy Policy when its Services, technology,
+          Sunrovo Finance may update this Privacy Policy when its Services, technology,
           legal obligations or data-processing practices change.
         </p>
 
@@ -345,7 +345,7 @@ export default function PrivacyPage() {
         </h2>
 
         <div className="mt-2 space-y-1">
-          <p>FISE HOLDING TRUST BANK</p>
+          <p>Sunrovo Finance</p>
           <p>Website: www.fiseholdings.com</p>
           <p>Privacy Contact: fiseholdings@supportplt.com</p>
         </div>

@@ -14,8 +14,8 @@ interface FiseLoaderProps {
 }
 
 /**
- * FISE Holdings Trust Bank loader component.
- * Provides consistent loading feedback with FISE branding.
+ * Sunrovo Finance loader component.
+ * Provides consistent loading feedback with Sunrovo branding.
  *
  * - mark: Small inline logo with subtle pulse (for buttons/cards)
  * - inline: Logo with loading text (for form submissions)
@@ -87,7 +87,7 @@ export function FiseLoader({
         <div className="flex flex-col items-center gap-1">
           <Image
             src="/brand/fise-wordmark.svg"
-            alt="FISE Holdings Trust Bank"
+            alt="Sunrovo Finance"
             width={120}
             height={28}
             className="h-7 w-auto opacity-60"
@@ -184,7 +184,7 @@ export function FiseLoader({
 }
 
 /**
- * Skeleton wrapper for consistency with FISE branding.
+ * Skeleton wrapper for consistency with Sunrovo branding.
  */
 export function FiseSkeleton({
   className,

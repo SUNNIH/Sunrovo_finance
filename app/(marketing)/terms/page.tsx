@@ -4,7 +4,7 @@ import { LegalPage } from "@/components/legal/legal-page";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "Terms of Service for FISE Holdings Trust Bank.",
+  description: "Terms of Service for Sunrovo Finance.",
 };
 
 export default function TermsPage() {

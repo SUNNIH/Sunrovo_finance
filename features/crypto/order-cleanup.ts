@@ -1,7 +1,6 @@
 import "server-only";
 import Decimal from "decimal.js";
 import { prisma } from "@/lib/db/prisma";
-import type { Prisma } from "@prisma/client";
 import { getHistoricalTradingPair } from "./trading-pairs";
 import { ensureAssetBalanceAndLedgerAccount } from "./wallet-helpers";
 import { writeAuditLog } from "@/lib/audit/log";

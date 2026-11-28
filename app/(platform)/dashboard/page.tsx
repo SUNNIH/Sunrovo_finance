@@ -11,6 +11,12 @@ import {
   Wallet as WalletIcon,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ElevatedCardHoverable,
+  ElevatedCardHeader,
+  ElevatedCardTitle,
+  ElevatedCardContent,
+} from "@/components/dashboard/elevated-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CurrencyValue } from "@/components/financial/currency-value";
@@ -98,13 +104,16 @@ export default async function DashboardPage() {
       {/* ── Balance overview card ─────────────────────────────────────────── */}
       <div
         className={cn(
-          "relative overflow-hidden rounded-xl border border-border bg-surface-elevated",
-          "shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-border-strong hover:shadow-md",
-          /* Subtle grid texture strip across the top edge */
-          "before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-48 before:plt-grid-texture before:opacity-40"
+          "relative overflow-hidden rounded-xl border border-border",
+          "shadow-[0_2px_4px_hsl(var(--border)/0.6),0_4px_12px_hsl(var(--border)/0.35),0_8px_24px_hsl(var(--border)/0.18)]",
+          "transition-[border-color,box-shadow] duration-300 hover:border-border-strong",
+          "hover:shadow-[0_4px_8px_hsl(var(--border)/0.7),0_8px_20px_hsl(var(--border)/0.45),0_16px_40px_hsl(var(--border)/0.25)]"
         )}
       >
-        <div className="relative z-10 p-5 sm:p-6">
+        {/* Premium swirling 3D glass effect background layers */}
+        <div className="absolute inset-0 glass-swirl-effect-prominent" aria-hidden="true" />
+        
+        <div className="relative z-10 p-5 sm:p-6 bg-gradient-to-br from-surface-elevated/80 via-surface-elevated/90 to-surface-elevated/95">
           {/* Balance row */}
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
@@ -178,13 +187,8 @@ export default async function DashboardPage() {
               href="/accounts"
               className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <Card
-                className={cn(
-                  "h-full rounded-xl transition-[border-color,box-shadow,transform] duration-200 ease-out",
-                  "group-hover:border-border-strong group-hover:shadow-md group-hover:-translate-y-0.5"
-                )}
-              >
-                <CardHeader className="pb-0">
+              <ElevatedCardHoverable className="h-full">
+                <ElevatedCardHeader className="pb-0">
                   <div className="flex items-start justify-between gap-2">
                     <div
                       className={cn(
@@ -201,22 +205,22 @@ export default async function DashboardPage() {
                     )}
                   </div>
                   <div className="mt-3">
-                    <CardTitle className="text-sm font-semibold text-text-primary">
+                    <ElevatedCardTitle className="text-sm font-semibold text-text-primary">
                       {accountDisplayName(account.nickname, account.type)}
-                    </CardTitle>
+                    </ElevatedCardTitle>
                     <p className="mt-0.5 text-body-sm financial-value text-text-tertiary">
                       {maskAccountNumber(account.accountNumber)}
                     </p>
                   </div>
-                </CardHeader>
-                <CardContent className="pt-3">
+                </ElevatedCardHeader>
+                <ElevatedCardContent className="pt-3">
                   <CurrencyValue
                     amount={account.balanceCache.toString()}
                     assetSymbol={account.currencySymbol}
                     className="text-xl font-bold text-text-primary"
                   />
-                </CardContent>
-              </Card>
+                </ElevatedCardContent>
+              </ElevatedCardHoverable>
             </Link>
           ))}
 
@@ -226,13 +230,8 @@ export default async function DashboardPage() {
               href="/wallets"
               className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <Card
-                className={cn(
-                  "h-full rounded-xl transition-[border-color,box-shadow,transform] duration-200 ease-out",
-                  "group-hover:border-border-strong group-hover:shadow-md group-hover:-translate-y-0.5"
-                )}
-              >
-                <CardHeader className="pb-0">
+              <ElevatedCardHoverable className="h-full">
+                <ElevatedCardHeader className="pb-0">
                   <div className="flex items-start justify-between gap-2">
                     <div
                       className={cn(
@@ -247,15 +246,15 @@ export default async function DashboardPage() {
                     </Badge>
                   </div>
                   <div className="mt-3">
-                    <CardTitle className="text-sm font-semibold text-text-primary">
+                    <ElevatedCardTitle className="text-sm font-semibold text-text-primary">
                       Spot Wallet
-                    </CardTitle>
+                    </ElevatedCardTitle>
                     <p className="mt-0.5 text-body-sm text-text-tertiary">
                       Digital assets
                     </p>
                   </div>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-1 pt-3">
+                </ElevatedCardHeader>
+                <ElevatedCardContent className="flex flex-col gap-1 pt-3">
                   {wallet.balances.length === 0 ? (
                     <p className="text-body-sm text-text-secondary">No assets yet</p>
                   ) : (
@@ -268,8 +267,8 @@ export default async function DashboardPage() {
                       />
                     ))
                   )}
-                </CardContent>
-              </Card>
+                </ElevatedCardContent>
+              </ElevatedCardHoverable>
             </Link>
           )}
 

@@ -30,7 +30,7 @@ export default async function SupportPage() {
           Help &amp; Support
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Find answers to common questions about your FISE Holdings Trust Bank account, transactions, and security.
+          Find answers to common questions about your Sunrovo Finance account, transactions, and security.
         </p>
       </div>
 
@@ -222,7 +222,7 @@ export default async function SupportPage() {
           />
           <FaqItem
             question="What should I do if I lose access to my MFA device?"
-            answer="Contact FISE Holdings Trust Bank support immediately. You will be required to verify your identity before MFA can be reset or replaced."
+            answer="Contact Sunrovo Finance support immediately. You will be required to verify your identity before MFA can be reset or replaced."
           />
           <FaqItem
             question="What is a transaction PIN?"
@@ -325,7 +325,7 @@ export default async function SupportPage() {
 
       {/* ── FOOTER NOTE ──────────────────────────────────────────────────────*/}
       <div className="text-center text-xs text-text-tertiary pb-4">
-        <p>FISE Holdings Trust Bank · Digital Banking &amp; Cryptocurrency Platform</p>
+        <p>Sunrovo Finance · Digital Banking &amp; Cryptocurrency Platform</p>
       </div>
     </div>
   );

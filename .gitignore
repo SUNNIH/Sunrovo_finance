@@ -78,3 +78,8 @@ desktop.ini
 
 # Next.js generated TypeScript declarations
 next-env.d.ts
+
+
+*.md
+.vercel
+.env*

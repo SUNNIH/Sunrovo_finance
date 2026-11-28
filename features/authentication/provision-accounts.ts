@@ -70,7 +70,7 @@ export async function provisionDefaultAccountsForUser(
   });
 
   // --- Crypto: spot wallet (no initial balance) --------------------------
-  const cryptoWallet = await tx.cryptoWallet.create({
+  await tx.cryptoWallet.create({
     data: { userId, label: "Spot Wallet" },
   });
   

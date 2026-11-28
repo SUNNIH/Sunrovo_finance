@@ -39,7 +39,7 @@ function getTransporter(): Transporter | null {
 
 export async function sendEmail({ to, subject, html, text }: SendEmailInput): Promise<void> {
   const transporter = getTransporter();
-  const from = process.env.EMAIL_FROM ?? "FISE Holdings Trust Bank <no-reply@platinumtrust.example>";
+  const from = process.env.EMAIL_FROM ?? "Sunrovo finance <no-reply@Sunrovo.example>";
 
   if (!transporter) {
     // Simulated delivery: never throw here, and never log the raw
@@ -55,15 +55,15 @@ export async function sendEmail({ to, subject, html, text }: SendEmailInput): Pr
 
 export function buildVerificationEmail(verificationUrl: string) {
   return {
-    subject: "Verify your FISE Holdings Trust Bank email",
-    text: `Welcome to FISE Holdings Trust Bank.\n\nVerify your email address:\n${verificationUrl}\n\nThis link expires in 24 hours. If you didn't create this account, you can ignore this email.`,
-    html: `<p>Welcome to <strong>FISE Holdings Trust Bank</strong>.</p><p><a href="${verificationUrl}">Verify your email address</a></p><p>This link expires in 24 hours. If you didn't create this account, you can ignore this email.</p>`,
+    subject: "Verify your Sunrovo finance account email",
+    text: `Welcome to Sunrovo finance.\n\nVerify your email address:\n${verificationUrl}\n\nThis link expires in 24 hours. If you didn't create this account, you can ignore this email.`,
+    html: `<p>Welcome to <strong>Sunrovo finance</strong>.</p><p><a href="${verificationUrl}">Verify your email address</a></p><p>This link expires in 24 hours. If you didn't create this account, you can ignore this email.</p>`,
   };
 }
 
 export function buildPasswordResetEmail(resetUrl: string) {
   return {
-    subject: "Reset your FISE Holdings Trust Bank password",
+    subject: "Reset your Sunrovo finance password",
     text: `We received a request to reset your password.\n\nReset it here:\n${resetUrl}\n\nThis link expires in 30 minutes. If you didn't request this, you can ignore this email — your password will not change.`,
     html: `<p>We received a request to reset your password.</p><p><a href="${resetUrl}">Reset your password</a></p><p>This link expires in 30 minutes. If you didn't request this, you can ignore this email — your password will not change.</p>`,
   };

@@ -16,7 +16,7 @@ export function LegalPage({
     <div className="min-h-screen bg-background text-text-primary">
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-5 sm:px-6">
-          <Link href="/" aria-label="FISE Holdings Trust Bank home">
+          <Link href="/" aria-label="Sunrovo Finance home">
             <FiseLogo className="h-9 w-auto max-w-[170px]" />
           </Link>
 
@@ -32,7 +32,7 @@ export function LegalPage({
       <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
         <div className="rounded-2xl border border-border bg-surface-elevated p-6 shadow-sm sm:p-10">
           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">
-            FISE Holdings Trust Bank
+            Sunrovo Finance
           </p>
 
           <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
@@ -60,7 +60,7 @@ export function LegalPage({
           </Link>
 
           <span className="ml-auto">
-            © {new Date().getFullYear()} FISE Holdings Trust Bank
+            © {new Date().getFullYear()} Sunrovo Finance
           </span>
         </div>
       </footer>

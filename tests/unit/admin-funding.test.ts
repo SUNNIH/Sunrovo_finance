@@ -1,18 +1,50 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import Decimal from "decimal.js";
-import { fundUserAccount, ADMIN_FUNDING_POOL_NAME } from "@/features/admin/funding";
+import { fundUserAccount } from "@/features/admin/funding";
 import { provisionDefaultAccountsForUser } from "@/features/authentication/provision-accounts";
 import { AuthError } from "@/features/authentication/errors";
 
 const prisma = new PrismaClient();
 
 describe("Admin funding", () => {
-  const adminUserId = `test-admin-${Date.now()}`;
-  const regularUserId = `test-user-${Date.now()}`;
-  const targetUserId = `test-target-${Date.now()}`;
+  let adminId = "";
+  let regularId = "";
+  let targetId = "";
 
   beforeEach(async () => {
+    adminId = "";
+    regularId = "";
+    targetId = "";
+
+    // This suite creates and deletes financial fixtures. Fail closed.
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl || process.env.SUNROVO_TEST_DB_CONFIRM !== "codex.phase6_test") {
+      throw new Error("SAFETY STOP: Isolated local test connection required.");
+    }
+    const url = new URL(databaseUrl);
+    if (
+      !["postgresql:", "postgres:"].includes(url.protocol) ||
+      !["localhost", "127.0.0.1"].includes(url.hostname) ||
+      url.pathname !== "/codex" ||
+      url.searchParams.getAll("schema").length !== 1 ||
+      url.searchParams.get("schema") !== "phase6_test"
+    ) {
+      throw new Error("SAFETY STOP: Refusing admin funding tests outside codex.phase6_test.");
+    }
+    const identity = await prisma.$queryRaw<
+      Array<{ databaseName: string; schemaName: string }>
+    >`
+      SELECT current_database() AS "databaseName", current_schema() AS "schemaName"
+    `;
+    if (
+      identity.length !== 1 ||
+      identity[0]?.databaseName !== "codex" ||
+      identity[0]?.schemaName !== "phase6_test"
+    ) {
+      throw new Error("SAFETY STOP: PostgreSQL identity mismatch.");
+    }
+
     // Create admin user
     const adminProfile = await prisma.profile.create({
       data: {
@@ -29,7 +61,7 @@ describe("Admin funding", () => {
         },
       },
     });
-    Object.assign(globalThis, { __testAdminId: adminProfile.userId });
+    adminId = adminProfile.userId;
 
     // Create regular user
     const regularProfile = await prisma.profile.create({
@@ -47,7 +79,7 @@ describe("Admin funding", () => {
         },
       },
     });
-    Object.assign(globalThis, { __testRegularUserId: regularProfile.userId });
+    regularId = regularProfile.userId;
 
     // Create target user with zero-balance accounts
     const targetProfile = await prisma.profile.create({
@@ -65,7 +97,7 @@ describe("Admin funding", () => {
         },
       },
     });
-    Object.assign(globalThis, { __testTargetUserId: targetProfile.userId });
+    targetId = targetProfile.userId;
 
     await prisma.$transaction(async (tx) => {
       await provisionDefaultAccountsForUser(tx, targetProfile.userId, "USD");
@@ -73,29 +105,37 @@ describe("Admin funding", () => {
   });
 
   afterEach(async () => {
-    const adminId = (globalThis as any).__testAdminId;
-    const regularId = (globalThis as any).__testRegularUserId;
-    const targetId = (globalThis as any).__testTargetUserId;
+    const userIds = [adminId, regularId, targetId].filter((id) => id.length > 0);
+    if (userIds.length === 0) return;
 
-    // Clean up in reverse dependency order
-    await prisma.$transaction([
-      prisma.auditLog.deleteMany({ where: { actorUserId: { in: [adminId, regularId, targetId] } } }),
-      prisma.transaction.deleteMany({ where: { userId: { in: [adminId, regularId, targetId] } } }),
-      prisma.ledgerEntry.deleteMany({ where: { ledgerAccount: { bankAccount: { userId: { in: [adminId, regularId, targetId] } } } } }),
-      prisma.ledgerEntry.deleteMany({ where: { ledgerAccount: { cryptoWallet: { userId: { in: [adminId, regularId, targetId] } } } } }),
-      prisma.ledgerAccount.deleteMany({ where: { bankAccount: { userId: { in: [adminId, regularId, targetId] } } } }),
-      prisma.ledgerAccount.deleteMany({ where: { cryptoWallet: { userId: { in: [adminId, regularId, targetId] } } } }),
-      prisma.assetBalance.deleteMany({ where: { wallet: { userId: { in: [adminId, regularId, targetId] } } } }),
-      prisma.cryptoWallet.deleteMany({ where: { userId: { in: [adminId, regularId, targetId] } } }),
-      prisma.bankAccount.deleteMany({ where: { userId: { in: [adminId, regularId, targetId] } } }),
-      prisma.profile.deleteMany({ where: { userId: { in: [adminId, regularId, targetId] } } }),
-      prisma.user.deleteMany({ where: { id: { in: [adminId, regularId, targetId] } } }),
-    ]);
+    await prisma.$transaction(async (tx) => {
+      const entries = await tx.ledgerEntry.findMany({
+        where: {
+          OR: [
+            { ledgerAccount: { bankAccount: { userId: { in: userIds } } } },
+            { ledgerAccount: { cryptoWallet: { userId: { in: userIds } } } },
+          ],
+        },
+        select: { groupId: true },
+      });
+      const groupIds = [...new Set(entries.map((entry) => entry.groupId))];
+      if (groupIds.length > 0) {
+        await tx.ledgerEntry.deleteMany({ where: { groupId: { in: groupIds } } });
+      }
+
+      await tx.auditLog.deleteMany({ where: { actorUserId: { in: userIds } } });
+      await tx.transaction.deleteMany({ where: { userId: { in: userIds } } });
+      await tx.ledgerAccount.deleteMany({ where: { bankAccount: { userId: { in: userIds } } } });
+      await tx.ledgerAccount.deleteMany({ where: { cryptoWallet: { userId: { in: userIds } } } });
+      await tx.assetBalance.deleteMany({ where: { wallet: { userId: { in: userIds } } } });
+      await tx.cryptoWallet.deleteMany({ where: { userId: { in: userIds } } });
+      await tx.bankAccount.deleteMany({ where: { userId: { in: userIds } } });
+      await tx.profile.deleteMany({ where: { userId: { in: userIds } } });
+      await tx.user.deleteMany({ where: { id: { in: userIds } } });
+    });
   });
 
   it("allows admin to fund a bank account", async () => {
-    const adminId = (globalThis as any).__testAdminId;
-    const targetId = (globalThis as any).__testTargetUserId;
 
     const account = await prisma.bankAccount.findFirst({
       where: { userId: targetId, type: "CURRENT" },
@@ -124,8 +164,6 @@ describe("Admin funding", () => {
   });
 
   it("rejects funding from non-admin user", async () => {
-    const regularId = (globalThis as any).__testRegularUserId;
-    const targetId = (globalThis as any).__testTargetUserId;
 
     const account = await prisma.bankAccount.findFirst({
       where: { userId: targetId, type: "CURRENT" },
@@ -147,8 +185,6 @@ describe("Admin funding", () => {
   });
 
   it("creates balanced ledger entries", async () => {
-    const adminId = (globalThis as any).__testAdminId;
-    const targetId = (globalThis as any).__testTargetUserId;
 
     const account = await prisma.bankAccount.findFirst({
       where: { userId: targetId, type: "CURRENT" },
@@ -189,8 +225,6 @@ describe("Admin funding", () => {
   });
 
   it("prevents duplicate funding with same idempotency key", async () => {
-    const adminId = (globalThis as any).__testAdminId;
-    const targetId = (globalThis as any).__testTargetUserId;
 
     const account = await prisma.bankAccount.findFirst({
       where: { userId: targetId, type: "CURRENT" },
@@ -232,8 +266,6 @@ describe("Admin funding", () => {
   });
 
   it("rejects funding with mismatched currency", async () => {
-    const adminId = (globalThis as any).__testAdminId;
-    const targetId = (globalThis as any).__testTargetUserId;
 
     const account = await prisma.bankAccount.findFirst({
       where: { userId: targetId, type: "CURRENT" },
@@ -255,9 +287,6 @@ describe("Admin funding", () => {
   });
 
   it("rejects funding account belonging to different user", async () => {
-    const adminId = (globalThis as any).__testAdminId;
-    const targetId = (globalThis as any).__testTargetUserId;
-    const regularId = (globalThis as any).__testRegularUserId;
 
     const account = await prisma.bankAccount.findFirst({
       where: { userId: targetId, type: "CURRENT" },
@@ -279,8 +308,6 @@ describe("Admin funding", () => {
   });
 
   it("creates user transaction history", async () => {
-    const adminId = (globalThis as any).__testAdminId;
-    const targetId = (globalThis as any).__testTargetUserId;
 
     const account = await prisma.bankAccount.findFirst({
       where: { userId: targetId, type: "CURRENT" },
@@ -310,8 +337,6 @@ describe("Admin funding", () => {
   });
 
   it("creates admin audit log", async () => {
-    const adminId = (globalThis as any).__testAdminId;
-    const targetId = (globalThis as any).__testTargetUserId;
 
     const account = await prisma.bankAccount.findFirst({
       where: { userId: targetId, type: "CURRENT" },
@@ -339,8 +364,6 @@ describe("Admin funding", () => {
   });
 
   it("allows funding crypto wallet", async () => {
-    const adminId = (globalThis as any).__testAdminId;
-    const targetId = (globalThis as any).__testTargetUserId;
 
     const wallet = await prisma.cryptoWallet.findFirst({
       where: { userId: targetId },
@@ -370,8 +393,6 @@ describe("Admin funding", () => {
   });
 
   it("rejects zero or negative amounts", async () => {
-    const adminId = (globalThis as any).__testAdminId;
-    const targetId = (globalThis as any).__testTargetUserId;
 
     const account = await prisma.bankAccount.findFirst({
       where: { userId: targetId, type: "CURRENT" },
@@ -407,8 +428,6 @@ describe("Admin funding", () => {
   });
 
   it("prevents concurrent duplicate funding with database-enforced uniqueness", async () => {
-    const adminId = (globalThis as any).__testAdminId;
-    const targetId = (globalThis as any).__testTargetUserId;
 
     const account = await prisma.bankAccount.findFirst({
       where: { userId: targetId, type: "CURRENT" },
@@ -431,17 +450,21 @@ describe("Admin funding", () => {
             reason: "Concurrent funding test",
           },
           idempotencyKey
-        ).catch((error) => ({ error: error.message }))
+        ).catch((error: unknown) => ({
+          error: error instanceof Error ? error.message : String(error),
+        }))
       );
 
     const results = await Promise.all(concurrentRequests);
 
     // At least one should succeed
-    const successfulResults = results.filter((r) => !("error" in r));
+    const successfulResults = results.filter(
+      (r): r is Awaited<ReturnType<typeof fundUserAccount>> => !("error" in r)
+    );
     expect(successfulResults.length).toBeGreaterThanOrEqual(1);
 
     // All successful results should have the same transaction ID (idempotency)
-    const transactionIds = successfulResults.map((r: any) => r.transactionId);
+    const transactionIds = successfulResults.map((r) => r.transactionId);
     const uniqueTransactionIds = new Set(transactionIds);
     expect(uniqueTransactionIds.size).toBe(1);
 

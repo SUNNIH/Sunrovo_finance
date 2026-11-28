@@ -20,7 +20,7 @@ export const BRAND_PEOPLE_CAROUSEL_IMAGES: readonly CarouselImageItem[] = [
   },
   {
     id: "people1-webp",
-    src: "/images/auth/signup-people1.webp",
+    src: "/images/auth/signup-people1.png",
     desktopPosition: "object-left",
     mobilePosition: "object-top",
   },
@@ -44,7 +44,7 @@ export interface BrandPeopleCarouselProps {
 }
 
 /**
- * Shared human visual carousel for FISE Holdings Trust Bank.
+ * Shared human visual carousel for Sunrovo Finance.
  * Used consistently across the Homepage Hero and Auth pages.
  *
  * - Smoothly cross-fades between 2 brand images on a 5.5s cycle with 1.5s ease-in-out transition.
@@ -217,12 +217,12 @@ export function BrandPeopleCarousel({
             {/* Minimal branding caption */}
             <div className="absolute inset-0 z-30 flex flex-col justify-end p-4 sm:p-6">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-slate-950/60 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/95 backdrop-blur-md w-fit mb-1.5 shadow-xs">
-                FISE Holdings Trust Bank
+                Sunrovo Finance
               </span>
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white drop-shadow-md">
                 Banking built around you.
               </h2>
-              <p className="text-xs sm:text-sm font-medium text-blue-100/95 drop-shadow-sm">
+              <p className="text-xs sm:text-sm font-medium text-white/95 drop-shadow-sm">
                 Secure. Simple. Personal.
               </p>
             </div>

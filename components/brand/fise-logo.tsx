@@ -14,11 +14,11 @@ const LOGO_ASSETS: Record<FiseLogoVariant, { src: string; width: number; height:
   wordmark: { src: "/brand/fise-wordmark.svg", width: 260, height: 56 },
 };
 
-/** The shared FISE Holdings Trust Bank logo, with accessible alternative text. */
+/** The shared Sunrovo Finance logo, with accessible alternative text. */
 export function FiseLogo({
   variant = "wordmark",
   className,
-  alt = "FISE Holdings Trust Bank",
+  alt = "Sunrovo Finance",
 }: FiseLogoProps) {
   const asset = LOGO_ASSETS[variant];
 

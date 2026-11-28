@@ -8,7 +8,6 @@ import { PrismaClient } from "@prisma/client";
  * instance on `globalThis` to avoid exhausting Postgres connections.
  */
 declare global {
-  // eslint-disable-next-line no-var
   var __pltPrisma: PrismaClient | undefined;
 }
 

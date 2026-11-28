@@ -36,53 +36,6 @@ interface RepairCandidate {
   transactionCount: number;
 }
 
-async function calculateBalanceFromLedgerHistory(
-  userId: string,
-  assetSymbol: string
-): Promise<{ balance: Decimal; hasHistory: boolean; entryCount: number }> {
-  // Find all ledger entries for this user's asset across all accounts
-  const userLedgerAccounts = await prisma.ledgerAccount.findMany({
-    where: {
-      assetSymbol,
-      OR: [
-        { bankAccountId: { not: null } },
-        { cryptoWalletId: { not: null } },
-      ],
-      bankAccount: { userId },
-    },
-    select: { id: true },
-  });
-
-  if (userLedgerAccounts.length === 0) {
-    return { balance: new Decimal(0), hasHistory: false, entryCount: 0 };
-  }
-
-  const ledgerAccountIds = userLedgerAccounts.map((la) => la.id);
-
-  const entries = await prisma.ledgerEntry.findMany({
-    where: { ledgerAccountId: { in: ledgerAccountIds } },
-    select: {
-      direction: true,
-      amount: true,
-    },
-  });
-
-  if (entries.length === 0) {
-    return { balance: new Decimal(0), hasHistory: false, entryCount: 0 };
-  }
-
-  let balance = new Decimal(0);
-  for (const entry of entries) {
-    if (entry.direction === 'DEBIT') {
-      balance = balance.minus(entry.amount);
-    } else {
-      balance = balance.plus(entry.amount);
-    }
-  }
-
-  return { balance, hasHistory: true, entryCount: entries.length };
-}
-
 async function findRepairCandidates(): Promise<RepairCandidate[]> {
   const allBankAccounts = await prisma.bankAccount.findMany({
     where: {
@@ -136,7 +89,7 @@ async function findRepairCandidates(): Promise<RepairCandidate[]> {
 }
 
 async function repairAccount(candidate: RepairCandidate): Promise<boolean> {
-  const { bankAccount, calculatedBalance } = candidate;
+  const { bankAccount } = candidate;
 
   try {
     await prisma.$transaction(async (tx) => {
